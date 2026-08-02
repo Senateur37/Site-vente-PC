@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Contact — TechShop{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto py-4">
+  <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Nous contacter</h1>
+  <p class="text-slate-500 dark:text-slate-400 text-sm mb-8">Une question ? Envoyez-nous un message, nous vous répondrons rapidement.</p>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    {% if params.telephone %}
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Téléphone</h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.telephone }}</p>
+    </div>
+    {% endif %}
+    {% if params.email %}
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Email</h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.email }}</p>
+    </div>
+    {% endif %}
+    {% if params.adresse %}
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 md:col-span-2">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Adresse</h2>
+      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.adresse }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Envoyer un message</h2>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nom *</label>
+          <input type="text" name="nom" required
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email *</label>
+          <input type="email" name="email" required
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sujet</label>
+        <input type="text" name="sujet"
+          class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Message *</label>
+        <textarea name="message" rows="4" required
+          class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent"></textarea>
+      </div>
+      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-sm">
+        Envoyer le message
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

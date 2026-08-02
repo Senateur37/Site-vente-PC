@@ -1,0 +1,119 @@
+{% extends "dashboard/base_admin.html" %}
+{% load produit_tags %}
+{% block title %}Commande #{{ commande.id }} — TechShop{% endblock %}
+{% block content %}
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commande #{{ commande.id }}</h1>
+  <a href="{% url 'dashboard:commandes_liste' %}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition">
+    ← Retour aux commandes
+  </a>
+</div>
+
+<div class="grid md:grid-cols-3 gap-6">
+  <!-- Détails commande -->
+  <div class="md:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Détails de la commande</h2>
+
+    <div class="grid sm:grid-cols-2 gap-4 mb-6 text-sm">
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Client</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.nom_client }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Téléphone</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.telephone }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Email</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.email|default:'—' }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Client (compte)</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.utilisateur.username|default:'Invité' }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Paiement</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.get_methode_paiement_display }}</p>
+      </div>
+      <div class="sm:col-span-2">
+        <p class="text-slate-400 dark:text-slate-500">Adresse</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.adresse }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Date</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.date_creation|date:"d/m/Y H:i" }}</p>
+      </div>
+      <div>
+        <p class="text-slate-400 dark:text-slate-500">Statut actuel</p>
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full
+          {% if commande.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
+          {% if commande.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
+          {% if commande.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+          {{ commande.get_statut_display }}
+        </span>
+      </div>
+    </div>
+
+    {% if commande.note %}
+    <div class="mb-6">
+      <p class="text-slate-400 dark:text-slate-500 text-sm">Note du client</p>
+      <p class="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md p-3 mt-1">{{ commande.note }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Lignes de commande -->
+    <h3 class="font-semibold text-slate-900 dark:text-white mb-3">Articles commandés</h3>
+    <div class="divide-y divide-slate-100 dark:divide-slate-700">
+      {% for ligne in commande.lignes.all %}
+      <div class="flex justify-between py-2 text-sm">
+        <span class="text-slate-600 dark:text-slate-300">{{ ligne.nom_produit }} × {{ ligne.quantite }}</span>
+        <span class="font-medium text-slate-900 dark:text-white">{{ ligne.sous_total }} FCFA</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 mt-2 text-sm">
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Sous-total</span>
+        <span class="font-medium text-slate-900 dark:text-white">{{ commande.sous_total|prix_fcfa }} FCFA</span>
+      </div>
+      {% if commande.reduction > 0 %}
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Réduction{% if commande.code_promo %} ({{ commande.code_promo.code }}){% endif %}</span>
+        <span class="font-medium text-green-600 dark:text-green-400">-{{ commande.reduction|prix_fcfa }} FCFA</span>
+      </div>
+      {% endif %}
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Livraison</span>
+        <span class="font-medium text-slate-900 dark:text-white">{{ commande.frais_livraison|prix_fcfa }} FCFA</span>
+      </div>
+    </div>
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between items-center mt-2">
+      <span class="font-semibold text-slate-900 dark:text-white">Total</span>
+      <span class="font-bold text-xl text-accent">{{ commande.total|prix_fcfa }} FCFA</span>
+    </div>
+  </div>
+
+  <!-- Changer le statut -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Modifier le statut</h2>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label for="statut" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nouveau statut</label>
+        <select name="statut" id="statut"
+                class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+          {% for value, label in commande.STATUT_CHOICES %}
+            <option value="{{ value }}" {% if commande.statut == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white font-semibold py-2.5 rounded-md text-sm">
+        Mettre à jour
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+

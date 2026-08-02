@@ -1,0 +1,123 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Catégories — TechShop{% endblock %}
+{% block content %}
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Catégories</h1>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+  <!-- Liste des catégories -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    {% if categories %}
+    <ul class="divide-y divide-slate-100 dark:divide-slate-700">
+      {% for cat in categories %}
+      <li class="flex items-center justify-between py-3">
+        <div>
+          <p class="text-sm font-medium text-slate-900 dark:text-white">{{ cat.nom }}</p>
+          <p class="text-xs text-slate-400 truncate">Slug : {{ cat.slug }}</p>
+        </div>
+        <button type="button"
+                data-delete-url="{% url 'dashboard:categorie_supprimer' cat.id %}"
+                data-objet-nom="{{ cat.nom }}"
+                class="delete-btn text-xs bg-red-500 text-white rounded-md px-3 py-1.5 hover:bg-red-600 transition">
+          Supprimer
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-slate-400 text-center py-6">Aucune catégorie.</p>
+    {% endif %}
+  </div>
+
+  <!-- Ajouter une catégorie -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ajouter une catégorie</h2>
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      {% for field in form %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          {{ field.label }}
+          {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+        </label>
+        <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               {% if field.field.required %}required{% endif %}
+               class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
+               placeholder="Nom de la catégorie">
+        {% if field.errors %}
+          <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-5 py-2.5 rounded-md text-sm">
+        Ajouter
+      </button>
+    </form>
+  </div>
+
+<!-- Modal de confirmation de suppression -->
+<div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+  <div id="delete-modal-overlay" class="absolute inset-0 bg-black/50"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+    <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Confirmer la suppression</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+      Êtes-vous sûr de vouloir supprimer <strong id="delete-objet-nom" class="text-slate-700 dark:text-slate-300"></strong> ?<br>
+      Cette action est irréversible.
+    </p>
+    <form id="delete-form" method="post" class="flex flex-col sm:flex-row gap-3 justify-center">
+      {% csrf_token %}
+      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">
+        Oui, supprimer
+      </button>
+      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-md hover:border-accent text-sm text-center">
+        Annuler
+      </button>
+    </form>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var modal = document.getElementById('delete-modal');
+  var overlay = document.getElementById('delete-modal-overlay');
+  var form = document.getElementById('delete-form');
+  var nomSpan = document.getElementById('delete-objet-nom');
+  var cancelBtn = document.getElementById('delete-cancel-btn');
+
+  var deleteBtns = document.querySelectorAll('.delete-btn');
+
+  deleteBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var url = btn.getAttribute('data-delete-url');
+      var nom = btn.getAttribute('data-objet-nom');
+      form.action = url;
+      nomSpan.textContent = nom;
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    });
+  });
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  if (overlay) overlay.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+})();
+</script>
+{% endblock %}

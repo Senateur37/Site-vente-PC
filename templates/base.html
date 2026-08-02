@@ -1,0 +1,197 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% block meta_description %}{% if site_settings.site_description %}<meta name="description" content="{{ site_settings.site_description }}">{% endif %}{% endblock %}
+  <title>{% block title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: '#2563eb',
+            accentdark: '#1d4ed8',
+            surface: '#f8fafc',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
+
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4">
+      <a href="{% url 'produits:liste' %}" class="flex items-center gap-2 shrink-0">
+        {% if site_settings and site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="" class="h-8 w-auto">
+        {% endif %}
+        <span class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">{{ site_settings.site_nom|default:'TechShop' }}</span>
+      </a>
+
+      <form method="get" action="{% url 'produits:liste' %}" id="recherche-form" class="relative flex order-last md:order-none w-full md:w-auto mt-2 md:mt-0">
+        <input type="text" name="q" id="recherche-input" placeholder="Rechercher..." autocomplete="off"
+          class="bg-surface dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-sm rounded-l-md px-3 py-2 w-full md:w-48 lg:w-56 focus:outline-none focus:border-accent dark:text-slate-200 dark:placeholder-slate-400">
+        <button type="submit" class="bg-accent text-white font-bold px-4 rounded-r-md hover:bg-accentdark shrink-0">→</button>
+      </form>
+
+<nav class="flex items-center gap-3 md:gap-6 text-sm">
+        <a href="{% url 'produits:liste' %}" class="text-slate-600 dark:text-slate-300 hover:text-accent whitespace-nowrap">Boutique</a>
+        <a href="{% url 'commandes:voir_panier' %}" class="text-slate-600 dark:text-slate-300 hover:text-accent whitespace-nowrap">
+          Panier
+          {% if panier_count %}
+            <span class="bg-accent text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">{{ panier_count }}</span>
+          {% endif %}
+        </a>
+        {% if request.user.is_staff %}
+        <a href="{% url 'dashboard:index' %}" class="text-accent hover:text-accentdark font-semibold whitespace-nowrap">Dashboard</a>
+        {% endif %}
+        <!-- Dark mode toggle -->
+        <button id="theme-toggle" type="button"
+                class="w-8 h-8 md:w-9 md:h-9 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center transition shrink-0"
+                aria-label="Basculer le mode sombre/clair">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 md:w-4 md:h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+          <!-- Moon icon (shown in dark mode) -->
+          <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto w-full px-4 md:px-6 py-6 md:py-8 flex-1">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 px-4 py-3 rounded-md text-sm border
+          {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300{% endif %}
+          {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300{% endif %}
+          {% if message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300{% endif %}
+          {% if message.tags == 'info' %}bg-slate-50 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+
+  <footer class="border-t border-slate-200 dark:border-slate-700 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+    <div class="mb-2 flex items-center justify-center gap-4">
+      <a href="{% url 'produits:liste' %}" class="hover:text-accent">Boutique</a>
+      <a href="{% url 'produits:apropos' %}" class="hover:text-accent">À propos</a>
+      <a href="{% url 'produits:contact' %}" class="hover:text-accent">Contact</a>
+    </div>
+    {% if site_settings and site_settings.copyright_texte %}
+      {{ site_settings.copyright_texte }}
+    {% else %}
+      &copy; {% now "Y" %} SACKOTECH — Ordinateurs &amp; accessoires. Paiement à la livraison.
+    {% endif %}
+  </footer>
+
+  <script>
+    (function() {
+      const htmlEl = document.documentElement;
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+        htmlEl.classList.add('dark');
+      } else {
+        htmlEl.classList.remove('dark');
+      }
+
+      const toggleBtn = document.getElementById('theme-toggle');
+      const iconSun = document.getElementById('theme-icon-sun');
+      const iconMoon = document.getElementById('theme-icon-moon');
+
+      function updateIcons() {
+        const isDark = htmlEl.classList.contains('dark');
+        iconSun.classList.toggle('hidden', !isDark);
+        iconMoon.classList.toggle('hidden', isDark);
+      }
+
+      updateIcons();
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          htmlEl.classList.toggle('dark');
+          const isDark = htmlEl.classList.contains('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateIcons();
+        });
+      }
+    })();
+  </script>
+
+  <script>
+    (function() {
+      const input = document.getElementById('recherche-input');
+      const form = document.getElementById('recherche-form');
+      if (!input || !form) return;
+
+      const box = document.createElement('div');
+      box.id = 'recherche-suggestions';
+      box.className = 'hidden absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl overflow-hidden z-50 text-left';
+      form.appendChild(box);
+
+      let timer = null;
+
+      function afficher(resultats) {
+        const q = input.value.trim();
+        if (!resultats.length) {
+          box.innerHTML = '<div class="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Aucun résultat</div>';
+        } else {
+          box.innerHTML = resultats.map(function(r) {
+            const nom = document.createElement('div');
+            nom.textContent = r.nom;
+            return '<a href="' + r.url + '" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-between gap-3">' +
+              '<span class="truncate">' + nom.innerHTML + '</span>' +
+              '<span class="text-accent font-semibold ml-2 shrink-0 whitespace-nowrap">' + r.prix + ' FCFA</span></a>';
+          }).join('') +
+          '<a href="' + form.getAttribute('action') + '?q=' + encodeURIComponent(q) + '" class="block px-4 py-2 text-xs text-accent font-medium border-t border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700">Voir tous les résultats →</a>';
+        }
+        box.classList.remove('hidden');
+      }
+
+      input.addEventListener('input', function() {
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (q.length < 2) {
+          box.classList.add('hidden');
+          box.innerHTML = '';
+          return;
+        }
+        timer = setTimeout(function() {
+          fetch('{% url "produits:recherche_ajax" %}?q=' + encodeURIComponent(q))
+            .then(function(r) { return r.json(); })
+            .then(function(data) { afficher(data.resultats); })
+            .catch(function() { box.classList.add('hidden'); });
+        }, 250);
+      });
+
+      input.addEventListener('focus', function() {
+        if (box.innerHTML) box.classList.remove('hidden');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!form.contains(e.target)) box.classList.add('hidden');
+      });
+
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') box.classList.add('hidden');
+      });
+    })();
+  </script>
+
+</body>
+</html>

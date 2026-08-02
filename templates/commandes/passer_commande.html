@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load produit_tags %}
+{% block title %}Passer commande — TechShop{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-1">Passer commande</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-8">Renseignez vos coordonnées pour la livraison.</p>
+
+<div class="grid md:grid-cols-5 gap-6 md:gap-10">
+
+  <form method="post" class="md:col-span-3 space-y-5">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="px-4 py-3 rounded-md text-sm border bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% for field in form %}
+    <div>
+      <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+        {{ field.label }}
+        {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+      </label>
+
+      {% if field.name == 'adresse' or field.name == 'note' %}
+        <textarea name="{{ field.name }}"
+                  id="{{ field.id_for_label }}"
+                  {% if field.field.required %}required{% endif %}
+                  rows="{% if field.name == 'adresse' %}3{% else %}2{% endif %}"
+                  placeholder="{% if field.name == 'adresse' %}Quartier, rue, point de repère...{% else %}Instructions supplémentaires (optionnel){% endif %}"
+                  class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent min-h-[80px] dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">{{ field.value|default:'' }}</textarea>
+
+      {% elif field.name == 'methode_paiement' %}
+        <select name="{{ field.name }}" id="{{ field.id_for_label }}"
+                class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+          {% for value, label in field.field.choices %}
+            <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Mobile Money : nous vous appellerons pour confirmer le paiement avant la livraison.</p>
+
+      {% elif field.name == 'email' %}
+        <input type="email"
+               name="{{ field.name }}" id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               placeholder="Ex: vous@email.com"
+               class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
+        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Un email de confirmation vous sera envoyé.</p>
+
+      {% elif field.name == 'code_promo' %}
+        <input type="text"
+               name="{{ field.name }}" id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               placeholder="Ex: BIENVENUE10"
+               class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
+
+      {% else %}
+        <input type="text"
+               name="{{ field.name }}"
+               id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               {% if field.field.required %}required{% endif %}
+               placeholder="{% if field.name == 'nom_client' %}Votre nom complet{% else %}Ex: 70 00 00 00{% endif %}"
+               class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
+      {% endif %}
+
+      {% if field.errors %}
+        <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center">
+        Confirmer la commande
+      </button>
+      <a href="{% url 'commandes:voir_panier' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent text-center">
+        ← Retour au panier
+      </a>
+    </div>
+  </form>
+
+  <aside class="md:col-span-2">
+    <div class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Récapitulatif</h2>
+      <ul class="space-y-3 mb-4">
+        {% for item in panier %}
+        <li class="flex justify-between gap-3 text-sm">
+          <span class="text-slate-600 dark:text-slate-300">{{ item.produit.nom }} × {{ item.quantite }}</span>
+          <span class="font-medium text-slate-900 dark:text-white whitespace-nowrap">{{ item.sous_total|prix_fcfa }} FCFA</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-4 space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500 dark:text-slate-400">Sous-total</span>
+          <span class="font-medium text-slate-900 dark:text-white">{{ sous_total|prix_fcfa }} FCFA</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500 dark:text-slate-400">Livraison</span>
+          <span class="font-medium text-slate-900 dark:text-white">{% if frais_livraison == 0 %}Gratuite{% else %}{{ frais_livraison|prix_fcfa }} FCFA{% endif %}</span>
+        </div>
+      </div>
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-3 mt-2 flex justify-between items-center">
+        <span class="font-semibold text-slate-900 dark:text-white">Total</span>
+        <span class="font-bold text-xl text-accent">{{ total_general|prix_fcfa }} FCFA</span>
+      </div>
+      <p class="text-xs text-slate-400 dark:text-slate-500 mt-4">Un code promo ? Saisissez-le dans le champ ci-dessus avant de confirmer.</p>
+    </div>
+  </aside>
+
+</div>
+
+{% endblock %}

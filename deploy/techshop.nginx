@@ -1,0 +1,28 @@
+# Configuration Nginx pour TechShop
+# Remplacer example.com par votre domaine
+
+server {
+    listen 80;
+    server_name example.com www.example.com;
+
+    client_max_body_size 10M;
+
+    # Fichiers statiques
+    location /static/ {
+        alias /home/techshop/techshop/staticfiles/;
+    }
+
+    # Fichiers media (images produits)
+    location /media/ {
+        alias /home/techshop/techshop/media/;
+    }
+
+    # Application Django via Gunicorn
+    location / {
+        proxy_pass http://unix:/home/techshop/techshop/techshop.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

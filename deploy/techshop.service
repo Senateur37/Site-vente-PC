@@ -1,0 +1,14 @@
+[Unit]
+Description=TechShop Gunicorn
+After=network.target
+
+[Service]
+User=techshop
+Group=www-data
+WorkingDirectory=/home/techshop/techshop
+EnvironmentFile=/home/techshop/techshop/.env
+ExecStart=/home/techshop/techshop/venv/bin/gunicorn --workers 3 --bind unix:/home/techshop/techshop/techshop.sock techshop.wsgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

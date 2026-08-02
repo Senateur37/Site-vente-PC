@@ -1,0 +1,177 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Produits — TechShop{% endblock %}
+{% block content %}
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Produits</h1>
+  <a href="{% url 'dashboard:produit_ajouter' %}" class="bg-accent hover:bg-accentdark text-white text-sm font-semibold px-4 py-2 rounded-md inline-block text-center whitespace-nowrap">
+    + Ajouter un produit
+  </a>
+</div>
+
+{% if produits %}
+<div class="overflow-x-auto -mx-4 md:mx-0">
+  <table class="w-full min-w-[600px] border-collapse">
+    <thead>
+      <tr class="border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 text-left">
+        <th class="py-3 px-4 md:px-2">Image</th>
+        <th class="py-3 px-4 md:px-2">Nom</th>
+        <th class="py-3 px-4 md:px-2 hidden sm:table-cell">Catégorie</th>
+        <th class="py-3 px-4 md:px-2 hidden md:table-cell">Stock</th>
+        <th class="py-3 px-4 md:px-2">Prix</th>
+        <th class="py-3 px-4 md:px-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for produit in produits %}
+      <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+        <td class="py-3 px-4 md:px-2">
+          <div class="w-10 h-10 rounded-md bg-surface dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center overflow-hidden">
+            {% if produit.image %}
+              <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
+            {% else %}
+              <span class="text-xs text-slate-400">—</span>
+            {% endif %}
+          </div>
+        </td>
+        <td class="py-3 px-4 md:px-2">
+          <p class="text-sm font-medium text-slate-900 dark:text-white truncate max-w-[200px]">{{ produit.nom }}</p>
+          {% if produit.marque %}
+            <p class="text-xs text-slate-400">{{ produit.get_marque_display }}</p>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 md:px-2 text-sm text-slate-600 dark:text-slate-300 hidden sm:table-cell">{{ produit.categorie.nom }}</td>
+        <td class="py-3 px-4 md:px-2 hidden md:table-cell">
+          {% if produit.en_stock %}
+            <span class="text-sm {% if produit.stock <= 3 %}text-red-500 font-medium{% else %}text-slate-600 dark:text-slate-300{% endif %}">{{ produit.stock }}</span>
+          {% else %}
+            <span class="text-xs text-red-500">Rupture</span>
+          {% endif %}
+        </td>
+        <td class="py-3 px-4 md:px-2 text-sm font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ produit.prix }} FCFA</td>
+        <td class="py-3 px-4 md:px-2">
+          <div class="flex items-center gap-2">
+            <a href="{% url 'dashboard:produit_modifier' produit.id %}" class="text-xs border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1.5 hover:border-accent hover:text-accent text-slate-600 dark:text-slate-300 transition">
+              Modifier
+            </a>
+            <button type="button"
+                    data-delete-url="{% url 'dashboard:produit_supprimer' produit.id %}"
+                    data-produit-nom="{{ produit.nom }}"
+                    class="delete-btn text-xs bg-red-500 text-white rounded-md px-3 py-1.5 hover:bg-red-600 transition">
+              Supprimer
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Mobile cards -->
+<div class="sm:hidden grid grid-cols-1 gap-3 mt-4">
+  {% for produit in produits %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center gap-3">
+    <div class="w-14 h-14 rounded-lg bg-surface dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center overflow-hidden shrink-0">
+      {% if produit.image %}
+        <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="w-full h-full object-cover">
+      {% else %}
+        <span class="text-xs text-slate-400">—</span>
+      {% endif %}
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-medium text-slate-900 dark:text-white truncate">{{ produit.nom }}</p>
+      <p class="text-xs text-slate-400">{{ produit.categorie.nom }} · {{ produit.prix }} FCFA</p>
+      <p class="text-xs {% if produit.en_stock and produit.stock > 3 %}text-slate-400{% elif produit.en_stock %}text-red-500{% else %}text-red-500{% endif %}">
+        {% if produit.en_stock %}{{ produit.stock }} en stock{% else %}Rupture{% endif %}
+      </p>
+    </div>
+    <div class="flex flex-col gap-1.5 shrink-0">
+      <a href="{% url 'dashboard:produit_modifier' produit.id %}" class="text-xs border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1 text-center hover:border-accent hover:text-accent text-slate-600 dark:text-slate-300 transition">
+        Modifier
+      </a>
+      <button type="button"
+              data-delete-url="{% url 'dashboard:produit_supprimer' produit.id %}"
+              data-produit-nom="{{ produit.nom }}"
+              class="delete-btn text-xs bg-red-500 text-white rounded-md px-3 py-1 hover:bg-red-600 transition w-full">
+        Suppr.
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
+  <p class="text-slate-400 dark:text-slate-500 mb-4">Aucun produit pour le moment.</p>
+  <a href="{% url 'dashboard:produit_ajouter' %}" class="bg-accent hover:bg-accentdark text-white text-sm font-semibold px-5 py-2 rounded-md inline-block">
+    Ajouter un produit
+  </a>
+</div>
+{% endif %}
+
+<!-- Modal de confirmation de suppression -->
+<div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+  <div id="delete-modal-overlay" class="absolute inset-0 bg-black/50"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+    <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+    </div>
+    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Confirmer la suppression</h3>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+      Êtes-vous sûr de vouloir supprimer <strong id="delete-produit-nom" class="text-slate-700 dark:text-slate-300"></strong> ?<br>
+      Cette action est irréversible.
+    </p>
+    <form id="delete-form" method="post" class="flex flex-col sm:flex-row gap-3 justify-center">
+      {% csrf_token %}
+      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">
+        Oui, supprimer
+      </button>
+      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-md hover:border-accent text-sm text-center">
+        Annuler
+      </button>
+    </form>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+(function() {
+  var modal = document.getElementById('delete-modal');
+  var overlay = document.getElementById('delete-modal-overlay');
+  var form = document.getElementById('delete-form');
+  var nomSpan = document.getElementById('delete-produit-nom');
+  var cancelBtn = document.getElementById('delete-cancel-btn');
+
+  var deleteBtns = document.querySelectorAll('.delete-btn');
+
+  deleteBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var url = btn.getAttribute('data-delete-url');
+      var nom = btn.getAttribute('data-produit-nom');
+      form.action = url;
+      nomSpan.textContent = nom;
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    });
+  });
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  if (overlay) overlay.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+})();
+</script>
+{% endblock %}
+
+{% endblock %}
+

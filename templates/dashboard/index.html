@@ -1,0 +1,138 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Tableau de bord — TechShop{% endblock %}
+{% block content %}
+
+<h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">Tableau de bord</h1>
+
+<!-- Stats cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-5">
+    <p class="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">Total commandes</p>
+    <p class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">{{ total_commandes }}</p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-5">
+    <p class="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">En attente</p>
+    <p class="text-2xl md:text-3xl font-bold text-amber-500">{{ commandes_en_attente }}</p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-5">
+    <p class="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">Livrées</p>
+    <p class="text-2xl md:text-3xl font-bold text-green-500">{{ commandes_livrees }}</p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-5">
+    <p class="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">C.A. mois</p>
+    <p class="text-lg md:text-xl font-bold text-accent">{{ chiffre_affaires_mois|floatformat:0 }} FCFA</p>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+
+  <!-- Chiffre d'affaires total -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Chiffre d'affaires total</h2>
+    <p class="text-3xl font-bold text-accent">{{ chiffre_affaires|floatformat:0 }} FCFA</p>
+  </div>
+
+  <!-- Produits populaires -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Produits les plus vendus</h2>
+    {% if produits_populaires %}
+    <ul class="space-y-2">
+      {% for p in produits_populaires %}
+      <li class="flex justify-between text-sm">
+        <span class="text-slate-600 dark:text-slate-300 truncate">{{ p.nom_produit }}</span>
+        <span class="font-medium text-slate-900 dark:text-white ml-2 shrink-0">{{ p.total_vendu }} vendu{{ p.total_vendu|pluralize }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-slate-400">Aucune vente pour le moment.</p>
+    {% endif %}
+  </div>
+
+  <!-- Graphique ventes mensuelles -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 md:col-span-2">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ventes des 6 derniers mois (FCFA)</h2>
+    <canvas id="chart-ventes" height="120"></canvas>
+  </div>
+
+  <!-- Stock faible -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Stock faible</h2>
+    {% if stock_faible %}
+    <ul class="space-y-2">
+      {% for p in stock_faible %}
+      <li class="flex justify-between text-sm">
+        <span class="text-slate-600 dark:text-slate-300 truncate">{{ p.nom }}</span>
+        <span class="font-medium text-red-500 ml-2 shrink-0">{{ p.stock }} restant{{ p.stock|pluralize }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-sm text-slate-400">Tous les produits sont bien approvisionnés.</p>
+    {% endif %}
+  </div>
+
+  <!-- Dernières commandes -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Dernières commandes</h2>
+    {% if dernieres_commandes %}
+    <div class="space-y-2">
+      {% for cmd in dernieres_commandes %}
+      <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="flex justify-between items-center p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-slate-900 dark:text-white truncate">#{{ cmd.id }} — {{ cmd.nom_client }}</p>
+          <p class="text-xs text-slate-400">{{ cmd.date_creation|date:"d/m/Y H:i" }}</p>
+        </div>
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ml-2
+          {% if cmd.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
+          {% if cmd.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
+          {% if cmd.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+          {{ cmd.get_statut_display }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-slate-400">Aucune commande pour le moment.</p>
+    {% endif %}
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ mois_ventes|json_script:"data-mois-ventes" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const canvas = document.getElementById('chart-ventes');
+  if (!canvas || typeof Chart === 'undefined') return;
+  let data = [];
+  try { data = JSON.parse(document.getElementById('data-mois-ventes').textContent); } catch(e) {}
+  if (!data.length) {
+    canvas.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de données de ventes.</p>';
+    return;
+  }
+  const labels = data.map(function(d) { return d.mois; });
+  const valeurs = data.map(function(d) { return d.total; });
+  new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Ventes (FCFA)',
+        data: valeurs,
+        backgroundColor: '#2563eb',
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

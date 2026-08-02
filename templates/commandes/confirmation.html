@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load produit_tags %}
+{% block title %}Commande confirmée — TechShop{% endblock %}
+{% block content %}
+
+<div class="max-w-xl mx-auto text-center py-8">
+  <div class="w-16 h-16 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-5">✓</div>
+
+  <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Commande confirmée !</h1>
+  <p class="text-slate-500 dark:text-slate-400 mb-8">
+    Merci {{ commande.nom_client }}, votre commande <strong class="text-slate-700 dark:text-slate-300">#{{ commande.id }}</strong> a bien été enregistrée.
+    Nous vous contacterons au <strong class="text-slate-700 dark:text-slate-300">{{ commande.telephone }}</strong> pour la livraison.
+  </p>
+
+  <div class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 text-left mb-8">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Détails de la commande</h2>
+
+    <ul class="space-y-3 mb-4">
+      {% for ligne in commande.lignes.all %}
+      <li class="flex justify-between gap-3 text-sm">
+        <span class="text-slate-600 dark:text-slate-300">{{ ligne.nom_produit }} × {{ ligne.quantite }}</span>
+        <span class="font-medium text-slate-900 dark:text-white whitespace-nowrap">{{ ligne.sous_total|prix_fcfa }} FCFA</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 text-sm">
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Sous-total</span>
+        <span class="font-medium text-slate-900 dark:text-white">{{ commande.sous_total|prix_fcfa }} FCFA</span>
+      </div>
+      {% if commande.reduction > 0 %}
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Réduction{% if commande.code_promo %} ({{ commande.code_promo.code }}){% endif %}</span>
+        <span class="font-medium text-green-600 dark:text-green-400">-{{ commande.reduction|prix_fcfa }} FCFA</span>
+      </div>
+      {% endif %}
+      <div class="flex justify-between">
+        <span class="text-slate-500 dark:text-slate-400">Livraison</span>
+        <span class="font-medium text-slate-900 dark:text-white">{% if commande.frais_livraison == 0 %}Gratuite{% else %}{{ commande.frais_livraison|prix_fcfa }} FCFA{% endif %}</span>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 mt-2 flex justify-between items-center mb-4">
+      <span class="font-semibold text-slate-900 dark:text-white">Total</span>
+      <span class="font-bold text-xl text-accent">{{ commande.total|prix_fcfa }} FCFA</span>
+    </div>
+
+    <div class="text-sm text-slate-500 dark:text-slate-400 space-y-1">
+      <p><span class="text-slate-400 dark:text-slate-500">Paiement :</span> {{ commande.get_methode_paiement_display }}</p>
+      <p><span class="text-slate-400 dark:text-slate-500">Adresse :</span> {{ commande.adresse }}</p>
+      {% if commande.note %}
+        <p><span class="text-slate-400 dark:text-slate-500">Note :</span> {{ commande.note }}</p>
+      {% endif %}
+      <p><span class="text-slate-400 dark:text-slate-500">Statut :</span> {{ commande.get_statut_display }}</p>
+    </div>
+  </div>
+
+  <a href="{% url 'produits:liste' %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md inline-block w-full sm:w-auto text-center">
+    Continuer mes achats
+  </a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            accent: '#2563eb',
+            accentdark: '#1d4ed8',
+            surface: '#f8fafc',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .sidebar-transition {
+      transition: transform 0.3s ease-in-out;
+    }
+    @media (max-width: 767px) {
+      .sidebar-overlay {
+        transition: opacity 0.3s ease-in-out;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col md:flex-row">
+
+  <!-- Mobile header (visible on small screens) -->
+  <header class="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40">
+    <div class="flex items-center justify-between px-4 py-3">
+      <button id="sidebar-toggle-mobile" type="button" class="w-9 h-9 rounded-md border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-accent hover:border-accent">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2 font-bold text-slate-900 dark:text-white">
+        {% if site_settings and site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="" class="h-7 w-auto">
+        {% endif %}
+        <span>{{ site_settings.site_nom|default:'TechShop' }}</span>
+      </a>
+      <button id="theme-toggle-mobile" type="button"
+              class="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center transition">
+        <svg id="theme-icon-moon-mobile" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+        <svg id="theme-icon-sun-mobile" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black/40 z-30 hidden md:hidden opacity-0"></div>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar-transition fixed md:sticky top-0 left-0 z-40 md:z-auto w-64 h-full md:h-screen bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col -translate-x-full md:translate-x-0">
+    
+    <!-- Sidebar header (desktop) -->
+    <div class="hidden md:flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+      <a href="{% url 'dashboard:index' %}" class="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+        {% if site_settings and site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="" class="h-7 w-auto">
+        {% endif %}
+        <span>{{ site_settings.site_nom|default:'TechShop' }}</span>
+      </a>
+      <button id="theme-toggle-desktop" type="button"
+              class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center transition">
+        <svg id="theme-icon-moon-desktop" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+        <svg id="theme-icon-sun-desktop" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Close button (mobile) -->
+    <div class="md:hidden flex justify-end px-4 pt-4">
+      <button id="sidebar-close" type="button" class="w-8 h-8 rounded-md border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Admin info -->
+    <div class="border-b border-slate-200 dark:border-slate-700 px-5 py-4">
+      <p class="text-sm font-medium text-slate-900 dark:text-white truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+      <p class="text-xs text-slate-400 dark:text-slate-500">Administrateur</p>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <a href="{% url 'dashboard:index' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if request.resolver_match.view_name == 'dashboard:index' %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Tableau de bord
+      </a>
+
+      <a href="{% url 'dashboard:produits_liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'produit' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        Produits
+        {% if nb_stock_faible %}
+          <span class="ml-auto text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">{{ nb_stock_faible }}</span>
+        {% endif %}
+      </a>
+
+      <a href="{% url 'dashboard:categories_liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'categorie' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+        </svg>
+        Catégories
+      </a>
+      <a href="{% url 'dashboard:marques_liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'marque' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-2v13M9 19c0 .667-.333 1-1 1H4c-.667 0-1-.333-1-1V8c0-.667.333-1 1-1h4c.667 0 1 .333 1 1v11z"/>
+        </svg>
+        Marques
+
+      <a href="{% url 'dashboard:commandes_liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'commande' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+        </svg>
+        Commandes
+      </a>
+
+      <a href="{% url 'dashboard:clients_liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'client' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        Clients
+      </a>
+
+      <a href="{% url 'dashboard:parametres' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition {% if 'parametre' in request.resolver_match.view_name %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Paramètres
+      </a>
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="border-t border-slate-200 dark:border-slate-700 p-3">
+      <a href="{% url 'produits:liste' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Retour à la boutique
+      </a>
+      <a href="{% url 'dashboard:logout' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 min-w-0 px-4 md:px-6 lg:px-8 py-4 md:py-6 overflow-x-hidden">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="mb-4 px-4 py-3 rounded-md text-sm border
+          {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300{% endif %}
+          {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300{% endif %}
+          {% if message.tags == 'warning' %}bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300{% endif %}
+          {% if message.tags == 'info' %}bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+
+  <script>
+    (function() {
+      const htmlEl = document.documentElement;
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+        htmlEl.classList.add('dark');
+      } else {
+        htmlEl.classList.remove('dark');
+      }
+
+      // Theme toggle function
+      function setupThemeToggle(btnId, sunId, moonId) {
+        const btn = document.getElementById(btnId);
+        const sun = document.getElementById(sunId);
+        const moon = document.getElementById(moonId);
+        if (!btn || !sun || !moon) return;
+
+        function update() {
+          const isDark = htmlEl.classList.contains('dark');
+          sun.classList.toggle('hidden', !isDark);
+          moon.classList.toggle('hidden', isDark);
+        }
+        update();
+
+        btn.addEventListener('click', function() {
+          htmlEl.classList.toggle('dark');
+          const isDark = htmlEl.classList.contains('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          update();
+        });
+      }
+
+      setupThemeToggle('theme-toggle-desktop', 'theme-icon-sun-desktop', 'theme-icon-moon-desktop');
+      setupThemeToggle('theme-toggle-mobile', 'theme-icon-sun-mobile', 'theme-icon-moon-mobile');
+
+      // Sidebar toggle (mobile)
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const openBtn = document.getElementById('sidebar-toggle-mobile');
+      const closeBtn = document.getElementById('sidebar-close');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+        overlay.classList.remove('hidden');
+        setTimeout(function() { overlay.classList.remove('opacity-0'); overlay.classList.add('opacity-100'); }, 10);
+        document.body.classList.add('overflow-hidden', 'md:overflow-auto');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+        overlay.classList.add('opacity-0');
+        overlay.classList.remove('opacity-100');
+        setTimeout(function() { overlay.classList.add('hidden'); }, 300);
+        document.body.classList.remove('overflow-hidden', 'md:overflow-auto');
+      }
+
+      if (openBtn) openBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+{% load produit_tags %}
+{% block title %}{% if categorie_active %}{{ categorie_active|capfirst }} — Boutique TechShop{% elif recherche %}Recherche "{{ recherche }}" — TechShop{% else %}Boutique — TechShop{% endif %}{% endblock %}
+
+{% block content %}
+
+<nav class="flex items-center gap-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-6">
+  <a href="{% url 'produits:liste' %}" class="hover:text-accent">Accueil</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 inline shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+  <span class="font-medium text-slate-700 dark:text-slate-200">Boutique</span>
+</nav>
+
+{% if not recherche and not marque_active and not prix_min and not prix_max %}
+  {% if site_settings.banniere %}
+    <div class="relative mb-6 md:mb-8 rounded-xl overflow-hidden">
+      <img src="{{ site_settings.banniere.url }}" alt="Bannière" class="w-full h-auto object-cover rounded-xl" loading="lazy">
+    </div>
+  {% else %}
+    <div class="relative mb-6 md:mb-8 rounded-xl overflow-hidden bg-gradient-to-r from-accent to-purple-600 text-white">
+      <div class="relative z-10 p-5 md:p-8">
+        <h2 class="text-lg md:text-2xl font-bold mb-1">Le meilleur du matériel informatique, au meilleur prix</h2>
+        <p class="text-sm md:text-base opacity-90">Ordinateurs, accessoires et composants garantis, livrés partout à Bamako.</p>
+      </div>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if produits_a_la_une %}
+<section class="mb-8 md:mb-10">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">À la une</h2>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+    {% for produit in produits_a_la_une %}{% include "produits/_card.html" with produit=produit %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if not recherche and not marque_active and not prix_min and not prix_max and produits_defilement %}
+<div class="relative mb-6 md:mb-8 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-4">
+  <div class="flex overflow-x-auto gap-4 px-4 scrollbar-hide">
+    {% for produit in produits_defilement %}
+    <a href="{% url 'produits:detail' produit.slug %}" class="flex items-center gap-3 shrink-0 w-56 md:w-64 bg-white dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 hover:border-accent hover:shadow-md transition-all">
+      <div class="shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-md bg-white dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+        {% if produit.image %}<img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="w-full h-full object-cover" loading="lazy">{% else %}<span class="text-slate-300 text-[10px]">pas d'image</span>{% endif %}
+      </div>
+      <div class="min-w-0">
+        <p class="text-xs md:text-sm font-semibold text-slate-800 dark:text-white truncate">{{ produit.nom }}</p>
+        <p class="text-xs md:text-sm font-bold text-accent">{{ produit.prix|prix_fcfa }} FCFA</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if not recherche and not marque_active and not prix_min and not prix_max and top_marques %}
+<section class="mb-8 md:mb-10">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">Top Marques</h2>
+  </div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
+    {% for marque in top_marques %}
+    <a href="?marque={{ marque.valeur }}" class="flex flex-col items-center justify-center p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-accent hover:shadow-md transition-all group">
+      {% if marque.logo_url %}<div class="h-10 w-full mb-1 flex items-center justify-center bg-white rounded px-1"><img src="{{ marque.logo_url }}" alt="{{ marque.label }}" class="max-h-full max-w-full object-contain" loading="lazy"></div><span class="text-slate-700 dark:text-slate-300 font-semibold mb-1 text-xs text-center">{{ marque.label }}</span>{% else %}<span class="text-slate-700 dark:text-slate-300 font-bold mb-1 text-center">{{ marque.label }}</span>{% endif %}
+      <span class="text-[10px] text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">{{ marque.nb_produits }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Menu burger : categories et filtres -->
+<div class="mb-6">
+  <button id="categorie-toggle" type="button" class="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg px-4 py-2.5 hover:border-accent hover:shadow-md w-full sm:w-auto transition-all">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    <span>Catégorie &amp; Filtre</span>
+    <svg id="categorie-chevron" class="w-4 h-4 ml-2 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+  </button>
+  <div id="categorie-menu" class="hidden mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-lg">
+    <h3 class="text-xs uppercase text-slate-500 font-medium tracking-wide mb-2">Catégories</h3>
+    <div class="flex flex-wrap gap-1 mb-4">
+      <a href="{% url 'produits:liste' %}" class="text-sm px-4 py-2 rounded-lg {% if not categorie_active %}bg-accent/10 text-accent font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %} transition">Tous</a>
+      {% for cat in categories %}<a href="?categorie={{ cat.slug }}" class="text-sm px-4 py-2 rounded-lg {% if categorie_active == cat.slug %}bg-accent/10 text-accent font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %} transition">{{ cat.nom }}</a>{% endfor %}
+    </div>
+    <hr class="border-slate-200 dark:border-slate-700 mb-4">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-xs uppercase text-slate-500 font-medium tracking-wide">Filtres</h3>
+      {% if marque_active or prix_min or prix_max %}<a href="{% url 'produits:liste' %}" class="text-xs text-accent">Réinitialiser</a>{% endif %}
+    </div>
+    <form method="get" action="{% url 'produits:liste' %}" class="space-y-3">
+      {% if categorie_active %}<input type="hidden" name="categorie" value="{{ categorie_active }}">{% endif %}
+      {% if recherche %}<input type="hidden" name="q" value="{{ recherche }}">{% endif %}
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="marque" class="text-xs text-slate-500 font-medium block mb-1">Marque</label>
+          <select name="marque" id="marque" class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 dark:text-slate-200">
+            <option value="">Toutes</option>
+            {% for value, label in marques %}<option value="{{ value }}" {% if marque_active == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="prix_min" class="text-xs text-slate-500 font-medium block mb-1">Prix min</label>
+          <input type="number" name="prix_min" id="prix_min" value="{{ prix_min }}" min="0" placeholder="0" class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 dark:text-slate-200">
+        </div>
+        <div>
+          <label for="prix_max" class="text-xs text-slate-500 font-medium block mb-1">Prix max</label>
+          <input type="number" name="prix_max" id="prix_max" value="{{ prix_max }}" min="0" placeholder="Max" class="w-full border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 dark:text-slate-200">
+        </div>
+      </div>
+      <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white text-sm font-semibold px-4 py-2 rounded-lg">Filtrer</button>
+    </form>
+  </div>
+</div>
+
+<!-- Sections personnalisees (hors menu burger) -->
+{% for section in sections %}
+<section class="mb-10">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ section.titre }}</h2>
+    {% if section.afficher_voir_plus %}<a href="{% url 'produits:liste' %}?{% if section.type == 'categorie' %}categorie={{ section.categorie }}{% elif section.type == 'marque' %}marque={{ section.marque }}{% else %}tri={{ section.type }}{% endif %}" class="text-xs text-accent font-medium hover:underline">Voir plus →</a>{% endif %}
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for produit in section.produits %}{% include "produits/_card.html" with produit=produit %}{% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<!-- Tous les produits -->
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+  <div>
+    <h2 class="text-lg font-bold text-slate-900 dark:text-white">Tous les produits</h2>
+    <p class="text-xs text-slate-400">{% with total=produits.paginator.count %}{{ total }} produit{{ total|pluralize }}{% endwith %}</p>
+  </div>
+  <form method="get" action="{% url 'produits:liste' %}" class="flex items-center gap-2">
+    {% if categorie_active %}<input type="hidden" name="categorie" value="{{ categorie_active }}">{% endif %}
+    {% if recherche %}<input type="hidden" name="q" value="{{ recherche }}">{% endif %}
+    {% if marque_active %}<input type="hidden" name="marque" value="{{ marque_active }}">{% endif %}
+    {% if prix_min %}<input type="hidden" name="prix_min" value="{{ prix_min }}">{% endif %}
+    {% if prix_max %}<input type="hidden" name="prix_max" value="{{ prix_max }}">{% endif %}
+    <label for="tri" class="text-xs text-slate-500 font-medium sr-only">Trier</label>
+    <select name="tri" id="tri" onchange="this.form.submit()"
+      class="border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+      <option value="" {% if not tri_actif %}selected{% endif %}>Trier par défaut</option>
+      <option value="nouveautes" {% if tri_actif == 'nouveautes' %}selected{% endif %}>Nouveautés</option>
+      <option value="prix_croissant" {% if tri_actif == 'prix_croissant' %}selected{% endif %}>Prix croissant</option>
+      <option value="prix_decroissant" {% if tri_actif == 'prix_decroissant' %}selected{% endif %}>Prix décroissant</option>
+      <option value="nom_a_z" {% if tri_actif == 'nom_a_z' %}selected{% endif %}>Nom (A → Z)</option>
+      <option value="nom_z_a" {% if tri_actif == 'nom_z_a' %}selected{% endif %}>Nom (Z → A)</option>
+      <option value="meilleures_ventes" {% if tri_actif == 'meilleures_ventes' %}selected{% endif %}>Meilleures ventes</option>
+    </select>
+  </form>
+</div>
+
+{% if produits %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+  {% for produit in produits %}{% include "produits/_card.html" with produit=produit %}{% endfor %}
+</div>
+{% else %}
+<div class="py-10 text-center bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+  <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+  </div>
+  <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Aucun produit trouvé</h3>
+  <p class="text-slate-500 text-sm">Essayez de modifier vos critères de recherche.</p>
+  <a href="{% url 'produits:liste' %}" class="inline-block mt-3 text-accent text-sm font-medium">Voir tous les produits →</a>
+</div>
+{% endif %}
+
+{% if produits.has_other_pages %}
+<nav class="flex flex-wrap items-center justify-center gap-2 mt-8" aria-label="Pagination">
+  {% if produits.has_previous %}
+    <a href="?{% url_replace page=produits.previous_page_number %}" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:border-accent hover:text-accent transition">← Précédent</a>
+  {% endif %}
+
+  {% if produits.number > 3 %}
+    <a href="?{% url_replace page=1 %}" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:border-accent hover:text-accent transition flex items-center justify-center">1</a>
+    <span class="text-slate-400 text-sm px-1">…</span>
+  {% endif %}
+
+  {% for num in produits.paginator.page_range %}
+    {% if num > produits.number|add:"-3" and num < produits.number|add:"3" %}
+      {% if num == produits.number %}
+        <span class="w-9 h-9 rounded-lg bg-accent text-white text-sm font-semibold flex items-center justify-center">{{ num }}</span>
+      {% else %}
+        <a href="?{% url_replace page=num %}" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:border-accent hover:text-accent transition flex items-center justify-center">{{ num }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% if produits.number < produits.paginator.num_pages|add:"-2" %}
+    <span class="text-slate-400 text-sm px-1">…</span>
+    <a href="?{% url_replace page=produits.paginator.num_pages %}" class="w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:border-accent hover:text-accent transition flex items-center justify-center">{{ produits.paginator.num_pages }}</a>
+  {% endif %}
+
+  {% if produits.has_next %}
+    <a href="?{% url_replace page=produits.next_page_number %}" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-300 hover:border-accent hover:text-accent transition">Suivant →</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+<script>
+document.getElementById('categorie-toggle')?.addEventListener('click', function() { const menu = document.getElementById('categorie-menu'); const chevron = document.getElementById('categorie-chevron'); if (menu) { menu.classList.toggle('hidden'); if (chevron) chevron.classList.toggle('rotate-180'); } });
+</script>
+<style>
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+{% endblock %}

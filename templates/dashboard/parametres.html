@@ -1,0 +1,90 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Paramètres — Tableau de bord{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl">
+  <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Paramètres du site</h1>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Section: Informations générales -->
+    <fieldset class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <legend class="font-semibold text-slate-900 dark:text-white px-2">Informations générales</legend>
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nom du site</label>
+          <input type="text" name="site_nom" value="{{ settings.site_nom|default:'TechShop' }}"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+          <textarea name="site_description" rows="3"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">{{ settings.site_description|default:'' }}</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Logo</label>
+            <input type="file" name="logo" accept="image/*"
+              class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-slate-700 file:text-accent hover:file:bg-blue-100 dark:hover:file:bg-slate-600">
+          </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Bannière (1200×400px)</label>
+          <input type="file" name="banniere" accept="image/*"
+            class="w-full text-sm text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 dark:file:bg-slate-700 file:text-accent hover:file:bg-blue-100 dark:hover:file:bg-slate-600">
+          {% if settings.banniere %}
+          <div class="mt-2">
+            <img src="{{ settings.banniere.url }}" alt="Bannière actuelle" class="h-20 rounded border border-slate-200">
+            <p class="text-xs text-slate-400 mt-1">Bannière actuelle</p>
+          </div>
+          {% endif %}
+        </div>
+    </fieldset>
+
+    <!-- Section: Contact -->
+    <fieldset class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <legend class="font-semibold text-slate-900 dark:text-white px-2">Contact</legend>
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Téléphone</label>
+          <input type="text" name="telephone" value="{{ settings.telephone|default:'' }}"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Adresse</label>
+          <textarea name="adresse" rows="2"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">{{ settings.adresse|default:'' }}</textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+          <input type="email" name="email" value="{{ settings.email|default:'' }}"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+    </fieldset>
+
+    <!-- Section: Livraison -->
+    <fieldset class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+      <legend class="font-semibold text-slate-900 dark:text-white px-2">Livraison</legend>
+      <div class="mt-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Frais de livraison fixes (FCFA)</label>
+          <input type="number" step="0.01" min="0" name="livraison_prix_fixe" value="{{ settings.livraison_prix_fixe|default:0 }}"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Livraison gratuite à partir de (FCFA)</label>
+          <input type="number" step="0.01" min="0" name="livraison_gratuite_des" value="{{ settings.livraison_gratuite_des|default:0 }}"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent">
+          <p class="text-xs text-slate-400 mt-1">0 = jamais de livraison gratuite.</p>
+        </div>
+    </fieldset>
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit"
+        class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md transition">
+        Enregistrer
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

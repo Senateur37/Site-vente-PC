@@ -1,0 +1,102 @@
+{% load static %}
+{% load produit_tags %}
+<a href="{% url 'produits:detail' produit.slug %}"
+   class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-accent hover:shadow-xl transition-all duration-200 flex flex-col relative">
+
+  {# ─── BADGES ─── #}
+  <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+    {% if produit.est_nouveau %}
+    <span class="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">Nouveau</span>
+    {% endif %}
+    {% if produit.en_promo and produit.prix_barre %}
+    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">-{{ produit.pourcentage_reduction }}%</span>
+    {% endif %}
+  </div>
+  {% if not produit.en_stock %}
+  <div class="absolute top-2 right-2 z-10">
+    <span class="bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">Rupture</span>
+  </div>
+  {% endif %}
+
+  {# ─── IMAGE ─── #}
+  <div class="aspect-[4/3] bg-surface dark:bg-slate-700 flex items-center justify-center text-slate-400 text-xs overflow-hidden relative">
+    {% if produit.image %}
+      <img src="{{ produit.image.url }}" alt="{{ produit.nom }}"
+           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+           loading="lazy">
+    {% else %}
+      <div class="flex flex-col items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span>pas d'image</span>
+      </div>
+    {% endif %}
+
+    {# ─── BOUTON AJOUT (toujours visible) ─── #}
+    {% if produit.en_stock %}
+    <div class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/50 to-transparent">
+      <form method="post" action="{% url 'commandes:ajouter' produit.id %}" class="quick-add-form">
+        {% csrf_token %}
+        <input type="hidden" name="quantite" value="1">
+        <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white text-xs font-semibold py-2 rounded-lg shadow-lg transition-colors">
+          Ajouter au panier
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ─── INFOS ─── #}
+  <div class="p-3 flex flex-col gap-1 flex-1">
+    {# Catégorie + Marque #}
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <span class="text-accent text-[10px] uppercase tracking-wide font-medium">{{ produit.categorie.nom }}</span>
+      {% if produit.marque %}
+        <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase">· {{ produit.get_marque_display }}</span>
+      {% endif %}
+    </div>
+
+    {# Nom #}
+    <span class="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors line-clamp-1">{{ produit.nom }}</span>
+
+    {# Note #}
+    {% if produit.nb_avis %}
+    <div class="flex items-center gap-1">
+      <span class="text-amber-500 text-xs">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
+      <span class="text-[11px] text-slate-400">{{ produit.note_moyenne }} ({{ produit.nb_avis }})</span>
+    </div>
+    {% endif %}
+
+    {# Stock #}
+    {% if produit.en_stock %}
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot shrink-0"></span>
+      <span class="text-[11px] text-slate-500 dark:text-slate-400">{{ produit.stock }} en stock</span>
+    </div>
+    {% else %}
+    <div class="flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
+      <span class="text-[11px] text-red-500 dark:text-red-400 font-medium">Rupture de stock</span>
+    </div>
+    {% endif %}
+
+    {# Prix #}
+    <div class="flex items-baseline gap-2 mt-1">
+      <span class="font-bold text-base text-slate-900 dark:text-white">{{ produit.prix|prix_fcfa }} FCFA</span>
+      {% if produit.en_promo and produit.prix_barre %}
+        <span class="text-xs text-slate-400 line-through">{{ produit.prix_barre|prix_fcfa }} FCFA</span>
+      {% endif %}
+    </div>
+
+    {# Barre de stock (visuelle) #}
+    {% if produit.en_stock %}
+    <div class="mt-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1 overflow-hidden">
+      {% with pct=produit.stock|stringformat:"f"|slice:":2" %}
+      <div class="bg-accent h-full rounded-full" style="width:{% if produit.stock > 20 %}100{% else %}{{ produit.stock|add:5 }}00{% endif %}%"></div>
+      {% endwith %}
+    </div>
+    {% endif %}
+  </div>
+</a>
+

@@ -1,0 +1,116 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}{{ titre }} — TechShop{% endblock %}
+{% block content %}
+
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">{{ titre }}</h1>
+
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-5">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="px-4 py-3 rounded-md text-sm border bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {% for field in form %}
+      <div>
+        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          {{ field.label }}
+          {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}
+        </label>
+
+        {% if field.name == 'description' %}
+          <textarea name="{{ field.name }}" id="{{ field.id_for_label }}"
+                    rows="4"
+                    class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">{{ field.value|default:'' }}</textarea>
+
+        {% elif field.name == 'disponible' or field.name == 'a_la_une' %}
+          <label class="inline-flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                   {% if field.value %}checked{% endif %}
+                   class="w-4 h-4 rounded border-slate-300 text-accent focus:ring-accent">
+            <span class="text-sm text-slate-600 dark:text-slate-300">{% if field.help_text %}{{ field.help_text }}{% elif field.name == 'disponible' %}Produit disponible à la vente{% endif %}</span>
+          </label>
+
+        {% elif field.field.widget.input_type == 'file' %}
+          <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}"
+                 accept="image/*"
+                 class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
+          {% if field.value and field.name == 'image' %}
+            <p class="text-xs text-slate-400 mt-1">Image actuelle : {{ field.value }}</p>
+          {% endif %}
+
+        {% elif field.field.widget.input_type == 'select' %}
+          <select name="{{ field.name }}" id="{{ field.id_for_label }}"
+                  class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+            {% for choice in field.field.choices %}
+              <option value="{{ choice.0 }}" {% if field.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
+            {% endfor %}
+          </select>
+
+        {% else %}
+          {% with input_type=field.field.widget.input_type %}
+          <input type="{% if input_type %}{{ input_type }}{% elif field.name == 'prix' or field.name == 'stock' %}number{% else %}text{% endif %}"
+                 name="{{ field.name }}" id="{{ field.id_for_label }}"
+                 value="{{ field.value|default:'' }}"
+                 {% if field.field.required %}required{% endif %}
+                 {% if field.name == 'prix' %}step="0.01" min="0"{% endif %}
+                 {% if field.name == 'stock' %}min="0"{% endif %}
+                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
+                 placeholder="{{ field.help_text|default:'' }}">
+          {% endwith %}
+        {% endif %}
+
+        {% if field.errors %}
+          <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
+        {% endif %}
+        {% if field.help_text and field.name != 'disponible' and field.name != 'a_la_une' %}
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ field.help_text }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <!-- Photos supplémentaires -->
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          Photos supplémentaires <span class="text-xs text-slate-400 font-normal">(optionnel, jusqu'à 5)</span>
+        </label>
+
+        {% if form.instance.pk and form.instance.images_supplementaires.exists %}
+        <div class="flex flex-wrap gap-3 mb-4">
+          {% for img in form.instance.images_supplementaires.all %}
+          <div class="relative w-20 h-20 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-slate-100 dark:bg-slate-700">
+            <img src="{{ img.image.url }}" alt="{{ img.legende }}" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition flex items-center justify-center">
+              <a href="{% url 'dashboard:supprimer_image_produit' img.id %}"
+                 class="text-white text-xs bg-red-600 rounded px-2 py-1 hover:bg-red-700"
+                 onclick="return confirm('Supprimer cette image ?')">
+                × Supprimer
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <input type="file" name="images_supplementaires" id="id_images_supplementaires"
+               accept="image/*" multiple
+               class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
+        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Vous pouvez sélectionner plusieurs images à la fois (Ctrl+clic).</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center text-sm">
+          {% if 'Ajouter' in titre %}Ajouter le produit{% else %}Enregistrer les modifications{% endif %}
+        </button>
+        <a href="{% url 'dashboard:produits_liste' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent text-center text-sm">
+          Annuler
+        </a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+

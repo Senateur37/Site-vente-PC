@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" class="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouveau mot de passe — TechShop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { accent: '#2563eb', accentdark: '#1d4ed8', surface: '#f8fafc' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
+
+  <div class="flex-1 flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-sm">
+      <div class="text-center mb-8">
+        <a href="{% url 'produits:liste' %}" class="text-2xl font-bold text-slate-900 dark:text-white">TECH<span class="text-accent">SHOP</span></a>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Nouveau mot de passe</p>
+      </div>
+
+      <form method="post" class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 md:p-8 shadow-sm">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="mb-4 px-4 py-3 rounded-md text-sm border bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300">
+          {{ form.new_password1.errors }}
+          {{ form.new_password2.errors }}
+        </div>
+        {% endif %}
+        <div class="mb-4">
+          <label for="id_new_password1" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nouveau mot de passe</label>
+          <input type="password" name="new_password1" id="id_new_password1" required
+                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+        </div>
+        <div class="mb-6">
+          <label for="id_new_password2" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Confirmer</label>
+          <input type="password" name="new_password2" id="id_new_password2" required
+                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+        </div>
+        <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white font-semibold py-2.5 rounded-md text-sm transition">
+          Réinitialiser le mot de passe
+        </button>
+      </form>
+    </div>
+    </div>
+  </div>
+
+  <button id="theme-toggle" type="button"
+          class="fixed bottom-4 right-4 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center shadow-md transition z-50"
+          aria-label="Basculer le mode sombre/clair">
+    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+    </svg>
+    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+    </svg>
+  </button>
+
+  
+  <script>
+    (function() {
+      const htmlEl = document.documentElement;
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+        htmlEl.classList.add('dark');
+      } else {
+        htmlEl.classList.remove('dark');
+      }
+      const toggleBtn = document.getElementById('theme-toggle');
+      const iconSun = document.getElementById('theme-icon-sun');
+      const iconMoon = document.getElementById('theme-icon-moon');
+      function updateIcons() {
+        const isDark = htmlEl.classList.contains('dark');
+        iconSun.classList.toggle('hidden', !isDark);
+        iconMoon.classList.toggle('hidden', isDark);
+      }
+      updateIcons();
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+          htmlEl.classList.toggle('dark');
+          const isDark = htmlEl.classList.contains('dark');
+          localStorage.setItem('theme', isDark ? 'dark' : 'light');
+          updateIcons();
+        });
+      }
+    })();
+  </script>
+  
+</body>
+</html>

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load produit_tags %}
+{% block title %}Mon panier — TechShop{% endblock %}
+{% block content %}
+
+<h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Mon panier</h1>
+
+{% if panier|length > 0 %}
+
+<!-- Mobile card layout (hidden on md+) -->
+<div class="md:hidden space-y-4 mb-6">
+  {% for item in panier %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+    <div class="flex justify-between items-start mb-3">
+      <div>
+        <span class="font-semibold text-slate-900 dark:text-white">{{ item.produit.nom }}</span>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.produit.prix|prix_fcfa }} FCFA</p>
+      </div>
+      <form method="post" action="{% url 'commandes:supprimer' item.produit.id %}">
+        {% csrf_token %}
+        <button type="submit" class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1.5">Retirer</button>
+      </form>
+    </div>
+    <div class="flex items-center justify-between">
+      <form method="post" action="{% url 'commandes:modifier' item.produit.id %}" class="flex items-center gap-2">
+        {% csrf_token %}
+        <input type="number" name="quantite" value="{{ item.quantite }}" min="1" max="{{ item.produit.stock }}"
+          class="w-16 border border-slate-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-center text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+        <button type="submit" class="text-xs border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1.5 hover:border-accent hover:text-accent dark:text-slate-300 dark:hover:text-accent">Modifier</button>
+      </form>
+      <span class="font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ item.sous_total|prix_fcfa }} FCFA</span>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+    <div class="flex justify-between items-center py-1">
+      <span class="text-slate-600 dark:text-slate-300 text-sm">Sous-total</span>
+      <span class="text-slate-900 dark:text-white font-medium">{{ sous_total|prix_fcfa }} FCFA</span>
+    </div>
+    <div class="flex justify-between items-center py-1">
+      <span class="text-slate-600 dark:text-slate-300 text-sm">Livraison</span>
+      <span class="text-slate-900 dark:text-white font-medium">{% if frais_livraison == 0 %}Gratuite{% else %}{{ frais_livraison|prix_fcfa }} FCFA{% endif %}</span>
+    </div>
+    {% if livraison_gratuite_des and frais_livraison > 0 %}
+    <p class="text-[11px] text-accent mt-1">Livraison gratuite dès {{ livraison_gratuite_des|prix_fcfa }} FCFA</p>
+    {% endif %}
+    <div class="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-slate-700 mt-2">
+      <span class="font-bold text-slate-900 dark:text-white">Total</span>
+      <span class="font-bold text-xl text-accent">{{ total_general|prix_fcfa }} FCFA</span>
+    </div>
+  </div>
+</div>
+
+<!-- Desktop table (hidden on small screens) -->
+<div class="hidden md:block overflow-x-auto mb-6">
+<table class="w-full border-collapse">
+  <thead>
+    <tr class="border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 text-left">
+      <th class="py-3 px-2">Produit</th>
+      <th class="py-3 px-2">Prix</th>
+      <th class="py-3 px-2">Quantité</th>
+      <th class="py-3 px-2">Sous-total</th>
+      <th class="py-3 px-2"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in panier %}
+    <tr class="border-b border-slate-100 dark:border-slate-700">
+      <td class="py-3 px-2 text-slate-900 dark:text-white">{{ item.produit.nom }}</td>
+      <td class="py-3 px-2 text-slate-600 dark:text-slate-300">{{ item.produit.prix|prix_fcfa }} FCFA</td>
+      <td class="py-3 px-2">
+        <form method="post" action="{% url 'commandes:modifier' item.produit.id %}" class="flex gap-2">
+          {% csrf_token %}
+          <input type="number" name="quantite" value="{{ item.quantite }}" min="1" max="{{ item.produit.stock }}"
+            class="w-16 border border-slate-200 dark:border-slate-600 rounded-md px-2 py-1.5 text-center text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+          <button type="submit" class="text-xs border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1.5 hover:border-accent hover:text-accent dark:text-slate-300 dark:hover:text-accent">Modifier</button>
+        </form>
+      </td>
+      <td class="py-3 px-2 font-semibold text-slate-900 dark:text-white">{{ item.sous_total|prix_fcfa }} FCFA</td>
+      <td class="py-3 px-2">
+        <form method="post" action="{% url 'commandes:supprimer' item.produit.id %}">
+          {% csrf_token %}
+          <button type="submit" class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1.5">Retirer</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td colspan="3" class="py-3 px-2 text-sm text-slate-500 dark:text-slate-400">Sous-total</td>
+      <td colspan="2" class="py-3 px-2 font-medium text-slate-900 dark:text-white text-right">{{ sous_total|prix_fcfa }} FCFA</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="py-3 px-2 text-sm text-slate-500 dark:text-slate-400">Livraison</td>
+      <td colspan="2" class="py-3 px-2 font-medium text-slate-900 dark:text-white text-right">{% if frais_livraison == 0 %}Gratuite{% else %}{{ frais_livraison|prix_fcfa }} FCFA{% endif %}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="py-4 px-2 font-bold text-slate-900 dark:text-white">Total</td>
+      <td colspan="2" class="py-4 px-2 font-bold text-xl text-accent text-right">{{ total_general|prix_fcfa }} FCFA</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="flex flex-col sm:flex-row gap-3">
+  <a href="{% url 'commandes:passer_commande' %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center">
+    Passer la commande →
+  </a>
+  <a href="{% url 'produits:liste' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent text-center">
+    Continuer mes achats
+  </a>
+</div>
+
+{% else %}
+<p class="text-slate-500 dark:text-slate-400 py-10">Votre panier est vide.</p>
+<a href="{% url 'produits:liste' %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md inline-block">
+  Voir les produits
+</a>
+{% endif %}
+
+{% endblock %}
