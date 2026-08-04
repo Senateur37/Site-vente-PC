@@ -52,7 +52,25 @@
   <!-- Graphique ventes mensuelles -->
   <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 md:col-span-2">
     <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ventes des 6 derniers mois (FCFA)</h2>
-    <canvas id="chart-ventes" height="120"></canvas>
+    <div class="relative" style="height: 280px;">
+      <canvas id="chart-ventes"></canvas>
+    </div>
+  </div>
+
+  <!-- Top produits vendus -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Top produits (quantité vendue)</h2>
+    <div class="relative" style="height: 260px;">
+      <canvas id="chart-top-produits"></canvas>
+    </div>
+  </div>
+
+  <!-- Répartition des commandes par statut -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Commandes par statut</h2>
+    <div class="relative" style="height: 260px;">
+      <canvas id="chart-statuts"></canvas>
+    </div>
   </div>
 
   <!-- Stock faible -->
@@ -101,38 +119,138 @@
 
 {% block extra_js %}
 {{ mois_ventes|json_script:"data-mois-ventes" }}
+{{ top_produits_vendus|json_script:"data-top-produits" }}
+{{ repartition_statuts|json_script:"data-statuts" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  const canvas = document.getElementById('chart-ventes');
-  if (!canvas || typeof Chart === 'undefined') return;
-  let data = [];
-  try { data = JSON.parse(document.getElementById('data-mois-ventes').textContent); } catch(e) {}
-  if (!data.length) {
-    canvas.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de données de ventes.</p>';
-    return;
+  if (typeof Chart === 'undefined') return;
+
+  function lire(id) {
+    const el = document.getElementById(id);
+    if (!el) return [];
+    try { return JSON.parse(el.textContent); } catch(e) { return []; }
   }
-  const labels = data.map(function(d) { return d.mois; });
-  const valeurs = data.map(function(d) { return d.total; });
-  new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Ventes (FCFA)',
-        data: valeurs,
-        backgroundColor: '#2563eb',
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true }
-      }
+
+  const nomMois = function(cle) {
+    const noms = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    return noms[parseInt(cle.split('-')[1], 10) - 1];
+  };
+  const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+
+  // 1) Ventes mensuelles
+  const mois = lire('data-mois-ventes');
+  const canvasVentes = document.getElementById('chart-ventes');
+  if (canvasVentes) {
+    if (!mois.length || mois.every(function(d) { return !d.total; })) {
+      canvasVentes.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de données de ventes.</p>';
+    } else {
+      new Chart(canvasVentes, {
+        type: 'bar',
+        data: {
+          labels: mois.map(function(d) { return nomMois(d.mois); }),
+          datasets: [{
+            label: 'Ventes (FCFA)',
+            data: mois.map(function(d) { return d.total; }),
+            backgroundColor: '#2563eb',
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + new Intl.NumberFormat('fr-FR').format(ctx.parsed.y) + ' FCFA';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(v) { return new Intl.NumberFormat('fr-FR').format(v); }
+              }
+            }
+          }
+        }
+      });
     }
-  });
+  }
+
+  // 2) Top produits vendus
+  const top = lire('data-top-produits');
+  const canvasTop = document.getElementById('chart-top-produits');
+  if (canvasTop) {
+    if (!top.length) {
+      canvasTop.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune vente pour le moment.</p>';
+    } else {
+      new Chart(canvasTop, {
+        type: 'bar',
+        data: {
+          labels: top.map(function(d) { return d.nom_produit; }),
+          datasets: [{
+            label: 'Quantité vendue',
+            data: top.map(function(d) { return d.quantite; }),
+            backgroundColor: palette,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ' ' + ctx.parsed.x + ' vendu(s)';
+                }
+              }
+            }
+          },
+          scales: {
+            x: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+  }
+
+  // 3) Répartition des commandes par statut
+  const statuts = lire('data-statuts');
+  const canvasStatuts = document.getElementById('chart-statuts');
+  if (canvasStatuts) {
+    const actifs = statuts.filter(function(d) { return d.total > 0; });
+    if (!actifs.length) {
+      canvasStatuts.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune commande pour le moment.</p>';
+    } else {
+      new Chart(canvasStatuts, {
+        type: 'doughnut',
+        data: {
+          labels: actifs.map(function(d) { return d.statut; }),
+          datasets: [{
+            data: actifs.map(function(d) { return d.total; }),
+            backgroundColor: palette,
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '55%',
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+  }
 })();
 </script>
 {% endblock %}

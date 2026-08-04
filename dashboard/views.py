@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum, Count, F, ExpressionWrapper
 from django.db.models.fields import DecimalField
+from django.db.models.functions import TruncMonth
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -93,23 +94,29 @@ def index(request):
     dernieres_commandes = Commande.objects.all()[:8]
 
     # Données pour les graphiques (6 derniers mois)
-    mois_ventes = []
     maintenant = timezone.now()
-    for i in range(5, -1, -1):
-        mois = maintenant.month - i
-        annee = maintenant.year
-        while mois <= 0:
-            mois += 12
-            annee -= 1
-        total_mois = LigneCommande.objects.filter(
+    premier_mois = maintenant.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    lignes_par_mois = (
+        LigneCommande.objects.filter(
             commande__statut='livree_payee',
-            commande__date_creation__year=annee,
-            commande__date_creation__month=mois,
-        ).aggregate(total=Sum(F('prix_unitaire') * F('quantite')))['total'] or 0
-        mois_ventes.append({
-            'mois': f"{annee}-{mois:02d}",
-            'total': float(total_mois),
-        })
+            commande__date_creation__gte=premier_mois - timedelta(days=150),
+        )
+        .annotate(mois=TruncMonth('commande__date_creation'))
+        .values('mois')
+        .annotate(total=Sum(F('prix_unitaire') * F('quantite')))
+    )
+    total_par_mois = {row['mois'].strftime('%Y-%m'): float(row['total']) for row in lignes_par_mois}
+
+    mois_ventes = []
+    for i in range(5, -1, -1):
+        m = maintenant.month - i
+        a = maintenant.year
+        while m <= 0:
+            m += 12
+            a -= 1
+        cle = f"{a}-{m:02d}"
+        mois_ventes.append({'mois': cle, 'total': total_par_mois.get(cle, 0)})
 
     top_produits_vendus = []
     top_quantites = LigneCommande.objects.values('nom_produit').annotate(
@@ -126,6 +133,11 @@ def index(request):
         )['total'] or 0
         top_produits_vendus.append({'nom_produit': row['nom_produit'], 'quantite': row['quantite'], 'total': total})
 
+    repartition_statuts = [
+        {'statut': label, 'total': Commande.objects.filter(statut=code).count()}
+        for code, label in Commande.STATUT_CHOICES
+    ]
+
     context = {
         'total_commandes': total_commandes,
         'commandes_en_attente': commandes_en_attente,
@@ -137,6 +149,7 @@ def index(request):
         'dernieres_commandes': dernieres_commandes,
         'mois_ventes': mois_ventes,
         'top_produits_vendus': top_produits_vendus,
+        'repartition_statuts': repartition_statuts,
         'nb_stock_faible': stock_faible.count(),
     }
     return render(request, 'dashboard/index.html', context)
