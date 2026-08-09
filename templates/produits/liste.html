@@ -119,7 +119,9 @@
 <section class="mb-10">
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ section.titre }}</h2>
-    {% if section.afficher_voir_plus %}<a href="{% url 'produits:liste' %}?{% if section.type == 'categorie' %}categorie={{ section.categorie }}{% elif section.type == 'marque' %}marque={{ section.marque }}{% else %}tri={{ section.type }}{% endif %}" class="text-xs text-accent font-medium hover:underline">Voir plus →</a>{% endif %}
+    {% if section.afficher_voir_plus %}
+      <a href="{% url 'produits:section_detail' section.id %}" class="text-xs text-accent font-medium hover:underline">Voir plus →</a>
+    {% endif %}
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     {% for produit in section.produits %}{% include "produits/_card.html" with produit=produit %}{% endfor %}

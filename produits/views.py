@@ -25,13 +25,18 @@ def _parse_prix(value):
         return None, ''
 
 
-def _get_section_produits(section):
-    """Récupère les produits pour une section d'accueil selon son type."""
-    max_p = section.max_produits
+def _get_section_produits(section, limit=None):
+    """Récupère les produits pour une section d'accueil selon son type.
+    limit=None => utilise max_produits. limit=0 => tous les produits."""
+    if limit is None:
+        limit = section.max_produits
+    fin = ':limit' if limit else ''
     if section.type_section == 'meilleures_ventes':
         ids = LigneCommande.objects.values('produit_id').annotate(
             total_vendu=Sum('quantite')
-        ).filter(produit_id__isnull=False).order_by('-total_vendu')[:max_p]
+        ).filter(produit_id__isnull=False).order_by('-total_vendu')
+        if limit:
+            ids = ids[:limit]
         produits = []
         for item in ids:
             try:
@@ -41,17 +46,17 @@ def _get_section_produits(section):
                 pass
         return produits
     elif section.type_section == 'nouveautes':
-        return list(Produit.objects.filter(disponible=True).order_by('-date_ajout')[:max_p])
+        qs = Produit.objects.filter(disponible=True).order_by('-date_ajout')
+        return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'categorie' and section.categorie:
-        return list(Produit.objects.filter(
-            disponible=True, categorie=section.categorie
-        )[:max_p])
+        qs = Produit.objects.filter(disponible=True, categorie=section.categorie)
+        return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'marque' and section.marque:
-        return list(Produit.objects.filter(
-            disponible=True, marque=section.marque
-        )[:max_p])
+        qs = Produit.objects.filter(disponible=True, marque=section.marque)
+        return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'personnalise':
-        return list(section.produits_personnalises.filter(disponible=True)[:max_p])
+        qs = section.produits_personnalises.filter(disponible=True)
+        return list(qs[:limit]) if limit else list(qs)
     return []
 
 
@@ -153,6 +158,7 @@ def liste_produits(request):
             produits_section = _get_section_produits(section)
             if produits_section:
                 sections.append({
+                    'id': section.id,
                     'titre': section.titre,
                     'type': section.type_section,
                     'produits': produits_section,
@@ -312,3 +318,22 @@ def apropos(request):
     from dashboard.models import SiteSettings
     params = SiteSettings.get_settings()
     return render(request, 'produits/apropos.html', {'params': params})
+
+
+def section_detail(request, section_id):
+    section = get_object_or_404(SectionAccueil, id=section_id, active=True)
+    produits = _get_section_produits(section, limit=0)
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(produits, 12)
+    try:
+        produits_page = paginator.page(page)
+    except PageNotAnInteger:
+        produits_page = paginator.page(1)
+    except EmptyPage:
+        produits_page = paginator.page(paginator.num_pages)
+
+    return render(request, 'produits/section_detail.html', {
+        'section': section,
+        'produits': produits_page,
+    })

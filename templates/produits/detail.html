@@ -151,11 +151,18 @@
     <form method="post" class="space-y-4">
       {% csrf_token %}
       <div>
-        <label for="id_note" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Note</label>
-        <select name="note" id="id_note"
-          class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
-          {% for value, label in avis_form.note.field.choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-        </select>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Note</label>
+        <div id="note-etoiles" class="flex items-center gap-1">
+          {% for i in "12345" %}
+          <button type="button" data-valeur="{{ forloop.counter }}" aria-label="{{ forloop.counter }} étoiles"
+                  class="etoile w-10 h-10 flex items-center justify-center rounded-md text-2xl text-slate-300 dark:text-slate-600 hover:scale-110 transition-transform focus:outline-none">
+            ★
+          </button>
+          {% endfor %}
+          <span id="note-texte" class="ml-2 text-sm text-slate-400 dark:text-slate-500">Cliquez pour noter</span>
+        </div>
+        <input type="hidden" name="note" id="id_note" value="">
+        {% if avis_form.note.errors %}<p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ avis_form.note.errors.0 }}</p>{% endif %}
       </div>
       <div>
         <label for="id_auteur" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Votre nom</label>
@@ -180,6 +187,49 @@
 <script>
 (function () {
   const mainImg = document.getElementById('galerie-image');
+
+  // === Étoiles de notation ===
+  const etoiles = document.querySelectorAll('.etoile');
+  const champNote = document.getElementById('id_note');
+  const texteNote = document.getElementById('note-texte');
+  let noteSelectionnee = 0;
+  let survol = 0;
+
+  if (etoiles.length && champNote) {
+    const libelles = ['', 'Très décevant', 'Médiocre', 'Correct', 'Très bien', 'Excellent !'];
+    function afficher() {
+      const active = survol || noteSelectionnee;
+      etoiles.forEach(function (e) {
+        const v = parseInt(e.dataset.valeur, 10);
+        if (v <= active) {
+          e.classList.remove('text-slate-300', 'dark:text-slate-600');
+          e.classList.add('text-amber-400');
+        } else {
+          e.classList.remove('text-amber-400');
+          e.classList.add('text-slate-300', 'dark:text-slate-600');
+        }
+      });
+      if (texteNote) {
+        texteNote.textContent = active ? (libelles[active] + ' (' + active + '/5)') : 'Cliquez pour noter';
+      }
+    }
+    etoiles.forEach(function (e) {
+      e.addEventListener('click', function () {
+        noteSelectionnee = parseInt(e.dataset.valeur, 10);
+        champNote.value = noteSelectionnee;
+        survol = 0;
+        afficher();
+      });
+      e.addEventListener('mouseenter', function () {
+        survol = parseInt(e.dataset.valeur, 10);
+        afficher();
+      });
+      e.addEventListener('mouseleave', function () {
+        survol = 0;
+        afficher();
+      });
+    });
+  }
   const vignettes = document.querySelectorAll('.galerie-vignette');
   const track = document.getElementById('galerie-vignettes');
   const prevBtn = document.getElementById('galerie-prev');
