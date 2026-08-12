@@ -1,0 +1,24 @@
+{
+  "name": "TechShop — Ordinateurs & accessoires",
+  "short_name": "TechShop",
+  "description": "Le meilleur du matériel informatique au meilleur prix",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
