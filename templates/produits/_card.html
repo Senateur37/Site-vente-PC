@@ -92,8 +92,8 @@
     {# Barre de stock (visuelle) #}
     {% if produit.en_stock %}
     <div class="mt-1 w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1 overflow-hidden">
-      {% with pct=produit.stock|stringformat:"f"|slice:":2" %}
-      <div class="bg-accent h-full rounded-full" style="width:{% if produit.stock > 20 %}100{% else %}{{ produit.stock|add:5 }}00{% endif %}%"></div>
+      {% with pct=produit.stock|add:5 %}
+      <div class="bg-accent h-full rounded-full" style="width:{% if produit.stock > 20 %}100{% elif pct > 100 %}100{% else %}{{ pct }}{% endif %}%"></div>
       {% endwith %}
     </div>
     {% endif %}
