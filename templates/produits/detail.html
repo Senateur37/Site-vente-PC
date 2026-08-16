@@ -4,44 +4,53 @@
 {% block meta_description %}{% if produit.description %}<meta name="description" content="{{ produit.description|truncatechars:160 }}">{% endif %}{% endblock %}
 {% block content %}
 
-<div class="grid md:grid-cols-2 gap-6 md:gap-10 mb-12 md:mb-16">
+<nav class="flex items-center gap-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-6">
+  <a href="{% url 'produits:liste' %}" class="hover:text-accent">Accueil</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 inline shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+  <span class="font-medium text-slate-700 dark:text-slate-200 truncate">{{ produit.nom }}</span>
+</nav>
+
+<div class="grid md:grid-cols-2 gap-6 md:gap-10">
+
+  <!-- Photo principale -->
   <div>
-    {% with images=produit.images_galerie %}
-    <div class="relative bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mb-3">
-      <div id="galerie-principale" class="aspect-square flex items-center justify-center p-6">
+    <div class="relative bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+      <div id="galerie-principale" class="relative aspect-square w-full flex items-center justify-center">
+        {% with images=produit.images_galerie %}
         {% if images %}
           <img id="galerie-image" src="{{ images.0.url }}" alt="{{ images.0.alt }}"
-               class="max-w-full max-h-full object-contain transition-opacity duration-200">
+               class="max-w-full max-h-full object-contain p-4">
         {% else %}
           <span class="text-slate-400 dark:text-slate-500 text-sm">[ pas d'image ]</span>
         {% endif %}
-      </div>
 
-      {% if images %}
-      <div class="absolute top-3 right-3 flex gap-2">
-        <button type="button" id="btn-favori" aria-label="Ajouter aux favoris"
-                class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 transition">
-          <svg id="icone-favori" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-        </button>
-        <button type="button" id="btn-partager" aria-label="Partager"
-                class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-accent hover:border-accent transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-          </svg>
-        </button>
+        {% if images %}
+        <div class="absolute top-3 right-3 flex gap-2">
+          <button type="button" id="btn-favori" aria-label="Ajouter aux favoris"
+                  class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 transition">
+            <svg id="icone-favori" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+            </svg>
+          </button>
+          <button type="button" id="btn-partager" aria-label="Partager"
+                  class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-accent hover:border-accent transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+          </button>
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
     </div>
+    {% endwith %}
 
+    {% with images=produit.images_galerie %}
     {% if images|length > 1 %}
-    <div class="relative flex items-center gap-2">
+    <div class="relative flex items-center gap-2 mt-3">
       <button type="button" id="galerie-prev" aria-label="Images précédentes"
               class="shrink-0 w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none">
         ‹
       </button>
-
       <div id="galerie-vignettes" class="flex gap-2 overflow-x-auto scroll-smooth flex-1 py-1">
         {% for img in images %}
         <button type="button"
@@ -53,7 +62,6 @@
         </button>
         {% endfor %}
       </div>
-
       <button type="button" id="galerie-next" aria-label="Images suivantes"
               class="shrink-0 w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none">
         ›
@@ -63,6 +71,7 @@
     {% endwith %}
   </div>
 
+  <!-- Informations -->
   <div>
     <span class="text-accent text-xs uppercase tracking-wide font-medium">{{ produit.categorie.nom }}</span>
     {% if produit.marque %}
@@ -77,45 +86,44 @@
     </div>
     {% endif %}
 
-    <div class="text-2xl md:text-3xl font-bold text-accent mb-4">{{ produit.prix|prix_fcfa }} FCFA</div>
-
-    {% if produit.en_stock %}
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ produit.stock }} unité{{ produit.stock|pluralize }} en stock</p>
+    <div class="text-2xl md:text-3xl font-bold text-accent mb-2">{{ produit.prix|prix_fcfa }} FCFA</div>
+    {% if produit.en_promo and produit.prix_barre %}
+    <p class="text-sm text-slate-400 mb-4"><span class="line-through">{{ produit.prix_barre|prix_fcfa }} FCFA</span> <span class="text-red-500 font-semibold">-{{ produit.pourcentage_reduction }}%</span></p>
     {% else %}
-      <p class="text-sm text-red-500 dark:text-red-400 mb-4">Rupture de stock</p>
+    <p class="text-sm text-slate-400 mb-4">&nbsp;</p>
     {% endif %}
 
-    <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">{{ produit.description|linebreaks }}</p>
-
     {% if produit.en_stock %}
-    <form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3" method="post" action="{% url 'commandes:ajouter' produit.id %}">
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4"><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>{{ produit.stock }} unité{{ produit.stock|pluralize }} en stock</p>
+    {% else %}
+      <p class="text-sm text-red-500 dark:text-red-400 mb-4"><span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span>Rupture de stock</p>
+    {% endif %}
+
+    <form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6" method="post" action="{% url 'commandes:ajouter' produit.id %}">
       {% csrf_token %}
-      <input type="number" name="quantite" value="1" min="1" max="{{ produit.stock }}"
+      <input type="number" name="quantite" value="1" min="1" max="{{ produit.stock }}" {% if not produit.en_stock %}disabled{% endif %}
         class="w-full sm:w-20 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-center focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
-      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center">
-        Ajouter au panier
+      <button type="submit" {% if not produit.en_stock %}disabled{% endif %} class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center {% if not produit.en_stock %}opacity-50 cursor-not-allowed{% endif %}">
+        {% if produit.en_stock %}Ajouter au panier{% else %}Indisponible{% endif %}
       </button>
     </form>
-    {% else %}
-      <button class="border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 font-semibold px-6 py-2.5 rounded-md cursor-not-allowed" disabled>
-        Indisponible
-      </button>
-    {% endif %}
+
+    <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ produit.description }}</p>
   </div>
 </div>
 
 {% if produits_similaires %}
-<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Produits similaires</h2>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 mt-12 md:mt-16">Produits similaires</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
   {% for p in produits_similaires %}
   <a href="{% url 'produits:detail' p.slug %}"
      class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-accent hover:shadow-md transition flex flex-col">
     <div class="aspect-[4/3] bg-surface dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs overflow-hidden">
       {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.nom }}" class="w-full h-full object-cover">{% else %}[ pas d'image ]{% endif %}
     </div>
-    <div class="p-4 flex flex-col gap-1">
-      <span class="text-accent text-[11px] uppercase tracking-wide font-medium">{{ p.categorie.nom }}</span>
-      <span class="font-semibold text-sm text-slate-900 dark:text-white">{{ p.nom }}</span>
+    <div class="p-3 md:p-4 flex flex-col gap-1">
+      <span class="text-accent text-[11px] uppercase tracking-wide font-medium truncate">{{ p.categorie.nom }}</span>
+      <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ p.nom }}</span>
       <span class="font-bold text-slate-900 dark:text-white">{{ p.prix|prix_fcfa }} FCFA</span>
     </div>
   </a>
@@ -132,13 +140,13 @@
     {% for a in avis %}
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
       <div class="flex items-center justify-between mb-1">
-        <div class="flex items-center gap-2">
-          <span class="text-amber-500 text-sm">{% for i in "12345" %}{% if forloop.counter <= a.note %}★{% else %}☆{% endif %}{% endfor %}</span>
-          <span class="font-semibold text-sm text-slate-900 dark:text-white">{{ a.auteur }}</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-amber-500 text-sm shrink-0">{% for i in "12345" %}{% if forloop.counter <= a.note %}★{% else %}☆{% endif %}{% endfor %}</span>
+          <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ a.auteur }}</span>
         </div>
-        <span class="text-xs text-slate-400">{{ a.date_creation|date:"d/m/Y" }}</span>
+        <span class="text-xs text-slate-400 shrink-0 ml-2">{{ a.date_creation|date:"d/m/Y" }}</span>
       </div>
-      {% if a.commentaire %}<p class="text-sm text-slate-600 dark:text-slate-300 mt-1">{{ a.commentaire }}</p>{% endif %}
+      {% if a.commentaire %}<p class="text-sm text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-line">{{ a.commentaire }}</p>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -152,14 +160,14 @@
       {% csrf_token %}
       <div>
         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Note</label>
-        <div id="note-etoiles" class="flex items-center gap-1">
+        <div id="note-etoiles" class="flex flex-wrap items-center gap-1">
           {% for i in "12345" %}
           <button type="button" data-valeur="{{ forloop.counter }}" aria-label="{{ forloop.counter }} étoiles"
-                  class="etoile w-10 h-10 flex items-center justify-center rounded-md text-2xl text-slate-300 dark:text-slate-600 hover:scale-110 transition-transform focus:outline-none">
+                  class="etoile w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-md text-xl sm:text-2xl text-slate-300 dark:text-slate-600 hover:scale-110 transition-transform focus:outline-none">
             ★
           </button>
           {% endfor %}
-          <span id="note-texte" class="ml-2 text-sm text-slate-400 dark:text-slate-500">Cliquez pour noter</span>
+          <span id="note-texte" class="ml-1 sm:ml-2 text-xs sm:text-sm text-slate-400 dark:text-slate-500 min-w-0 truncate">Cliquez pour noter</span>
         </div>
         <input type="hidden" name="note" id="id_note" value="">
         {% if avis_form.note.errors %}<p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ avis_form.note.errors.0 }}</p>{% endif %}
@@ -230,6 +238,7 @@
       });
     });
   }
+
   const vignettes = document.querySelectorAll('.galerie-vignette');
   const track = document.getElementById('galerie-vignettes');
   const prevBtn = document.getElementById('galerie-prev');
@@ -313,4 +322,3 @@
 })();
 </script>
 {% endblock %}
-
