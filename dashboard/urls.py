@@ -9,8 +9,8 @@ urlpatterns = [
     path('logout/', views.deconnexion, name='logout'),
     path('', views.index, name='index'),
 
-    # Inscription
-    path('inscription/', views.inscription, name='inscription'),
+    # Inscription (désactivée en production — seul l'admin crée les comptes)
+    # path('inscription/', views.inscription, name='inscription'),
 
     # Password reset
     path('mot-de-passe-oublie/', auth_views.PasswordResetView.as_view(

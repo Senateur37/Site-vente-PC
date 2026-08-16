@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Sum, Count, F, ExpressionWrapper
@@ -58,7 +59,7 @@ def inscription(request):
         elif User.objects.filter(username=username).exists():
             messages.error(request, "Ce nom d'utilisateur est déjà pris.")
         else:
-            user = User.objects.create_user(username=username, email=email, password=password, is_staff=True)
+            user = User.objects.create_user(username=username, email=email, password=password, is_staff=False)
             messages.success(request, f"Compte '{username}' créé avec succès ! Vous pouvez vous connecter.")
             return redirect('dashboard:login')
 
@@ -67,7 +68,7 @@ def inscription(request):
 
 # ---------- Dashboard ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def index(request):
     aujourd_hui = timezone.now()
     debut_mois = aujourd_hui.replace(day=1, hour=0, minute=0, second=0)
@@ -157,13 +158,13 @@ def index(request):
 
 # ---------- Produits ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_produits(request):
     produits = Produit.objects.all()
     return render(request, 'dashboard/produits_liste.html', {'produits': produits})
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def ajouter_produit(request):
     if request.method == 'POST':
         form = ProduitForm(request.POST, request.FILES)
@@ -178,7 +179,7 @@ def ajouter_produit(request):
     return render(request, 'dashboard/produit_form.html', {'form': form, 'titre': 'Ajouter un produit'})
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def modifier_produit(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
     if request.method == 'POST':
@@ -194,7 +195,7 @@ def modifier_produit(request, produit_id):
     return render(request, 'dashboard/produit_form.html', {'form': form, 'titre': 'Modifier le produit'})
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def supprimer_produit(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
     if request.method == 'POST':
@@ -206,7 +207,7 @@ def supprimer_produit(request, produit_id):
 
 # ---------- Catégories ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_categories(request):
     categories = Categorie.objects.all()
     if request.method == 'POST':
@@ -220,7 +221,7 @@ def liste_categories(request):
     return render(request, 'dashboard/categories_liste.html', {'categories': categories, 'form': form})
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def supprimer_categorie(request, categorie_id):
     categorie = get_object_or_404(Categorie, id=categorie_id)
     if request.method == 'POST':
@@ -231,7 +232,7 @@ def supprimer_categorie(request, categorie_id):
 
 # ---------- Marques (logos) ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_marques(request):
     marques = LogoMarque.objects.all()
     if request.method == 'POST':
@@ -245,7 +246,7 @@ def liste_marques(request):
     return render(request, 'dashboard/marques_liste.html', {'marques': marques, 'form': form})
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def supprimer_marque(request, marque_id):
     marque = get_object_or_404(LogoMarque, id=marque_id)
     if request.method == 'POST':
@@ -256,7 +257,7 @@ def supprimer_marque(request, marque_id):
 
 # ---------- Avis ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_avis(request):
     avis = Avis.objects.select_related('produit').all()
     statut = request.GET.get('statut')
@@ -270,7 +271,7 @@ def liste_avis(request):
     })
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def approuver_avis(request, avis_id):
     avis = get_object_or_404(Avis, id=avis_id)
     avis.approuve = True
@@ -279,7 +280,7 @@ def approuver_avis(request, avis_id):
     return redirect('dashboard:avis_liste')
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def supprimer_avis(request, avis_id):
     avis = get_object_or_404(Avis, id=avis_id)
     avis.delete()
@@ -289,7 +290,7 @@ def supprimer_avis(request, avis_id):
 
 # ---------- Commandes ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_commandes(request):
     commandes = Commande.objects.all()
     statut = request.GET.get('statut')
@@ -302,7 +303,7 @@ def liste_commandes(request):
     })
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def detail_commande(request, commande_id):
     commande = get_object_or_404(Commande, id=commande_id)
     if request.method == 'POST':
@@ -317,7 +318,7 @@ def detail_commande(request, commande_id):
 
 # ---------- Paramètres ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def parametres(request):
     settings = SiteSettings.get_settings()
 
@@ -351,7 +352,7 @@ def parametres(request):
 
 # ---------- Supprimer image produit ----------
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def supprimer_image_produit(request, image_id):
     image = get_object_or_404(ImageProduit, id=image_id)
     produit_id = image.produit.id
@@ -360,7 +361,7 @@ def supprimer_image_produit(request, image_id):
     return redirect('dashboard:produit_modifier', produit_id=produit_id)
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def export_commandes(request):
     import csv
 
@@ -391,7 +392,7 @@ def export_commandes(request):
     return response
 
 
-@login_required(login_url='dashboard:login')
+@staff_member_required(login_url='dashboard:login')
 def liste_clients(request):
     clients = User.objects.filter(is_staff=False).order_by('username')
     stats = []
