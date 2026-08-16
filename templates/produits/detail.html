@@ -287,6 +287,7 @@
   if (favoriBtn) {
     const key = 'favoris';
     const slug = '{{ produit.slug|escapejs }}';
+    const produitId = {{ produit.id }};
     const favoris = JSON.parse(localStorage.getItem(key) || '[]');
     const icone = document.getElementById('icone-favori');
 
@@ -303,7 +304,8 @@
     setFavori(favoris.includes(slug));
     favoriBtn.addEventListener('click', function () {
       let list = JSON.parse(localStorage.getItem(key) || '[]');
-      if (list.includes(slug)) {
+      const actif = list.includes(slug);
+      if (actif) {
         list = list.filter(function (s) { return s !== slug; });
         setFavori(false);
       } else {
@@ -311,6 +313,13 @@
         setFavori(true);
       }
       localStorage.setItem(key, JSON.stringify(list));
+      var formData = new FormData();
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      fetch('{% url "produits:favori_toggle" produit.id %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        body: formData
+      }).catch(function () {});
     });
   }
 

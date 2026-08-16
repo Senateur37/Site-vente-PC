@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Sum, F, Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Produit, Categorie, SectionAccueil, LogoMarque, Avis
+from .models import Produit, Categorie, SectionAccueil, LogoMarque, Avis, Favori
 from .forms import AvisForm
 from commandes.models import LigneCommande
 
@@ -48,6 +48,20 @@ def _get_section_produits(section, limit=None):
     elif section.type_section == 'nouveautes':
         qs = Produit.objects.filter(disponible=True).order_by('-date_ajout')
         return list(qs[:limit]) if limit else list(qs)
+    elif section.type_section == 'plus_aimes':
+        ids = Favori.objects.values('produit_id').annotate(
+            nb=Count('id')
+        ).filter(produit_id__isnull=False).order_by('-nb')
+        if limit:
+            ids = ids[:limit]
+        produits = []
+        for item in ids:
+            try:
+                p = Produit.objects.get(id=item['produit_id'], disponible=True)
+                produits.append(p)
+            except Produit.DoesNotExist:
+                pass
+        return produits
     elif section.type_section == 'categorie' and section.categorie:
         qs = Produit.objects.filter(disponible=True, categorie=section.categorie)
         return list(qs[:limit]) if limit else list(qs)
@@ -337,3 +351,28 @@ def section_detail(request, section_id):
         'section': section,
         'produits': produits_page,
     })
+
+
+def basculer_favori(request, produit_id):
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'erreur': 'Méthode non autorisée'}, status=405)
+    produit = get_object_or_404(Produit, id=produit_id, disponible=True)
+    session_id = request.session.session_key
+    if not session_id:
+        request.session.create()
+        session_id = request.session.session_key
+    utilisateur = request.user if request.user.is_authenticated else None
+
+    if utilisateur:
+        favori = Favori.objects.filter(produit=produit, utilisateur=utilisateur).first()
+    else:
+        favori = Favori.objects.filter(produit=produit, session_id=session_id).first()
+
+    if favori:
+        favori.delete()
+        actif = False
+    else:
+        Favori.objects.create(produit=produit, session_id=session_id, utilisateur=utilisateur)
+        actif = True
+
+    return JsonResponse({'ok': True, 'actif': actif})

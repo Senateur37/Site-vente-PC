@@ -12,6 +12,7 @@ class SectionAccueil(models.Model):
     TYPE_SECTION = [
         ('meilleures_ventes', 'Meilleures ventes'),
         ('nouveautes', 'Nouveautés'),
+        ('plus_aimes', 'Produits les plus aimés'),
         ('categorie', 'Par catégorie'),
         ('marque', 'Par marque'),
         ('personnalise', 'Produits personnalisés'),
@@ -178,6 +179,38 @@ class Avis(models.Model):
 
     def __str__(self):
         return f"{self.auteur} — {self.note}/5 — {self.produit.nom}"
+
+
+class Favori(models.Model):
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name="favoris")
+    session_id = models.CharField(max_length=100, blank=True)
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="favoris",
+    )
+    date_ajout = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Favori"
+        verbose_name_plural = "Favoris"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["produit", "session_id"],
+                condition=models.Q(session_id__gt=''),
+                name="unique_favori_session",
+            ),
+            models.UniqueConstraint(
+                fields=["produit", "utilisateur"],
+                condition=models.Q(utilisateur__isnull=False),
+                name="unique_favori_utilisateur",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Favori : {self.produit.nom}"
 
 
 class LogoMarque(models.Model):
