@@ -246,36 +246,42 @@
   const favoriBtn = document.getElementById('btn-favori');
   const partagerBtn = document.getElementById('btn-partager');
 
-  if (vignettes.length && mainImg) {
-    vignettes.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        mainImg.src = btn.dataset.url;
-        mainImg.alt = btn.dataset.alt;
-        vignettes.forEach(function (v) {
-          v.classList.remove('border-accent');
-          v.classList.add('border-slate-200');
-        });
-        btn.classList.remove('border-slate-200');
-        btn.classList.add('border-accent');
-        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      });
-    });
-  }
-
   if (track && prevBtn && nextBtn) {
-    const scrollStep = 80;
-    function updateArrows() {
-      prevBtn.disabled = track.scrollLeft <= 0;
-      nextBtn.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+    const vignetteList = Array.prototype.slice.call(vignettes);
+    let position = 0;
+    function majPosition(index) {
+      position = index;
+      vignettes.forEach(function (v) {
+        v.classList.remove('border-accent');
+        v.classList.add('border-slate-200');
+      });
+      if (vignetteList[position]) {
+        vignetteList[position].classList.remove('border-slate-200');
+        vignetteList[position].classList.add('border-accent');
+        vignetteList[position].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+      prevBtn.disabled = position <= 0;
+      nextBtn.disabled = position >= vignetteList.length - 1;
+    }
+    function afficher(position) {
+      if (vignetteList[position]) {
+        mainImg.src = vignetteList[position].dataset.url;
+        mainImg.alt = vignetteList[position].dataset.alt;
+      }
+      majPosition(position);
     }
     prevBtn.addEventListener('click', function () {
-      track.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+      afficher(Math.max(0, position - 1));
     });
     nextBtn.addEventListener('click', function () {
-      track.scrollBy({ left: scrollStep, behavior: 'smooth' });
+      afficher(Math.min(vignetteList.length - 1, position + 1));
     });
-    track.addEventListener('scroll', updateArrows);
-    updateArrows();
+    vignettes.forEach(function (btn, index) {
+      btn.addEventListener('click', function () {
+        afficher(index);
+      });
+    });
+    majPosition(0);
   }
 
   if (favoriBtn) {
