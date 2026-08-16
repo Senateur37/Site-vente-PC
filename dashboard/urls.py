@@ -49,6 +49,11 @@ urlpatterns = [
     path('commandes/<int:commande_id>/', views.detail_commande, name='commande_detail'),
     path('commandes/export/', views.export_commandes, name='commandes_export'),
 
+    # Avis
+    path('avis/', views.liste_avis, name='avis_liste'),
+    path('avis/<int:avis_id>/approuver/', views.approuver_avis, name='avis_approuver'),
+    path('avis/<int:avis_id>/supprimer/', views.supprimer_avis, name='avis_supprimer'),
+
     # Clients
     path('clients/', views.liste_clients, name='clients_liste'),
 

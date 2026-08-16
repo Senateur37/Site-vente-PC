@@ -12,7 +12,7 @@ from django.utils.encoding import smart_str
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
-from produits.models import Produit, Categorie, LogoMarque, ImageProduit
+from produits.models import Produit, Categorie, LogoMarque, ImageProduit, Avis
 from produits.forms import ProduitForm, CategorieForm, LogoMarqueForm
 from commandes.models import Commande, LigneCommande
 from dashboard.models import SiteSettings
@@ -252,6 +252,39 @@ def supprimer_marque(request, marque_id):
         marque.delete()
         messages.success(request, "Marque supprimée.")
     return redirect('dashboard:marques_liste')
+
+
+# ---------- Avis ----------
+
+@login_required(login_url='dashboard:login')
+def liste_avis(request):
+    avis = Avis.objects.select_related('produit').all()
+    statut = request.GET.get('statut')
+    if statut == 'en_attente':
+        avis = avis.filter(approuve=False)
+    elif statut == 'approuves':
+        avis = avis.filter(approuve=True)
+    return render(request, 'dashboard/avis_liste.html', {
+        'avis': avis,
+        'statut_actif': statut,
+    })
+
+
+@login_required(login_url='dashboard:login')
+def approuver_avis(request, avis_id):
+    avis = get_object_or_404(Avis, id=avis_id)
+    avis.approuve = True
+    avis.save()
+    messages.success(request, "Avis approuvé et affiché sur le produit.")
+    return redirect('dashboard:avis_liste')
+
+
+@login_required(login_url='dashboard:login')
+def supprimer_avis(request, avis_id):
+    avis = get_object_or_404(Avis, id=avis_id)
+    avis.delete()
+    messages.success(request, "Avis supprimé.")
+    return redirect('dashboard:avis_liste')
 
 
 # ---------- Commandes ----------

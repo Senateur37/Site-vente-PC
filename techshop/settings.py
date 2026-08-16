@@ -61,6 +61,7 @@ TEMPLATES = [
                 'commandes.context_processors.panier_context',
                 'dashboard.context_processors.site_settings',
                 'dashboard.context_processors.stock_faible',
+                'dashboard.context_processors.avis_attente',
             ]
         },
     },

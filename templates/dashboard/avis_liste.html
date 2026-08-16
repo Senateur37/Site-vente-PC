@@ -1,0 +1,78 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Avis clients — TechShop{% endblock %}
+{% block content %}
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Avis clients</h1>
+
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'dashboard:avis_liste' %}"
+       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
+       {% if not statut_actif %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
+      Tous
+    </a>
+    <a href="?statut=en_attente"
+       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
+       {% if statut_actif == 'en_attente' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
+      En attente
+    </a>
+    <a href="?statut=approuves"
+       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
+       {% if statut_actif == 'approuves' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
+      Approuvés
+    </a>
+  </div>
+</div>
+
+{% if avis %}
+<div class="grid grid-cols-1 gap-4">
+  {% for a in avis %}
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-5">
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-medium text-slate-900 dark:text-white">{{ a.auteur }}</span>
+          <span class="text-amber-400 text-sm" title="{{ a.note }}/5">
+            {% for i in "12345" %}
+              {% if forloop.counter <= a.note %}★{% else %}<span class="text-slate-300 dark:text-slate-600">★</span>{% endif %}
+            {% endfor %}
+          </span>
+          {% if not a.approuve %}
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">EN ATTENTE</span>
+          {% endif %}
+        </div>
+        <p class="text-xs text-slate-400 mt-1">
+          Sur « {{ a.produit.nom }} » · {{ a.date_creation|date:"d/m/Y H:i" }}
+        </p>
+        {% if a.commentaire %}
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 whitespace-pre-line">{{ a.commentaire }}</p>
+        {% endif %}
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        {% if not a.approuve %}
+        <form method="post" action="{% url 'dashboard:avis_approuver' a.id %}">
+          {% csrf_token %}
+          <button type="submit" class="text-xs px-3 py-1.5 rounded-md bg-green-600 text-white hover:bg-green-700 transition whitespace-nowrap">
+            Approuver
+          </button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'dashboard:avis_supprimer' a.id %}"
+              onsubmit="return confirm('Supprimer cet avis ?');">
+          {% csrf_token %}
+          <button type="submit" class="text-xs px-3 py-1.5 rounded-md border border-red-200 dark:border-red-700 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition whitespace-nowrap">
+            Supprimer
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
+  <p class="text-slate-400 dark:text-slate-500">Aucun avis trouvé.</p>
+</div>
+{% endif %}
+
+{% endblock %}
