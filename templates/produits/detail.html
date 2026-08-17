@@ -4,57 +4,67 @@
 {% block meta_description %}{% if produit.description %}<meta name="description" content="{{ produit.description|truncatechars:160 }}">{% endif %}{% endblock %}
 {% block content %}
 
-<nav class="flex items-center gap-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-6">
+<!-- Fil d'Ariane -->
+<nav class="flex items-center gap-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-6 overflow-x-auto whitespace-nowrap pb-1">
   <a href="{% url 'produits:liste' %}" class="hover:text-accent">Accueil</a>
-  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 inline shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+  <a href="{% url 'produits:liste' %}?categorie={{ produit.categorie.slug }}" class="hover:text-accent">{{ produit.categorie.nom }}</a>
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
   <span class="font-medium text-slate-700 dark:text-slate-200 truncate">{{ produit.nom }}</span>
 </nav>
 
-<div class="grid md:grid-cols-2 gap-6 md:gap-10">
+<div class="grid lg:grid-cols-2 gap-6 lg:gap-12">
 
-  <!-- Photo principale -->
+  <!-- ===== Galerie ===== -->
   <div>
-    <div class="relative bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-      <div id="galerie-principale" class="relative w-full max-w-xs sm:max-w-none mx-auto flex items-center justify-center">
-        {% with images=produit.images_galerie %}
+    <div class="relative bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+      {% with images=produit.images_galerie %}
+      <div id="galerie-principale" class="relative w-full aspect-video flex items-center justify-center">
         {% if images %}
           <img id="galerie-image" src="{{ images.0.url }}" alt="{{ images.0.alt }}"
-               class="w-full h-auto object-contain rounded-lg">
+               class="w-full h-full object-contain p-2 sm:p-4">
         {% else %}
           <span class="text-slate-400 dark:text-slate-500 text-sm">[ pas d'image ]</span>
         {% endif %}
-
-        {% if images %}
-        <div class="absolute top-3 right-3 flex gap-2">
-          <button type="button" id="btn-favori" aria-label="Ajouter aux favoris"
-                  class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 transition">
-            <svg id="icone-favori" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-          </button>
-          <button type="button" id="btn-partager" aria-label="Partager"
-                  class="w-9 h-9 rounded-full bg-white/90 dark:bg-slate-700/90 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-accent hover:border-accent transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
-            </svg>
-          </button>
-        </div>
-        {% endif %}
       </div>
+
+      {% if produit.est_nouveau %}
+      <span class="absolute top-3 left-3 bg-green-500 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full z-10">NOUVEAU</span>
+      {% endif %}
+      {% if produit.en_promo %}
+      <span class="absolute bottom-3 left-3 bg-red-500 text-white text-xs sm:text-sm font-bold px-2 py-1 rounded-md z-10">-{{ produit.pourcentage_reduction }}%</span>
+      {% endif %}
+
+      {% if images %}
+      <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
+        <button type="button" id="btn-favori" aria-label="Ajouter aux favoris"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-slate-700/95 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-red-500 hover:border-red-200 transition">
+          <svg id="icone-favori" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </button>
+        <button type="button" id="btn-partager" aria-label="Partager"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/95 dark:bg-slate-700/95 border border-slate-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-accent hover:border-accent transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+        </button>
+      </div>
+      {% endif %}
+      {% endwith %}
     </div>
-    {% endwith %}
 
     {% with images=produit.images_galerie %}
     {% if images|length > 1 %}
-    <div class="relative flex items-center gap-2 mt-3">
-      <button type="button" id="galerie-prev" aria-label="Images précédentes"
-              class="shrink-0 w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none">
-        ‹
+    <div class="flex items-center gap-2 mt-3">
+      <button type="button" id="galerie-prev" aria-label="Image précédente"
+              class="shrink-0 w-9 h-9 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
       <div id="galerie-vignettes" class="flex gap-2 overflow-x-auto scroll-smooth flex-1 py-1">
         {% for img in images %}
         <button type="button"
-                class="galerie-vignette shrink-0 w-16 h-16 rounded-lg border-2 overflow-hidden bg-white dark:bg-slate-700 flex items-center justify-center p-1 transition
+                class="galerie-vignette shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl border-2 overflow-hidden bg-white dark:bg-slate-700 flex items-center justify-center p-1 transition
                 {% if forloop.first %}border-accent{% else %}border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500{% endif %}"
                 data-url="{{ img.url }}"
                 data-alt="{{ img.alt }}">
@@ -62,90 +72,126 @@
         </button>
         {% endfor %}
       </div>
-      <button type="button" id="galerie-next" aria-label="Images suivantes"
-              class="shrink-0 w-8 h-8 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none">
-        ›
+      <button type="button" id="galerie-next" aria-label="Image suivante"
+              class="shrink-0 w-9 h-9 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
     </div>
     {% endif %}
     {% endwith %}
   </div>
 
-  <!-- Informations -->
-  <div>
-    <span class="text-accent text-xs uppercase tracking-wide font-medium">{{ produit.categorie.nom }}</span>
-    {% if produit.marque %}
-      <span class="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-2">· {{ produit.get_marque_display }}</span>
-    {% endif %}
-    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-1 mb-3">{{ produit.nom }}</h1>
+  <!-- ===== Informations ===== -->
+  <div class="flex flex-col">
+    <div class="flex flex-wrap items-center gap-2 mb-2">
+      <a href="{% url 'produits:liste' %}?categorie={{ produit.categorie.slug }}" class="text-accent text-xs uppercase tracking-wide font-medium hover:underline">{{ produit.categorie.nom }}</a>
+      {% if produit.marque %}
+        <span class="text-xs text-slate-400 dark:text-slate-500">·</span>
+        <span class="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wide">{{ produit.get_marque_display }}</span>
+      {% endif %}
+    </div>
+
+    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-3">{{ produit.nom }}</h1>
 
     {% if produit.nb_avis %}
-    <div class="flex items-center gap-2 mb-2">
-      <span class="text-amber-500 text-sm">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
-      <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">{{ produit.note_moyenne }}/5 ({{ produit.nb_avis }} avis)</span>
-    </div>
+    <a href="#avis" class="flex items-center gap-2 mb-3 group">
+      <span class="text-amber-400 text-sm">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}<span class="text-slate-300 dark:text-slate-600">★</span>{% endif %}{% endfor %}</span>
+      <span class="text-sm text-slate-500 dark:text-slate-400 group-hover:text-accent transition">{{ produit.note_moyenne }}/5 <span class="underline">({{ produit.nb_avis }} avis)</span></span>
+    </a>
     {% endif %}
 
-    <div class="text-2xl md:text-3xl font-bold text-accent mb-2">{{ produit.prix|prix_fcfa }} FCFA</div>
-    {% if produit.en_promo and produit.prix_barre %}
-    <p class="text-sm text-slate-400 mb-4"><span class="line-through">{{ produit.prix_barre|prix_fcfa }} FCFA</span> <span class="text-red-500 font-semibold">-{{ produit.pourcentage_reduction }}%</span></p>
-    {% else %}
-    <p class="text-sm text-slate-400 mb-4">&nbsp;</p>
-    {% endif %}
+    <div class="flex items-end gap-3 mb-2 flex-wrap">
+      <span class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">{{ produit.prix|prix_fcfa }} FCFA</span>
+      {% if produit.en_promo %}
+      <span class="text-lg text-slate-400 line-through mb-1">{{ produit.prix_barre|prix_fcfa }} FCFA</span>
+      {% endif %}
+    </div>
 
     {% if produit.en_stock %}
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4"><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>{{ produit.stock }} unité{{ produit.stock|pluralize }} en stock</p>
+      <p class="text-sm text-green-600 dark:text-green-400 font-medium mb-4"><span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>En stock — {{ produit.stock }} disponible{{ produit.stock|pluralize }}</p>
     {% else %}
-      <p class="text-sm text-red-500 dark:text-red-400 mb-4"><span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span>Rupture de stock</p>
+      <p class="text-sm text-red-500 dark:text-red-400 font-medium mb-4"><span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>Rupture de stock</p>
     {% endif %}
 
-    <form class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6" method="post" action="{% url 'commandes:ajouter' produit.id %}">
+    <hr class="border-slate-200 dark:border-slate-700 my-4">
+
+    <form class="flex flex-col sm:flex-row gap-3 mb-4" method="post" action="{% url 'commandes:ajouter' produit.id %}">
       {% csrf_token %}
-      <input type="number" name="quantite" value="1" min="1" max="{{ produit.stock }}" {% if not produit.en_stock %}disabled{% endif %}
-        class="w-full sm:w-20 border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-center focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
-      <button type="submit" {% if not produit.en_stock %}disabled{% endif %} class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center {% if not produit.en_stock %}opacity-50 cursor-not-allowed{% endif %}">
+      <div class="flex items-stretch border border-slate-200 dark:border-slate-600 rounded-lg overflow-hidden shrink-0 self-start sm:self-auto">
+        <button type="button" id="qte-moins" class="w-10 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" aria-label="Diminuer">−</button>
+        <input type="number" name="quantite" id="qte-input" value="1" min="1" max="{{ produit.stock }}" {% if not produit.en_stock %}disabled{% endif %}
+          class="w-14 text-center border-x border-slate-200 dark:border-slate-600 focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 py-2.5" readonly>
+        <button type="button" id="qte-plus" class="w-10 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition" aria-label="Augmenter">+</button>
+      </div>
+      <button type="submit" {% if not produit.en_stock %}disabled{% endif %}
+              class="flex-1 bg-accent hover:bg-accentdark text-white font-semibold px-6 py-3 rounded-lg text-center transition {% if not produit.en_stock %}opacity-50 cursor-not-allowed{% endif %}">
         {% if produit.en_stock %}Ajouter au panier{% else %}Indisponible{% endif %}
       </button>
     </form>
 
-    <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ produit.description }}</p>
+    <!-- Réassurance -->
+    <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+      <div class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto text-accent mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">Livraison disponible</p>
+      </div>
+      <div class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto text-accent mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">Paiement à la livraison</p>
+      </div>
+      <div class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto text-accent mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">Paiement mobile</p>
+      </div>
+    </div>
+
+    {% if produit.description %}
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-2 text-sm uppercase tracking-wide">Description</h2>
+    <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm">{{ produit.description|lignes_nettoyees }}</p>
+    {% endif %}
   </div>
 </div>
 
 {% if produits_similaires %}
-<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 mt-12 md:mt-16">Produits similaires</h2>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-  {% for p in produits_similaires %}
-  <a href="{% url 'produits:detail' p.slug %}"
-     class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-accent hover:shadow-md transition flex flex-col">
-    <div class="aspect-[4/3] bg-surface dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs overflow-hidden">
-      {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.nom }}" class="w-full h-full object-cover">{% else %}[ pas d'image ]{% endif %}
-    </div>
-    <div class="p-3 md:p-4 flex flex-col gap-1">
-      <span class="text-accent text-[11px] uppercase tracking-wide font-medium truncate">{{ p.categorie.nom }}</span>
-      <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ p.nom }}</span>
-      <span class="font-bold text-slate-900 dark:text-white">{{ p.prix|prix_fcfa }} FCFA</span>
-    </div>
-  </a>
-  {% endfor %}
+<div class="mt-12 md:mt-16">
+  <h2 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-4">Produits similaires</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+    {% for p in produits_similaires %}
+    <a href="{% url 'produits:detail' p.slug %}"
+       class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden hover:border-accent hover:shadow-md transition flex flex-col group">
+      <div class="aspect-video bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs overflow-hidden relative">
+        {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.nom }}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">{% else %}[ pas d'image ]{% endif %}
+        {% if p.en_promo %}<span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">-{{ p.pourcentage_reduction }}%</span>{% endif %}
+      </div>
+      <div class="p-3 md:p-4 flex flex-col gap-1">
+        <span class="text-accent text-[11px] uppercase tracking-wide font-medium truncate">{{ p.categorie.nom }}</span>
+        <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ p.nom }}</span>
+        <span class="font-bold text-slate-900 dark:text-white">{{ p.prix|prix_fcfa }} FCFA</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
 </div>
 {% endif %}
 
 <!-- Avis produits -->
-<div class="mt-12 md:mt-16">
-  <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Avis clients ({{ avis|length }})</h2>
+<div id="avis" class="mt-12 md:mt-16">
+  <h2 class="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-4">Avis clients ({{ avis|length }})</h2>
 
   {% if avis %}
-  <div class="space-y-4 mb-8">
+  <div class="grid md:grid-cols-2 gap-3 mb-8">
     {% for a in avis %}
     <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
-      <div class="flex items-center justify-between mb-1">
+      <div class="flex items-center justify-between mb-1 gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="text-amber-500 text-sm shrink-0">{% for i in "12345" %}{% if forloop.counter <= a.note %}★{% else %}☆{% endif %}{% endfor %}</span>
+          <div class="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+            <span class="text-accent font-semibold text-sm">{{ a.auteur|first|upper }}</span>
+          </div>
           <span class="font-semibold text-sm text-slate-900 dark:text-white truncate">{{ a.auteur }}</span>
         </div>
-        <span class="text-xs text-slate-400 shrink-0 ml-2">{{ a.date_creation|date:"d/m/Y" }}</span>
+        <span class="text-xs text-slate-400 shrink-0">{{ a.date_creation|date:"d/m/Y" }}</span>
       </div>
+      <div class="text-amber-400 text-sm mb-1">{% for i in "12345" %}{% if forloop.counter <= a.note %}★{% else %}<span class="text-slate-300 dark:text-slate-600">★</span>{% endif %}{% endfor %}</div>
       {% if a.commentaire %}<p class="text-sm text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-line">{{ a.commentaire }}</p>{% endif %}
     </div>
     {% endfor %}
@@ -196,6 +242,22 @@
 (function () {
   const mainImg = document.getElementById('galerie-image');
 
+  // === Compteur de quantité ===
+  const qteInput = document.getElementById('qte-input');
+  const qteMoins = document.getElementById('qte-moins');
+  const qtePlus = document.getElementById('qte-plus');
+  if (qteInput && qteMoins && qtePlus) {
+    const max = parseInt(qteInput.max, 10) || 99;
+    qteMoins.addEventListener('click', function () {
+      const v = parseInt(qteInput.value, 10) || 1;
+      qteInput.value = Math.max(1, v - 1);
+    });
+    qtePlus.addEventListener('click', function () {
+      const v = parseInt(qteInput.value, 10) || 1;
+      qteInput.value = Math.min(max, v + 1);
+    });
+  }
+
   // === Étoiles de notation ===
   const etoiles = document.querySelectorAll('.etoile');
   const champNote = document.getElementById('id_note');
@@ -239,6 +301,7 @@
     });
   }
 
+  // === Galerie : flèches et vignettes ===
   const vignettes = document.querySelectorAll('.galerie-vignette');
   const track = document.getElementById('galerie-vignettes');
   const prevBtn = document.getElementById('galerie-prev');
@@ -287,7 +350,6 @@
   if (favoriBtn) {
     const key = 'favoris';
     const slug = '{{ produit.slug|escapejs }}';
-    const produitId = {{ produit.id }};
     const favoris = JSON.parse(localStorage.getItem(key) || '[]');
     const icone = document.getElementById('icone-favori');
 

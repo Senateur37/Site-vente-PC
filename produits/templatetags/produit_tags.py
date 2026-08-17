@@ -22,3 +22,12 @@ def prix_fcfa(prix):
         return prix
     return f"{valeur:,}".replace(",", " ")
 
+
+@register.filter
+def lignes_nettoyees(texte):
+    """Supprime les retours à la ligne multiples et les lignes vides."""
+    if not texte:
+        return ''
+    lignes = [l.strip() for l in texte.splitlines() if l.strip()]
+    return '\n'.join(lignes)
+
