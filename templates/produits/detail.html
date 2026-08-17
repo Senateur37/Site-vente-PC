@@ -15,11 +15,11 @@
   <!-- Photo principale -->
   <div>
     <div class="relative bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-      <div id="galerie-principale" class="relative aspect-square w-full flex items-center justify-center">
+      <div id="galerie-principale" class="relative w-full max-w-xs sm:max-w-none mx-auto flex items-center justify-center">
         {% with images=produit.images_galerie %}
         {% if images %}
           <img id="galerie-image" src="{{ images.0.url }}" alt="{{ images.0.alt }}"
-               class="max-w-full max-h-full object-contain p-4">
+               class="w-full h-auto object-contain rounded-lg">
         {% else %}
           <span class="text-slate-400 dark:text-slate-500 text-sm">[ pas d'image ]</span>
         {% endif %}

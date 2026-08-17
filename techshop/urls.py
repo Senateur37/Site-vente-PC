@@ -1,9 +1,11 @@
+import os
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.http import HttpResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as serve_static
 from produits.sitemaps import ProduitSitemap, PagesStatiquesSitemap
 
 sitemaps = {
@@ -36,3 +38,11 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
+# En dev local (DEBUG=False mais flag activé) : servir médias/statiques via Django
+# (en production réelle, c'est Nginx qui les sert)
+if not settings.DEBUG and os.getenv('SERVIR_MEDIA_LOCAL', 'False').lower() in ('1', 'true', 'yes', 'on'):
+    urlpatterns += [
+        path('media/<path:path>', serve_static, {'document_root': settings.MEDIA_ROOT}),
+        path('static/<path:path>', serve_static, {'document_root': settings.STATIC_ROOT}),
+    ]
