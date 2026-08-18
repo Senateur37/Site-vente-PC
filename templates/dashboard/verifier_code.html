@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mot de passe oublié — TechShop</title>
+  <title>Code de vérification — TechShop</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -22,25 +22,39 @@
     <div class="w-full max-w-sm">
       <div class="text-center mb-8">
         <a href="{% url 'produits:liste' %}" class="text-2xl font-bold text-slate-900 dark:text-white">TECH<span class="text-accent">SHOP</span></a>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Mot de passe oublié</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Code de vérification</p>
       </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="mb-4 px-4 py-3 rounded-md text-sm border
+            {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300{% endif %}
+            {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
 
       <form method="post" class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 md:p-8 shadow-sm">
         {% csrf_token %}
-        <div class="mb-4">
-          <label for="id_email" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
-          <input type="email" name="email" id="id_email" required placeholder="votre@email.com"
-                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+        <p class="text-sm text-slate-600 dark:text-slate-300 mb-5 text-center">Un code à 6 chiffres a été envoyé à votre adresse email.<br>Entrez-le ci-dessous :</p>
+        <div class="mb-6">
+          <label for="id_code" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Code de vérification</label>
+          <input type="text" name="code" id="id_code" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autofocus
+                 placeholder="000000"
+                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm text-center text-xl tracking-[0.5em] focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-500">
         </div>
         <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white font-semibold py-2.5 rounded-md text-sm transition">
-          Envoyer le code
+          Vérifier le code
         </button>
       </form>
 
       <div class="text-center mt-6">
-        <a href="{% url 'dashboard:login' %}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition">← Retour à la connexion</a>
+        <a href="{% url 'dashboard:mot_de_passe_oublie' %}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition">← Recommencer</a>
       </div>
+    </div>
   </div>
+
   <button id="theme-toggle" type="button"
           class="fixed bottom-4 right-4 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center shadow-md transition z-50"
           aria-label="Basculer le mode sombre/clair">
@@ -81,5 +95,6 @@
       }
     })();
   </script>
+
 </body>
 </html>

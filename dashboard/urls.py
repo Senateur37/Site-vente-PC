@@ -1,5 +1,4 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'dashboard'
@@ -12,23 +11,10 @@ urlpatterns = [
     # Inscription (désactivée en production — seul l'admin crée les comptes)
     # path('inscription/', views.inscription, name='inscription'),
 
-    # Password reset
-    path('mot-de-passe-oublie/', auth_views.PasswordResetView.as_view(
-        template_name='dashboard/mot_de_passe_oublie.html',
-        email_template_name='dashboard/email_reinitialisation.html',
-        subject_template_name='dashboard/email_reinitialisation_sujet.html',
-        success_url='/dashboard/mot-de-passe-oublie/envoye/'
-    ), name='mot_de_passe_oublie'),
-    path('mot-de-passe-oublie/envoye/', auth_views.PasswordResetDoneView.as_view(
-        template_name='dashboard/mot_de_passe_envoye.html'
-    ), name='mot_de_passe_envoye'),
-    path('reinitialiser/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
-        template_name='dashboard/reinitialiser_mot_de_passe.html',
-        success_url='/dashboard/reinitialiser/termine/'
-    ), name='reinitialiser_mot_de_passe'),
-    path('reinitialiser/termine/', auth_views.PasswordResetCompleteView.as_view(
-        template_name='dashboard/reinitialiser_termine.html'
-    ), name='reinitialiser_termine'),
+    # Password reset (code de vérification)
+    path('mot-de-passe-oublie/', views.mot_de_passe_oublie, name='mot_de_passe_oublie'),
+    path('mot-de-passe-oublie/code/', views.verifier_code, name='verifier_code'),
+    path('mot-de-passe-oublie/nouveau/', views.nouveau_mot_de_passe, name='nouveau_mot_de_passe'),
 
     # Produits
     path('produits/', views.liste_produits, name='produits_liste'),

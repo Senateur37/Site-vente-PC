@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_str
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
+import secrets, random
 
 from produits.models import Produit, Categorie, LogoMarque, ImageProduit, Avis
 from produits.forms import ProduitForm, CategorieForm, LogoMarqueForm
@@ -67,6 +68,102 @@ def inscription(request):
 
 
 # ---------- Dashboard ----------
+
+def mot_de_passe_oublie(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            messages.error(request, "Aucun compte n'est associé à cet email.")
+            return redirect('dashboard:mot_de_passe_oublie')
+
+        code = str(random.randint(100000, 999999))
+        request.session['reset_code'] = code
+        request.session['reset_email'] = email
+        request.session['reset_code_exp'] = (timezone.now() + timedelta(minutes=10)).isoformat()
+
+        try:
+            send_mail(
+                subject=f"Votre code de vérification TechShop : {code}",
+                message=(
+                    f"Bonjour {user.username},\n\n"
+                    f"Votre code de vérification pour réinitialiser votre mot de passe est :\n\n"
+                    f"   {code}\n\n"
+                    f"Ce code est valable 10 minutes. Si vous n'avez pas fait cette demande, ignorez cet email.\n\n"
+                    f"L'équipe TechShop"
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            return redirect('dashboard:verifier_code')
+        except Exception:
+            messages.error(request, "Impossible d'envoyer l'email. Vérifiez la configuration SMTP.")
+
+    return render(request, 'dashboard/mot_de_passe_oublie.html')
+
+
+def verifier_code(request):
+    if 'reset_email' not in request.session:
+        return redirect('dashboard:mot_de_passe_oublie')
+
+    if request.method == 'POST':
+        code_saisi = request.POST.get('code', '').strip()
+        code_attendu = request.session.get('reset_code')
+        expiration = request.session.get('reset_code_exp')
+
+        if expiration:
+            try:
+                exp = timezone.datetime.fromisoformat(expiration)
+                if timezone.now() > exp:
+                    messages.error(request, "Ce code a expiré. Veuillez en demander un nouveau.")
+                    request.session.pop('reset_code', None)
+                    request.session.pop('reset_email', None)
+                    request.session.pop('reset_code_exp', None)
+                    return redirect('dashboard:mot_de_passe_oublie')
+            except (ValueError, TypeError):
+                pass
+
+        if code_attendu and code_saisi == code_attendu:
+            request.session['reset_code_verifie'] = True
+            return redirect('dashboard:nouveau_mot_de_passe')
+        else:
+            messages.error(request, "Code incorrect. Vérifiez votre email.")
+
+    return render(request, 'dashboard/verifier_code.html')
+
+
+def nouveau_mot_de_passe(request):
+    if not request.session.get('reset_code_verifie'):
+        return redirect('dashboard:mot_de_passe_oublie')
+    email = request.session.get('reset_email')
+
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        password2 = request.POST.get('password2', '')
+        if not password or not password2:
+            messages.error(request, "Tous les champs sont obligatoires.")
+        elif password != password2:
+            messages.error(request, "Les mots de passe ne correspondent pas.")
+        elif len(password) < 8:
+            messages.error(request, "Le mot de passe doit contenir au moins 8 caractères.")
+        else:
+            try:
+                user = User.objects.get(email__iexact=email)
+                user.set_password(password)
+                user.save()
+                request.session.pop('reset_code', None)
+                request.session.pop('reset_email', None)
+                request.session.pop('reset_code_exp', None)
+                request.session.pop('reset_code_verifie', None)
+                messages.success(request, "Mot de passe réinitialisé ! Vous pouvez vous connecter.")
+                return redirect('dashboard:login')
+            except User.DoesNotExist:
+                messages.error(request, "Une erreur est survenue. Réessayez.")
+
+    return render(request, 'dashboard/nouveau_mot_de_passe.html')
+
 
 @staff_member_required(login_url='dashboard:login')
 def index(request):
