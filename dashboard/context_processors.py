@@ -27,3 +27,16 @@ def avis_attente(request):
         return {'nb_avis_attente': Avis.objects.filter(approuve=False).count()}
     except Exception:
         return {'nb_avis_attente': 0}
+
+
+def droits_dashboard(request):
+    from .roles import domaines_de, role_de
+    user = getattr(request, 'user', None)
+    if user is None or not getattr(user, 'is_staff', False):
+        return {}
+    acces = domaines_de(user)
+    contexte = {'acces': acces, 'role_dashboard': role_de(user)}
+    if 'commandes' in acces:
+        from commandes.models import Commande
+        contexte['nb_a_traiter_menu'] = Commande.objects.filter(statut='en_attente').count()
+    return contexte

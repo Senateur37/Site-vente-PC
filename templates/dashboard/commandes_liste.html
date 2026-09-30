@@ -1,96 +1,71 @@
 {% extends "dashboard/base_admin.html" %}
-{% block title %}Commandes — TechShop{% endblock %}
+{% load produit_tags %}
+{% block title %}Commandes — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
 {% block content %}
 
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commandes</h1>
-
-  <!-- Filtre par statut -->
-  <div class="flex flex-wrap gap-2">
-    <a href="{% url 'dashboard:commandes_export' %}"
-       class="text-xs px-3 py-1.5 rounded-full border border-accent text-accent hover:bg-accent hover:text-white whitespace-nowrap transition">
-      ⬇ Exporter (CSV)
-    </a>
-    <a href="{% url 'dashboard:commandes_liste' %}"
-       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
-       {% if not statut_actif %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
-      Toutes
-    </a>
-    {% for value, label in statut_choices %}
-      <a href="?statut={{ value }}"
-         class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
-         {% if statut_actif == value %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
-        {{ label }}
-      </a>
-    {% endfor %}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commandes</h1>
+    <p class="text-sm text-slate-500">{{ total }} résultat{{ total|pluralize }}</p>
   </div>
+  <a href="{% url 'dashboard:commandes_export' %}?{{ querystring }}" class="dash-btn-ghost self-start">⬇ Exporter en CSV{% if querystring %} (filtre actif){% endif %}</a>
 </div>
 
+<!-- Statuts -->
+<div class="flex flex-wrap gap-2 mb-4">
+  {% include "dashboard/_onglet_statut.html" with valeur="" libelle="Toutes" %}
+  {% for value, label in statut_choices %}
+    {% include "dashboard/_onglet_statut.html" with valeur=value libelle=label %}
+  {% endfor %}
+</div>
+
+<!-- Recherche et filtres -->
+<form method="get" class="dash-card p-3 md:p-4 mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">
+  {% if f.statut %}<input type="hidden" name="statut" value="{{ f.statut }}">{% endif %}
+  <label class="lg:col-span-2 text-xs font-medium text-slate-500">Recherche
+    <input type="search" name="q" value="{{ f.q }}" placeholder="N°, nom, téléphone, email…" class="dash-input mt-1">
+  </label>
+  <label class="text-xs font-medium text-slate-500">Paiement
+    <select name="paiement" class="dash-input mt-1">
+      <option value="">Tous</option>
+      {% for v, l in paiement_choices %}<option value="{{ v }}" {% if f.paiement == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Du<input type="date" name="du" value="{{ f.du }}" class="dash-input mt-1"></label>
+  <label class="text-xs font-medium text-slate-500">Au<input type="date" name="au" value="{{ f.au }}" class="dash-input mt-1"></label>
+  <div class="flex gap-2">
+    <button class="dash-btn-primary flex-1">Filtrer</button>
+    {% if querystring %}<a href="{% url 'dashboard:commandes_liste' %}" class="dash-btn-ghost" title="Réinitialiser">✕</a>{% endif %}
+  </div>
+</form>
+
 {% if commandes %}
-<div class="overflow-x-auto -mx-4 md:mx-0">
-  <table class="w-full min-w-[650px] border-collapse">
-    <thead>
-      <tr class="border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 text-left">
-        <th class="py-3 px-4 md:px-2">#</th>
-        <th class="py-3 px-4 md:px-2">Client</th>
-        <th class="py-3 px-4 md:px-2 hidden sm:table-cell">Téléphone</th>
-        <th class="py-3 px-4 md:px-2 hidden md:table-cell">Date</th>
-        <th class="py-3 px-4 md:px-2">Total</th>
-        <th class="py-3 px-4 md:px-2">Statut</th>
-        <th class="py-3 px-4 md:px-2">Actions</th>
+<div class="dash-card overflow-x-auto">
+  <table class="w-full min-w-[720px]">
+    <thead class="border-b border-slate-200 dark:border-slate-700">
+      <tr>
+        <th class="dash-th">#</th><th class="dash-th">Client</th><th class="dash-th hidden md:table-cell">Date</th>
+        <th class="dash-th hidden lg:table-cell">Paiement</th><th class="dash-th">Total</th><th class="dash-th">Statut</th><th class="dash-th"></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
       {% for cmd in commandes %}
-      <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-        <td class="py-3 px-4 md:px-2 text-sm font-medium text-slate-900 dark:text-white">#{{ cmd.id }}</td>
-        <td class="py-3 px-4 md:px-2 text-sm text-slate-600 dark:text-slate-300">{{ cmd.nom_client }}</td>
-        <td class="py-3 px-4 md:px-2 text-sm text-slate-500 hidden sm:table-cell">{{ cmd.telephone }}</td>
-        <td class="py-3 px-4 md:px-2 text-sm text-slate-500 hidden md:table-cell">{{ cmd.date_creation|date:"d/m/Y" }}</td>
-        <td class="py-3 px-4 md:px-2 text-sm font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ cmd.total }} FCFA</td>
-        <td class="py-3 px-4 md:px-2">
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full
-            {% if cmd.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
-            {% if cmd.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
-            {% if cmd.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
-            {{ cmd.get_statut_display }}
-          </span>
-        </td>
-        <td class="py-3 px-4 md:px-2">
-          <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="text-xs border border-slate-200 dark:border-slate-600 rounded-md px-3 py-1.5 hover:border-accent hover:text-accent text-slate-600 dark:text-slate-300 transition whitespace-nowrap">
-            Détail
-          </a>
-        </td>
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+        <td class="dash-td font-medium text-slate-900 dark:text-white">#{{ cmd.id }}</td>
+        <td class="dash-td"><p class="text-slate-900 dark:text-white">{{ cmd.nom_client }}</p><p class="text-xs text-slate-400">{{ cmd.telephone }}</p></td>
+        <td class="dash-td hidden md:table-cell whitespace-nowrap">{{ cmd.date_creation|date:"d/m/Y H:i" }}</td>
+        <td class="dash-td hidden lg:table-cell">{{ cmd.get_methode_paiement_display }}{% if cmd.paiement_statut == 'paye' %} <span class="badge bg-green-100 text-green-700">payé</span>{% endif %}</td>
+        <td class="dash-td font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ cmd.total|prix_fcfa }} FCFA</td>
+        <td class="dash-td">{% include "dashboard/_badge_statut.html" with statut=cmd.statut libelle=cmd.get_statut_display %}</td>
+        <td class="dash-td text-right"><a href="{% url 'dashboard:commande_detail' cmd.id %}" class="dash-btn-ghost px-3 py-1.5 text-xs">Détail</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-
-<!-- Mobile cards -->
-<div class="md:hidden grid grid-cols-1 gap-3 mt-4">
-  {% for cmd in commandes %}
-  <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between gap-3">
-    <div class="min-w-0">
-      <p class="text-sm font-medium text-slate-900 dark:text-white">#{{ cmd.id }} — {{ cmd.nom_client }}</p>
-      <p class="text-xs text-slate-400">{{ cmd.telephone }} · {{ cmd.date_creation|date:"d/m/Y" }}</p>
-      <p class="text-sm font-semibold text-slate-900 dark:text-white mt-1">{{ cmd.total }} FCFA</p>
-    </div>
-    <span class="text-xs font-medium px-2 py-0.5 rounded-full shrink-0
-      {% if cmd.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
-      {% if cmd.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
-      {% if cmd.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
-      {{ cmd.get_statut_display }}
-    </span>
-  </a>
-  {% endfor %}
-</div>
-
+{% include "dashboard/_pagination.html" %}
 {% else %}
-<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
-  <p class="text-slate-400 dark:text-slate-500">Aucune commande trouvée.</p>
-</div>
+<div class="dash-card p-10 text-center text-slate-500">Aucune commande ne correspond à ces critères.</div>
 {% endif %}
 
 {% endblock %}
-

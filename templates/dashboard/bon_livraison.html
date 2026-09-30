@@ -1,0 +1,61 @@
+{% load produit_tags %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bon de livraison BL-{{ commande.id|stringformat:"05d" }}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', Arial, sans-serif; color: #0f172a; margin: 0; background: #f1f5f9; }
+    .page { max-width: 800px; margin: 24px auto; background: #fff; padding: 48px; box-shadow: 0 1px 6px rgba(0,0,0,.1); }
+    h1 { font-size: 26px; margin: 0 0 4px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+    .entete { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+    .cadre { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 16px; margin-bottom: 24px; font-size: 14px; line-height: 1.6; }
+    .cadre h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #64748b; margin: 0 0 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #64748b; border-bottom: 2px solid #e2e8f0; padding: 10px 8px; }
+    td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; }
+    .r { text-align: right; white-space: nowrap; }
+    .case { width: 18px; height: 18px; border: 2px solid #94a3b8; border-radius: 3px; display: inline-block; vertical-align: middle; }
+    .encaisser { background: #fef3c7; border: 1px dashed #d97706; border-radius: 8px; padding: 14px 16px; margin: 24px 0; font-size: 16px; font-weight: 700; display: flex; justify-content: space-between; }
+    .signatures { display: flex; gap: 24px; margin-top: 56px; }
+    .signatures div { flex: 1; border-top: 1px solid #0f172a; padding-top: 8px; font-size: 12px; color: #64748b; }
+    .actions { text-align: center; margin: 16px; }
+    .actions button { background: #2563eb; color: #fff; border: 0; border-radius: 6px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    @media print { body { background: #fff; } .page { box-shadow: none; margin: 0; padding: 0; max-width: none; } .actions { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="actions"><button onclick="window.print()">🖨 Imprimer</button></div>
+  <div class="page">
+    <div class="entete">
+      <div><h1>BON DE LIVRAISON</h1><p class="muted">N° BL-{{ commande.id|stringformat:"05d" }} · Commande #{{ commande.id }}<br>Émis le {{ maintenant|date:"d/m/Y" }}</p></div>
+      <div style="text-align:right"><strong>{{ site.site_nom }}</strong><p class="muted">{% if site.telephone %}Tél. {{ site.telephone }}{% endif %}</p></div>
+    </div>
+
+    <div class="cadre">
+      <h2>Livrer à</h2>
+      <strong>{{ commande.nom_client }}</strong><br>
+      📞 {{ commande.telephone }}<br>
+      📍 {{ commande.adresse|linebreaksbr }}
+      {% if commande.note %}<br><em>Instructions : {{ commande.note|linebreaksbr }}</em>{% endif %}
+    </div>
+
+    <table>
+      <thead><tr><th style="width:36px"></th><th>Article</th><th class="r">Quantité</th></tr></thead>
+      <tbody>
+        {% for l in commande.lignes.all %}<tr><td><span class="case"></span></td><td>{{ l.nom_produit }}</td><td class="r"><strong>{{ l.quantite }}</strong></td></tr>{% endfor %}
+      </tbody>
+    </table>
+
+    {% if commande.statut != 'livree_payee' and commande.paiement_statut != 'paye' %}
+    <div class="encaisser"><span>Montant à encaisser à la livraison</span><span>{{ commande.total|prix_fcfa }} {{ site.monnaie_symbole }}</span></div>
+    {% else %}
+    <div class="cadre" style="margin-top:24px">Commande déjà réglée — aucun encaissement.</div>
+    {% endif %}
+
+    <div class="signatures"><div>Signature du livreur</div><div>Signature du client (bon pour réception)</div></div>
+  </div>
+</body>
+</html>

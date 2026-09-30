@@ -1,269 +1,227 @@
 {% extends "dashboard/base_admin.html" %}
-{% block title %}Tableau de bord — TechShop{% endblock %}
+{% load produit_tags %}
+{% block title %}Tableau de bord — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
 {% block content %}
 
-<h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">Tableau de bord</h1>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+  <div>
+    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Bonjour {{ request.user.first_name|default:request.user.username }} 👋</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Voici l'activité de la boutique.</p>
+  </div>
+  {% if peut_commandes %}
+  <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-sm self-start" role="group" aria-label="Période">
+    {% for jours, libelle in periodes %}
+      <a href="?p={{ jours }}" class="px-3 py-1.5 {% if periode == jours %}bg-accent text-white{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700{% endif %}" {% if periode == jours %}aria-current="true"{% endif %}>{{ libelle }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
 
-<!-- Stats cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 md:p-5 flex items-start justify-between gap-3 hover:shadow-md transition">
-    <div class="min-w-0">
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">Total commandes</p>
-      <p class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white truncate">{{ total_commandes }}</p>
-    </div>
-    <span class="shrink-0 w-10 h-10 rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+{% if peut_commandes %}
+<!-- Indicateurs -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+  <div class="dash-card p-4 md:p-5 bg-gradient-to-br from-accent to-blue-800 text-white border-0">
+    <p class="text-xs font-medium uppercase tracking-wide text-blue-100 mb-1.5">Chiffre d'affaires</p>
+    <p class="text-xl md:text-2xl font-extrabold">{{ ca|prix_fcfa }} <span class="text-sm font-semibold">FCFA</span></p>
+    <p class="text-xs mt-2 text-blue-100">
+      {% if ca_variation is None %}—{% elif ca_variation >= 0 %}▲ +{{ ca_variation }} %{% else %}▼ {{ ca_variation }} %{% endif %}
+      <span class="opacity-80">vs période précédente</span>
+    </p>
   </div>
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 md:p-5 flex items-start justify-between gap-3 hover:shadow-md transition">
-    <div class="min-w-0">
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">En attente</p>
-      <p class="text-2xl md:text-3xl font-bold text-amber-500 truncate">{{ commandes_en_attente }}</p>
-    </div>
-    <span class="shrink-0 w-10 h-10 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+  <div class="dash-card p-4 md:p-5">
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Commandes</p>
+    <p class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">{{ nb_commandes }}</p>
+    <p class="text-xs mt-2 {% if nb_variation is not None and nb_variation < 0 %}text-red-500{% else %}text-green-600{% endif %}">
+      {% if nb_variation is None %}<span class="text-slate-400">—</span>{% elif nb_variation >= 0 %}▲ +{{ nb_variation }} %{% else %}▼ {{ nb_variation }} %{% endif %}
+      <span class="text-slate-400">vs précédente</span>
+    </p>
   </div>
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 md:p-5 flex items-start justify-between gap-3 hover:shadow-md transition">
-    <div class="min-w-0">
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">Livrées</p>
-      <p class="text-2xl md:text-3xl font-bold text-green-500 truncate">{{ commandes_livrees }}</p>
-    </div>
-    <span class="shrink-0 w-10 h-10 rounded-xl bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span>
+  <div class="dash-card p-4 md:p-5">
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Panier moyen</p>
+    <p class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{{ panier_moyen|prix_fcfa }} <span class="text-sm font-semibold">FCFA</span></p>
+    <p class="text-xs mt-2 text-slate-400">{{ livrees }} commande{{ livrees|pluralize }} livrée{{ livrees|pluralize }} et payée{{ livrees|pluralize }}</p>
   </div>
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 md:p-5 flex items-start justify-between gap-3 hover:shadow-md transition">
-    <div class="min-w-0">
-      <p class="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">C.A. du mois</p>
-      <p class="text-lg md:text-xl font-bold text-accent truncate">{{ chiffre_affaires_mois|floatformat:0 }} FCFA</p>
-    </div>
-    <span class="shrink-0 w-10 h-10 rounded-xl bg-blue-100 text-accent dark:bg-blue-900/30 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+  <div class="dash-card p-4 md:p-5">
+    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Taux d'annulation</p>
+    <p class="text-2xl md:text-3xl font-bold {% if taux_annulation > 20 %}text-red-500{% else %}text-slate-900 dark:text-white{% endif %}">{{ taux_annulation }} %</p>
+    <p class="text-xs mt-2 text-slate-400">Sur la période</p>
   </div>
 </div>
 
-<div class="grid md:grid-cols-2 gap-6">
+<!-- Alertes -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+  <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente" class="dash-card p-4 flex items-center gap-3 hover:border-amber-400 transition">
+    <span class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center text-lg" aria-hidden="true">⏳</span>
+    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_a_traiter }}</p><p class="text-xs text-slate-500">commande{{ nb_a_traiter|pluralize }} à traiter</p></div>
+  </a>
+  {% if peut_catalogue %}
+  <a href="{% url 'dashboard:produits_liste' %}?stock=rupture" class="dash-card p-4 flex items-center gap-3 hover:border-red-400 transition">
+    <span class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center text-lg" aria-hidden="true">📦</span>
+    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_ruptures }}</p><p class="text-xs text-slate-500">produit{{ nb_ruptures|pluralize }} en rupture</p></div>
+  </a>
+  <a href="{% url 'dashboard:produits_liste' %}?stock=faible" class="dash-card p-4 flex items-center gap-3 hover:border-amber-400 transition">
+    <span class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center text-lg" aria-hidden="true">⚠️</span>
+    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_stock_faible_total }}</p><p class="text-xs text-slate-500">stock{{ nb_stock_faible_total|pluralize }} faible{{ nb_stock_faible_total|pluralize }}</p></div>
+  </a>
+  {% endif %}
+  {% if peut_avis %}
+  <a href="{% url 'dashboard:avis_liste' %}?statut=en_attente" class="dash-card p-4 flex items-center gap-3 hover:border-accent transition">
+    <span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-accent flex items-center justify-center text-lg" aria-hidden="true">💬</span>
+    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_avis_attente }}</p><p class="text-xs text-slate-500">avis à modérer</p></div>
+  </a>
+  {% endif %}
+</div>
 
-  <!-- Chiffre d'affaires total -->
-  <div class="rounded-2xl p-5 bg-gradient-to-br from-accent to-blue-800 text-white flex flex-col justify-center">
-    <h2 class="text-sm font-medium text-blue-100 mb-2">Chiffre d'affaires total</h2>
-    <p class="text-3xl md:text-4xl font-extrabold">{{ chiffre_affaires|floatformat:0 }} FCFA</p>
-    <p class="text-xs text-blue-200 mt-2">Commandes livrées et payées</p>
+<div class="grid lg:grid-cols-3 gap-4 md:gap-6 mb-6">
+  <div class="dash-card p-5 lg:col-span-2">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Chiffre d'affaires{% for j, l in periodes %}{% if j == periode %} · {{ l }}{% endif %}{% endfor %}</h2>
+    <div class="relative" style="height: 280px;"><canvas id="chart-ca" aria-label="Graphique du chiffre d'affaires" role="img"></canvas></div>
   </div>
-
-  <!-- Produits populaires -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Produits les plus vendus</h2>
-    {% if produits_populaires %}
-    <ul class="space-y-2">
-      {% for p in produits_populaires %}
-      <li class="flex justify-between text-sm">
-        <span class="text-slate-600 dark:text-slate-300 truncate">{{ p.nom_produit }}</span>
-        <span class="font-medium text-slate-900 dark:text-white ml-2 shrink-0">{{ p.total_vendu }} vendu{{ p.total_vendu|pluralize }}</span>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-sm text-slate-400">Aucune vente pour le moment.</p>
-    {% endif %}
-  </div>
-
-  <!-- Graphique ventes mensuelles -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 md:col-span-2">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ventes des 6 derniers mois (FCFA)</h2>
-    <div class="relative" style="height: 280px;">
-      <canvas id="chart-ventes"></canvas>
-    </div>
-  </div>
-
-  <!-- Top produits vendus -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Top produits (quantité vendue)</h2>
-    <div class="relative" style="height: 260px;">
-      <canvas id="chart-top-produits"></canvas>
-    </div>
-  </div>
-
-  <!-- Répartition des commandes par statut -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
+  <div class="dash-card p-5">
     <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Commandes par statut</h2>
-    <div class="relative" style="height: 260px;">
-      <canvas id="chart-statuts"></canvas>
-    </div>
+    <div class="relative" style="height: 280px;"><canvas id="chart-statuts" aria-label="Répartition des commandes par statut" role="img"></canvas></div>
   </div>
+</div>
 
-  <!-- Stock faible -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Stock faible</h2>
-    {% if stock_faible %}
-    <ul class="space-y-2">
-      {% for p in stock_faible %}
-      <li class="flex justify-between text-sm">
-        <span class="text-slate-600 dark:text-slate-300 truncate">{{ p.nom }}</span>
-        <span class="font-medium text-red-500 ml-2 shrink-0">{{ p.stock }} restant{{ p.stock|pluralize }}</span>
+<div class="grid lg:grid-cols-3 gap-4 md:gap-6 mb-6">
+  <div class="dash-card p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Top produits</h2>
+    {% if top_produits %}
+    <ul class="space-y-3">
+      {% for p in top_produits %}
+      <li>
+        <div class="flex justify-between text-sm gap-2"><span class="text-slate-700 dark:text-slate-200 truncate">{{ p.nom_produit }}</span><span class="font-semibold text-slate-900 dark:text-white shrink-0">{{ p.quantite }} ×</span></div>
+        <p class="text-xs text-slate-400">{{ p.total|prix_fcfa }} FCFA</p>
       </li>
       {% endfor %}
     </ul>
-    {% else %}
-    <p class="text-sm text-slate-400">Tous les produits sont bien approvisionnés.</p>
-    {% endif %}
+    {% else %}<p class="text-sm text-slate-400">Aucune vente sur la période.</p>{% endif %}
   </div>
 
-  <!-- Dernières commandes -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Dernières commandes</h2>
-    {% if dernieres_commandes %}
-    <div class="space-y-2">
-      {% for cmd in dernieres_commandes %}
+  <div class="dash-card p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold text-slate-900 dark:text-white">À traiter</h2>
+      <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente&tri=ancien" class="text-xs text-accent hover:underline">Tout voir</a>
+    </div>
+    {% if a_traiter %}
+    <div class="space-y-1">
+      {% for cmd in a_traiter %}
       <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="flex justify-between items-center p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <div class="min-w-0">
-          <p class="text-sm font-medium text-slate-900 dark:text-white truncate">#{{ cmd.id }} — {{ cmd.nom_client }}</p>
-          <p class="text-xs text-slate-400">{{ cmd.date_creation|date:"d/m/Y H:i" }}</p>
-        </div>
-        <span class="text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ml-2
-          {% if cmd.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
-          {% if cmd.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
-          {% if cmd.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
-          {{ cmd.get_statut_display }}
-        </span>
+        <div class="min-w-0"><p class="text-sm font-medium text-slate-900 dark:text-white truncate">#{{ cmd.id }} — {{ cmd.nom_client }}</p><p class="text-xs text-slate-400">{{ cmd.date_creation|timesince }}</p></div>
+        <span class="text-sm font-semibold text-slate-900 dark:text-white shrink-0 ml-2">{{ cmd.total|prix_fcfa }}</span>
       </a>
       {% endfor %}
     </div>
-    {% else %}
-    <p class="text-sm text-slate-400">Aucune commande pour le moment.</p>
-    {% endif %}
+    {% else %}<p class="text-sm text-slate-400">Rien à traiter 🎉</p>{% endif %}
   </div>
+
+  <div class="dash-card p-5">
+    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Paiements</h2>
+    {% if graph_paiements %}
+    <ul class="space-y-2 text-sm">
+      {% for p in graph_paiements %}<li class="flex justify-between"><span class="text-slate-600 dark:text-slate-300">{{ p.label }}</span><span class="font-semibold text-slate-900 dark:text-white">{{ p.total }}</span></li>{% endfor %}
+    </ul>
+    {% else %}<p class="text-sm text-slate-400">Aucune commande sur la période.</p>{% endif %}
+    <div class="border-t border-slate-100 dark:border-slate-700 mt-4 pt-3">
+      <p class="text-xs text-slate-400">C.A. depuis l'ouverture</p>
+      <p class="text-lg font-bold text-accent">{{ ca_total|prix_fcfa }} FCFA</p>
+    </div>
+  </div>
+</div>
+
+<div class="dash-card p-5 mb-6">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-slate-900 dark:text-white">Dernières commandes</h2>
+    <a href="{% url 'dashboard:commandes_liste' %}" class="text-xs text-accent hover:underline">Toutes les commandes</a>
+  </div>
+  {% if dernieres_commandes %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+        {% for cmd in dernieres_commandes %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
+          <td class="py-2.5 pr-3 font-medium"><a href="{% url 'dashboard:commande_detail' cmd.id %}" class="text-slate-900 dark:text-white hover:text-accent">#{{ cmd.id }}</a></td>
+          <td class="py-2.5 pr-3 text-slate-600 dark:text-slate-300">{{ cmd.nom_client }}</td>
+          <td class="py-2.5 pr-3 text-slate-400 hidden sm:table-cell">{{ cmd.date_creation|date:"d/m/Y H:i" }}</td>
+          <td class="py-2.5 pr-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ cmd.total|prix_fcfa }} FCFA</td>
+          <td class="py-2.5 text-right">{% include "dashboard/_badge_statut.html" with statut=cmd.statut libelle=cmd.get_statut_display %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="text-sm text-slate-400">Aucune commande pour le moment.</p>{% endif %}
+</div>
+{% endif %}
+
+{% if peut_catalogue and stock_faible %}
+<div class="dash-card p-5 mb-6">
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="font-semibold text-slate-900 dark:text-white">Stock à réapprovisionner</h2>
+    <a href="{% url 'dashboard:produits_liste' %}?stock=faible&tri=stock_asc" class="text-xs text-accent hover:underline">Voir tout</a>
+  </div>
+  <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
+    {% for p in stock_faible %}
+    <li class="flex justify-between text-sm"><a href="{% url 'dashboard:produit_modifier' p.id %}" class="text-slate-600 dark:text-slate-300 hover:text-accent truncate">{{ p.nom }}</a><span class="font-semibold text-red-500 ml-2 shrink-0">{{ p.stock }}</span></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{% if not peut_commandes and not peut_catalogue and not peut_avis %}
+<div class="dash-card p-8 text-center text-slate-500">Utilisez le menu pour accéder à vos sections.</div>
+{% endif %}
 
 {% endblock %}
 
 {% block extra_js %}
-{{ mois_ventes|json_script:"data-mois-ventes" }}
-{{ top_produits_vendus|json_script:"data-top-produits" }}
-{{ repartition_statuts|json_script:"data-statuts" }}
+{% if peut_commandes %}
+{{ graph_ca|json_script:"data-ca" }}
+{{ graph_statuts|json_script:"data-statuts" }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-(function() {
+(function () {
   if (typeof Chart === 'undefined') return;
+  const lire = (id) => { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } };
+  const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v);
+  const palette = ['#f59e0b', '#2563eb', '#16a34a', '#ef4444'];
 
-  function lire(id) {
-    const el = document.getElementById(id);
-    if (!el) return [];
-    try { return JSON.parse(el.textContent); } catch(e) { return []; }
-  }
-
-  const nomMois = function(cle) {
-    const noms = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
-    return noms[parseInt(cle.split('-')[1], 10) - 1];
-  };
-  const palette = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-
-  // 1) Ventes mensuelles
-  const mois = lire('data-mois-ventes');
-  const canvasVentes = document.getElementById('chart-ventes');
-  if (canvasVentes) {
-    if (!mois.length || mois.every(function(d) { return !d.total; })) {
-      canvasVentes.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de données de ventes.</p>';
+  const ca = lire('data-ca');
+  const c1 = document.getElementById('chart-ca');
+  if (ca && c1) {
+    if (!ca.valeurs.some((v) => v > 0)) {
+      c1.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de ventes livrées et payées sur cette période.</p>';
     } else {
-      new Chart(canvasVentes, {
-        type: 'bar',
-        data: {
-          labels: mois.map(function(d) { return nomMois(d.mois); }),
-          datasets: [{
-            label: 'Ventes (FCFA)',
-            data: mois.map(function(d) { return d.total; }),
-            backgroundColor: '#2563eb',
-            borderRadius: 6,
-          }]
-        },
+      new Chart(c1, {
+        type: ca.valeurs.length > 45 ? 'bar' : 'line',
+        data: { labels: ca.labels, datasets: [{
+          label: 'C.A. (FCFA)', data: ca.valeurs, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.15)',
+          fill: true, tension: .3, pointRadius: ca.valeurs.length > 31 ? 0 : 3, borderRadius: 4,
+        }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return ' ' + new Intl.NumberFormat('fr-FR').format(ctx.parsed.y) + ' FCFA';
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(v) { return new Intl.NumberFormat('fr-FR').format(v); }
-              }
-            }
-          }
-        }
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' ' + fmt(c.parsed.y) + ' FCFA' } } },
+          scales: { y: { beginAtZero: true, ticks: { callback: fmt } }, x: { ticks: { maxTicksLimit: 10 } } },
+        },
       });
     }
   }
 
-  // 2) Top produits vendus
-  const top = lire('data-top-produits');
-  const canvasTop = document.getElementById('chart-top-produits');
-  if (canvasTop) {
-    if (!top.length) {
-      canvasTop.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune vente pour le moment.</p>';
-    } else {
-      new Chart(canvasTop, {
-        type: 'bar',
-        data: {
-          labels: top.map(function(d) { return d.nom_produit; }),
-          datasets: [{
-            label: 'Quantité vendue',
-            data: top.map(function(d) { return d.quantite; }),
-            backgroundColor: palette,
-            borderRadius: 6,
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(ctx) {
-                  return ' ' + ctx.parsed.x + ' vendu(s)';
-                }
-              }
-            }
-          },
-          scales: {
-            x: { beginAtZero: true, ticks: { precision: 0 } }
-          }
-        }
-      });
-    }
-  }
-
-  // 3) Répartition des commandes par statut
-  const statuts = lire('data-statuts');
-  const canvasStatuts = document.getElementById('chart-statuts');
-  if (canvasStatuts) {
-    const actifs = statuts.filter(function(d) { return d.total > 0; });
+  const st = lire('data-statuts');
+  const c2 = document.getElementById('chart-statuts');
+  if (st && c2) {
+    const actifs = st.filter((d) => d.total > 0);
     if (!actifs.length) {
-      canvasStatuts.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune commande pour le moment.</p>';
+      c2.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune commande sur la période.</p>';
     } else {
-      new Chart(canvasStatuts, {
+      new Chart(c2, {
         type: 'doughnut',
-        data: {
-          labels: actifs.map(function(d) { return d.statut; }),
-          datasets: [{
-            data: actifs.map(function(d) { return d.total; }),
-            backgroundColor: palette,
-            borderWidth: 0,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '55%',
-          plugins: {
-            legend: { position: 'bottom' }
-          }
-        }
+        data: { labels: actifs.map((d) => d.statut), datasets: [{ data: actifs.map((d) => d.total), backgroundColor: palette, borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } },
       });
     }
   }
 })();
 </script>
+{% endif %}
 {% endblock %}

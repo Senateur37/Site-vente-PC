@@ -2,12 +2,53 @@
 {% block title %}Produits — TechShop{% endblock %}
 {% block content %}
 
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Produits</h1>
-  <a href="{% url 'dashboard:produit_ajouter' %}" class="bg-accent hover:bg-accentdark text-white text-sm font-semibold px-4 py-2 rounded-md inline-block text-center whitespace-nowrap">
-    + Ajouter un produit
-  </a>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+  <div>
+    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Produits</h1>
+    <p class="text-sm text-slate-500">{{ total }} produit{{ total|pluralize }}</p>
+  </div>
+  <a href="{% url 'dashboard:produit_ajouter' %}" class="dash-btn-primary self-start">+ Ajouter un produit</a>
 </div>
+
+<form method="get" class="dash-card p-3 md:p-4 mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">
+  <label class="lg:col-span-2 text-xs font-medium text-slate-500">Recherche
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Nom, description…" class="dash-input mt-1">
+  </label>
+  <label class="text-xs font-medium text-slate-500">Catégorie
+    <select name="categorie" class="dash-input mt-1"><option value="">Toutes</option>
+      {% for c in categories %}<option value="{{ c.id }}" {% if f.categorie == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nom }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Marque
+    <select name="marque" class="dash-input mt-1"><option value="">Toutes</option>
+      {% for v, l in marques %}<option value="{{ v }}" {% if f.marque == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Stock
+    <select name="stock" class="dash-input mt-1">
+      <option value="">Tous</option>
+      <option value="rupture" {% if f.stock == 'rupture' %}selected{% endif %}>En rupture</option>
+      <option value="faible" {% if f.stock == 'faible' %}selected{% endif %}>Stock faible</option>
+      <option value="ok" {% if f.stock == 'ok' %}selected{% endif %}>Bien approvisionné</option>
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Trier par
+    <select name="tri" class="dash-input mt-1">
+      {% for v, l in tris %}<option value="{{ v }}" {% if f.tri == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </label>
+  <div class="flex gap-2 sm:col-span-2 lg:col-span-6 justify-end">
+    <label class="text-xs font-medium text-slate-500 flex items-center gap-2 mr-auto">Visibilité
+      <select name="dispo" class="dash-input w-auto">
+        <option value="">Tous</option>
+        <option value="oui" {% if f.dispo == 'oui' %}selected{% endif %}>Visibles en boutique</option>
+        <option value="non" {% if f.dispo == 'non' %}selected{% endif %}>Masqués</option>
+      </select>
+    </label>
+    {% if querystring %}<a href="{% url 'dashboard:produits_liste' %}" class="dash-btn-ghost">Réinitialiser</a>{% endif %}
+    <button class="dash-btn-primary">Filtrer</button>
+  </div>
+</form>
 
 {% if produits %}
 <div class="overflow-x-auto -mx-4 md:mx-0">
@@ -101,12 +142,12 @@
   {% endfor %}
 </div>
 
+{% include "dashboard/_pagination.html" %}
+
 {% else %}
-<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
-  <p class="text-slate-400 dark:text-slate-500 mb-4">Aucun produit pour le moment.</p>
-  <a href="{% url 'dashboard:produit_ajouter' %}" class="bg-accent hover:bg-accentdark text-white text-sm font-semibold px-5 py-2 rounded-md inline-block">
-    Ajouter un produit
-  </a>
+<div class="dash-card p-8 text-center">
+  <p class="text-slate-400 dark:text-slate-500 mb-4">{% if querystring %}Aucun produit ne correspond à ces critères.{% else %}Aucun produit pour le moment.{% endif %}</p>
+  <a href="{% url 'dashboard:produit_ajouter' %}" class="dash-btn-primary">Ajouter un produit</a>
 </div>
 {% endif %}
 

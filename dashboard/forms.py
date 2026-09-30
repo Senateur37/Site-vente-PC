@@ -96,3 +96,61 @@ class CodePromoForm(StyleMixin, forms.ModelForm):
         if (data.get('pourcentage') or 0) > 100:
             self.add_error('pourcentage', "Le pourcentage ne peut pas dépasser 100.")
         return data
+
+
+# ---------- Équipe ----------
+
+from django.contrib.auth import password_validation  # noqa: E402
+from django.contrib.auth.models import User  # noqa: E402
+
+from .roles import ROLES  # noqa: E402
+
+ROLE_CHOIX = [(nom, nom) for nom in ROLES]
+
+
+class MembreForm(StyleMixin, forms.Form):
+    username = forms.CharField(label="Nom d'utilisateur", max_length=150)
+    first_name = forms.CharField(label="Prénom", max_length=150, required=False)
+    last_name = forms.CharField(label="Nom", max_length=150, required=False)
+    email = forms.EmailField(label="Email")
+    role = forms.ChoiceField(label="Rôle", choices=ROLE_CHOIX)
+    password1 = forms.CharField(label="Mot de passe", widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+    password2 = forms.CharField(label="Confirmer le mot de passe", widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+
+    def clean_username(self):
+        nom = self.cleaned_data['username'].strip()
+        if User.objects.filter(username__iexact=nom).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur existe déjà.")
+        return nom
+
+    def clean(self):
+        data = super().clean()
+        p1, p2 = data.get('password1'), data.get('password2')
+        if p1 and p2:
+            if p1 != p2:
+                self.add_error('password2', "Les mots de passe ne correspondent pas.")
+            else:
+                try:
+                    password_validation.validate_password(p1, User(username=data.get('username', ''), email=data.get('email', '')))
+                except forms.ValidationError as e:
+                    self.add_error('password1', e)
+        return data
+
+
+class MembreModifierForm(StyleMixin, forms.ModelForm):
+    role = forms.ChoiceField(label="Rôle", choices=ROLE_CHOIX)
+    password1 = forms.CharField(
+        label="Nouveau mot de passe", required=False,
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        help_text="Laisser vide pour ne pas le changer.")
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'is_active']
+        labels = {'first_name': "Prénom", 'last_name': "Nom", 'email': "Email", 'is_active': "Compte actif"}
+
+    def clean_password1(self):
+        p = self.cleaned_data.get('password1')
+        if p:
+            password_validation.validate_password(p, self.instance)
+        return p

@@ -1,119 +1,111 @@
 {% extends "dashboard/base_admin.html" %}
 {% load produit_tags %}
-{% block title %}Commande #{{ commande.id }} — TechShop{% endblock %}
+{% block title %}Commande #{{ commande.id }} — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
 {% block content %}
 
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commande #{{ commande.id }}</h1>
-  <a href="{% url 'dashboard:commandes_liste' %}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition">
-    ← Retour aux commandes
-  </a>
+  <div class="flex items-center gap-3 flex-wrap">
+    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commande #{{ commande.id }}</h1>
+    {% include "dashboard/_badge_statut.html" with statut=commande.statut libelle=commande.get_statut_display %}
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'dashboard:commande_facture' commande.id %}" target="_blank" rel="noopener" class="dash-btn-ghost">🧾 Facture</a>
+    <a href="{% url 'dashboard:commande_bon_livraison' commande.id %}" target="_blank" rel="noopener" class="dash-btn-ghost">🚚 Bon de livraison</a>
+    <a href="{% url 'dashboard:commandes_liste' %}" class="dash-btn-ghost">← Commandes</a>
+  </div>
 </div>
 
-<div class="grid md:grid-cols-3 gap-6">
-  <!-- Détails commande -->
-  <div class="md:col-span-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Détails de la commande</h2>
-
-    <div class="grid sm:grid-cols-2 gap-4 mb-6 text-sm">
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Client</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.nom_client }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Téléphone</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.telephone }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Email</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.email|default:'—' }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Client (compte)</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.utilisateur.username|default:'Invité' }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Paiement</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.get_methode_paiement_display }} — <span class="text-slate-500">{{ commande.get_paiement_statut_display }}</span></p>
-      </div>
-      <div class="sm:col-span-2">
-        <p class="text-slate-400 dark:text-slate-500">Adresse</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.adresse }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Date</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.date_creation|date:"d/m/Y H:i" }}</p>
-      </div>
-      <div>
-        <p class="text-slate-400 dark:text-slate-500">Statut actuel</p>
-        <span class="text-xs font-medium px-2 py-0.5 rounded-full
-          {% if commande.statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}
-          {% if commande.statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300{% endif %}
-          {% if commande.statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300{% endif %}">
-          {{ commande.get_statut_display }}
-        </span>
-      </div>
-    </div>
-
-    {% if commande.note %}
-    <div class="mb-6">
-      <p class="text-slate-400 dark:text-slate-500 text-sm">Note du client</p>
-      <p class="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md p-3 mt-1">{{ commande.note }}</p>
-    </div>
-    {% endif %}
-
-    <!-- Lignes de commande -->
-    <h3 class="font-semibold text-slate-900 dark:text-white mb-3">Articles commandés</h3>
-    <div class="divide-y divide-slate-100 dark:divide-slate-700">
-      {% for ligne in commande.lignes.all %}
-      <div class="flex justify-between py-2 text-sm">
-        <span class="text-slate-600 dark:text-slate-300">{{ ligne.nom_produit }} × {{ ligne.quantite }}</span>
-        <span class="font-medium text-slate-900 dark:text-white">{{ ligne.sous_total }} FCFA</span>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 mt-2 text-sm">
-      <div class="flex justify-between">
-        <span class="text-slate-500 dark:text-slate-400">Sous-total</span>
-        <span class="font-medium text-slate-900 dark:text-white">{{ commande.sous_total|prix_fcfa }} FCFA</span>
-      </div>
-      {% if commande.reduction > 0 %}
-      <div class="flex justify-between">
-        <span class="text-slate-500 dark:text-slate-400">Réduction{% if commande.code_promo %} ({{ commande.code_promo.code }}){% endif %}</span>
-        <span class="font-medium text-green-600 dark:text-green-400">-{{ commande.reduction|prix_fcfa }} FCFA</span>
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
+    <div class="dash-card p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Client et livraison</h2>
+      <dl class="grid sm:grid-cols-2 gap-4 text-sm">
+        <div><dt class="text-slate-400">Client</dt><dd class="font-medium text-slate-900 dark:text-white">{{ commande.nom_client }}</dd></div>
+        <div><dt class="text-slate-400">Téléphone</dt><dd class="font-medium"><a href="tel:{{ commande.telephone }}" class="text-accent hover:underline">{{ commande.telephone }}</a></dd></div>
+        <div><dt class="text-slate-400">Email</dt><dd class="font-medium text-slate-900 dark:text-white">{{ commande.email|default:'—' }}</dd></div>
+        <div><dt class="text-slate-400">Compte</dt><dd class="font-medium text-slate-900 dark:text-white">{{ commande.utilisateur.username|default:'Invité' }}</dd></div>
+        <div class="sm:col-span-2"><dt class="text-slate-400">Adresse</dt><dd class="font-medium text-slate-900 dark:text-white whitespace-pre-line">{{ commande.adresse }}</dd></div>
+        <div><dt class="text-slate-400">Paiement</dt><dd class="font-medium text-slate-900 dark:text-white">{{ commande.get_methode_paiement_display }} — <span class="text-slate-500">{{ commande.get_paiement_statut_display }}</span></dd></div>
+        <div><dt class="text-slate-400">Passée le</dt><dd class="font-medium text-slate-900 dark:text-white">{{ commande.date_creation|date:"d/m/Y à H:i" }}</dd></div>
+      </dl>
+      {% if commande.note %}
+      <div class="mt-5">
+        <p class="text-slate-400 text-sm">Instructions du client</p>
+        <p class="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md p-3 mt-1 whitespace-pre-line">{{ commande.note }}</p>
       </div>
       {% endif %}
-      <div class="flex justify-between">
-        <span class="text-slate-500 dark:text-slate-400">Livraison</span>
-        <span class="font-medium text-slate-900 dark:text-white">{{ commande.frais_livraison|prix_fcfa }} FCFA</span>
-      </div>
     </div>
-    <div class="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between items-center mt-2">
-      <span class="font-semibold text-slate-900 dark:text-white">Total</span>
-      <span class="font-bold text-xl text-accent">{{ commande.total|prix_fcfa }} FCFA</span>
+
+    <div class="dash-card p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Articles</h2>
+      <div class="divide-y divide-slate-100 dark:divide-slate-700">
+        {% for ligne in commande.lignes.all %}
+        <div class="flex justify-between gap-3 py-2.5 text-sm">
+          <span class="text-slate-600 dark:text-slate-300">{{ ligne.nom_produit }} <span class="text-slate-400">× {{ ligne.quantite }} · {{ ligne.prix_unitaire|prix_fcfa }}</span></span>
+          <span class="font-medium text-slate-900 dark:text-white whitespace-nowrap">{{ ligne.sous_total|prix_fcfa }} FCFA</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 mt-2 text-sm">
+        <div class="flex justify-between"><span class="text-slate-500">Sous-total</span><span class="font-medium">{{ commande.sous_total|prix_fcfa }} FCFA</span></div>
+        {% if commande.reduction > 0 %}
+        <div class="flex justify-between"><span class="text-slate-500">Réduction{% if commande.code_promo %} ({{ commande.code_promo.code }}){% endif %}</span><span class="font-medium text-green-600">-{{ commande.reduction|prix_fcfa }} FCFA</span></div>
+        {% endif %}
+        <div class="flex justify-between"><span class="text-slate-500">Livraison</span><span class="font-medium">{{ commande.frais_livraison|prix_fcfa }} FCFA</span></div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700"><span class="font-semibold">Total</span><span class="font-bold text-xl text-accent">{{ commande.total|prix_fcfa }} FCFA</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- Changer le statut -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Modifier le statut</h2>
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      <div>
-        <label for="statut" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nouveau statut</label>
-        <select name="statut" id="statut"
-                class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
-          {% for value, label in commande.STATUT_CHOICES %}
-            <option value="{{ value }}" {% if commande.statut == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white font-semibold py-2.5 rounded-md text-sm">
-        Mettre à jour
-      </button>
-    </form>
+  <div class="space-y-6">
+    <div class="dash-card p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Changer le statut</h2>
+      {% if commande.statut == 'annulee' %}
+        <p class="text-sm text-slate-500">Commande annulée : le stock a été remis en rayon, elle ne peut pas être rouverte.</p>
+      {% else %}
+      <form method="post" class="space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="statut">
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Nouveau statut
+          <select name="statut" class="dash-input mt-1">
+            {% for value, label in commande.STATUT_CHOICES %}<option value="{{ value }}" {% if commande.statut == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Note (optionnel)
+          <textarea name="note" rows="2" class="dash-input mt-1" placeholder="Ex : client joint par téléphone"></textarea>
+        </label>
+        <button class="dash-btn-primary w-full">Mettre à jour</button>
+        {% if commande.email %}<p class="text-xs text-slate-400">Le client est prévenu par email (livraison, livrée, annulée).</p>{% endif %}
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="dash-card p-5">
+      <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Historique et notes internes</h2>
+      <form method="post" class="mb-4 flex gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="note">
+        <input name="note" required maxlength="2000" class="dash-input" placeholder="Ajouter une note interne…" aria-label="Note interne">
+        <button class="dash-btn-ghost shrink-0">Ajouter</button>
+      </form>
+      <ol class="relative border-l border-slate-200 dark:border-slate-700 ml-2 space-y-4">
+        {% for h in historique %}
+        <li class="ml-4">
+          <span class="absolute -left-1.5 mt-1.5 w-3 h-3 rounded-full {% if h.est_changement_statut %}bg-accent{% else %}bg-slate-300 dark:bg-slate-600{% endif %}"></span>
+          <p class="text-sm text-slate-800 dark:text-slate-200">
+            {% if h.est_changement_statut %}Statut : <strong>{{ h.ancien_statut_label }}</strong> → <strong>{{ h.nouveau_statut_label }}</strong>{% else %}Note interne{% endif %}
+          </p>
+          {% if h.note %}<p class="text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md p-2 mt-1 whitespace-pre-line">{{ h.note }}</p>{% endif %}
+          <p class="text-xs text-slate-400 mt-1">{{ h.utilisateur.username|default:'—' }} · {{ h.date|date:"d/m/Y H:i" }}</p>
+        </li>
+        {% endfor %}
+        <li class="ml-4">
+          <span class="absolute -left-1.5 mt-1.5 w-3 h-3 rounded-full bg-green-500"></span>
+          <p class="text-sm text-slate-800 dark:text-slate-200">Commande passée</p>
+          <p class="text-xs text-slate-400 mt-1">{{ commande.date_creation|date:"d/m/Y H:i" }}</p>
+        </li>
+      </ol>
+    </div>
   </div>
 </div>
-
 {% endblock %}
-

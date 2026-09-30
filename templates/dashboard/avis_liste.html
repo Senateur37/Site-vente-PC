@@ -2,27 +2,30 @@
 {% block title %}Avis clients — TechShop{% endblock %}
 {% block content %}
 
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+<div class="mb-5">
   <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Avis clients</h1>
-
-  <div class="flex flex-wrap gap-2">
-    <a href="{% url 'dashboard:avis_liste' %}"
-       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
-       {% if not statut_actif %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
-      Tous
-    </a>
-    <a href="?statut=en_attente"
-       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
-       {% if statut_actif == 'en_attente' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
-      En attente
-    </a>
-    <a href="?statut=approuves"
-       class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition
-       {% if statut_actif == 'approuves' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-accent{% endif %}">
-      Approuvés
-    </a>
-  </div>
+  <p class="text-sm text-slate-500">{{ total }} avis</p>
 </div>
+
+<div class="flex flex-wrap gap-2 mb-4">
+  <a href="?{% if f.q %}q={{ f.q|urlencode }}&{% endif %}{% if f.note %}note={{ f.note }}{% endif %}" class="text-xs px-3 py-1.5 rounded-full border {% if not statut_actif %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-accent{% endif %}">Tous</a>
+  <a href="?statut=en_attente{% if f.q %}&q={{ f.q|urlencode }}{% endif %}{% if f.note %}&note={{ f.note }}{% endif %}" class="text-xs px-3 py-1.5 rounded-full border {% if statut_actif == 'en_attente' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-accent{% endif %}">En attente</a>
+  <a href="?statut=approuves{% if f.q %}&q={{ f.q|urlencode }}{% endif %}{% if f.note %}&note={{ f.note }}{% endif %}" class="text-xs px-3 py-1.5 rounded-full border {% if statut_actif == 'approuves' %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-accent{% endif %}">Approuvés</a>
+</div>
+
+<form method="get" class="dash-card p-3 md:p-4 mb-5 flex flex-wrap gap-2 items-end">
+  {% if statut_actif %}<input type="hidden" name="statut" value="{{ statut_actif }}">{% endif %}
+  <label class="flex-1 min-w-[200px] text-xs font-medium text-slate-500">Recherche
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Auteur, commentaire, produit…" class="dash-input mt-1">
+  </label>
+  <label class="text-xs font-medium text-slate-500">Note
+    <select name="note" class="dash-input mt-1"><option value="">Toutes</option>
+      {% for n in "54321" %}<option value="{{ n }}" {% if f.note == n %}selected{% endif %}>{{ n }} ★</option>{% endfor %}
+    </select>
+  </label>
+  <button class="dash-btn-primary">Filtrer</button>
+  {% if querystring %}<a href="{% url 'dashboard:avis_liste' %}" class="dash-btn-ghost">✕</a>{% endif %}
+</form>
 
 {% if avis %}
 <div class="grid grid-cols-1 gap-4">
@@ -69,10 +72,9 @@
   </div>
   {% endfor %}
 </div>
+{% include "dashboard/_pagination.html" %}
 {% else %}
-<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center">
-  <p class="text-slate-400 dark:text-slate-500">Aucun avis trouvé.</p>
-</div>
+<div class="dash-card p-8 text-center"><p class="text-slate-400 dark:text-slate-500">Aucun avis trouvé.</p></div>
 {% endif %}
 
 {% endblock %}

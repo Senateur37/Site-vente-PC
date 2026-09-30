@@ -1,0 +1,16 @@
+{% if page.paginator.num_pages > 1 %}
+<nav aria-label="Pagination" class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5 text-sm">
+  <p class="text-slate-500 dark:text-slate-400">
+    {{ page.start_index }}–{{ page.end_index }} sur {{ total }}
+  </p>
+  <div class="flex items-center gap-1">
+    {% if page.has_previous %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.previous_page_number }}" class="dash-btn-ghost px-3 py-1.5" aria-label="Page précédente">←</a>
+    {% endif %}
+    <span class="px-3 py-1.5 text-slate-600 dark:text-slate-300">Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.next_page_number }}" class="dash-btn-ghost px-3 py-1.5" aria-label="Page suivante">→</a>
+    {% endif %}
+  </div>
+</nav>
+{% endif %}

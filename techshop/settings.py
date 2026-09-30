@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'dashboard.context_processors.site_settings',
                 'dashboard.context_processors.stock_faible',
                 'dashboard.context_processors.avis_attente',
+                'dashboard.context_processors.droits_dashboard',
             ]
         },
     },
@@ -174,3 +176,7 @@ if not DEBUG:
         SECURE_HSTS_SECONDS = 31536000
         SECURE_HSTS_INCLUDE_SUBDOMAINS = True
         SECURE_HSTS_PRELOAD = True
+
+# Tests plus rapides : hachage de mot de passe léger (jamais utilisé en exploitation)
+if 'test' in sys.argv[1:2]:
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']

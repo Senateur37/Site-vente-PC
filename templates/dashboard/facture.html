@@ -1,0 +1,76 @@
+{% load produit_tags %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facture F-{{ commande.id|stringformat:"05d" }}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', Arial, sans-serif; color: #0f172a; margin: 0; background: #f1f5f9; }
+    .page { max-width: 800px; margin: 24px auto; background: #fff; padding: 48px; box-shadow: 0 1px 6px rgba(0,0,0,.1); }
+    header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 36px; }
+    h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -.5px; }
+    .muted { color: #64748b; font-size: 13px; line-height: 1.5; }
+    .logo { max-height: 56px; margin-bottom: 8px; }
+    .bloc { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+    .bloc h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #64748b; margin: 0 0 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #64748b; border-bottom: 2px solid #e2e8f0; padding: 10px 8px; }
+    td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+    .r { text-align: right; white-space: nowrap; }
+    .totaux { margin: 20px 0 0 auto; width: 300px; font-size: 14px; }
+    .totaux div { display: flex; justify-content: space-between; padding: 5px 0; }
+    .totaux .total { border-top: 2px solid #0f172a; margin-top: 6px; padding-top: 10px; font-size: 18px; font-weight: 700; }
+    footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; }
+    .actions { text-align: center; margin: 16px; }
+    .actions button { background: #2563eb; color: #fff; border: 0; border-radius: 6px; padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    @media print { body { background: #fff; } .page { box-shadow: none; margin: 0; padding: 0; max-width: none; } .actions { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="actions"><button onclick="window.print()">🖨 Imprimer / Enregistrer en PDF</button></div>
+  <div class="page">
+    <header>
+      <div>
+        {% if site.logo %}<img class="logo" src="{{ site.logo.url }}" alt="">{% endif %}
+        <h1>{{ site.site_nom }}</h1>
+        <p class="muted">{{ site.adresse|linebreaksbr }}{% if site.telephone %}<br>Tél. {{ site.telephone }}{% endif %}{% if site.email %}<br>{{ site.email }}{% endif %}</p>
+      </div>
+      <div style="text-align:right">
+        <h1>FACTURE</h1>
+        <p class="muted">N° F-{{ commande.id|stringformat:"05d" }}<br>Date : {{ commande.date_creation|date:"d/m/Y" }}<br>Commande #{{ commande.id }}</p>
+      </div>
+    </header>
+
+    <div class="bloc">
+      <div>
+        <h2>Facturé à</h2>
+        <p><strong>{{ commande.nom_client }}</strong><br>{{ commande.telephone }}{% if commande.email %}<br>{{ commande.email }}{% endif %}<br>{{ commande.adresse|linebreaksbr }}</p>
+      </div>
+      <div style="text-align:right">
+        <h2>Paiement</h2>
+        <p>{{ commande.get_methode_paiement_display }}<br>
+          {% if commande.statut == 'livree_payee' %}<strong style="color:#16a34a">Payée</strong>{% elif commande.paiement_statut == 'paye' %}<strong style="color:#16a34a">Payée en ligne</strong>{% else %}<strong style="color:#d97706">À régler</strong>{% endif %}</p>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Désignation</th><th class="r">Prix unitaire</th><th class="r">Qté</th><th class="r">Montant</th></tr></thead>
+      <tbody>
+        {% for l in commande.lignes.all %}
+        <tr><td>{{ l.nom_produit }}</td><td class="r">{{ l.prix_unitaire|prix_fcfa }} {{ site.monnaie_symbole }}</td><td class="r">{{ l.quantite }}</td><td class="r">{{ l.sous_total|prix_fcfa }} {{ site.monnaie_symbole }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="totaux">
+      <div><span>Sous-total</span><span>{{ commande.sous_total|prix_fcfa }} {{ site.monnaie_symbole }}</span></div>
+      {% if commande.reduction > 0 %}<div><span>Réduction{% if commande.code_promo %} ({{ commande.code_promo.code }}){% endif %}</span><span>-{{ commande.reduction|prix_fcfa }} {{ site.monnaie_symbole }}</span></div>{% endif %}
+      <div><span>Livraison</span><span>{{ commande.frais_livraison|prix_fcfa }} {{ site.monnaie_symbole }}</span></div>
+      <div class="total"><span>Total</span><span>{{ commande.total|prix_fcfa }} {{ site.monnaie_symbole }}</span></div>
+    </div>
+
+    <footer class="muted">{{ site.footer_texte }}<br>Merci pour votre confiance — {{ site.site_nom }}</footer>
+  </div>
+</body>
+</html>

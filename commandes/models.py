@@ -124,3 +124,33 @@ class LigneCommande(models.Model):
 
     def __str__(self):
         return f"{self.nom_produit} x{self.quantite}"
+
+class HistoriqueCommande(models.Model):
+    """Changements de statut et notes internes d'une commande."""
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name="historique")
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+    ancien_statut = models.CharField(max_length=20, blank=True)
+    nouveau_statut = models.CharField(max_length=20, blank=True)
+    note = models.TextField(blank=True, help_text="Note interne, jamais visible du client.")
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-date", "-id"]
+        verbose_name = "Historique de commande"
+
+    def __str__(self):
+        return f"#{self.commande_id} {self.ancien_statut} → {self.nouveau_statut}"
+
+    @property
+    def ancien_statut_label(self):
+        return dict(Commande.STATUT_CHOICES).get(self.ancien_statut, self.ancien_statut)
+
+    @property
+    def nouveau_statut_label(self):
+        return dict(Commande.STATUT_CHOICES).get(self.nouveau_statut, self.nouveau_statut)
+
+    @property
+    def est_changement_statut(self):
+        return bool(self.nouveau_statut and self.nouveau_statut != self.ancien_statut)

@@ -1,0 +1,4 @@
+<a href="?{% if f.q %}q={{ f.q|urlencode }}&{% endif %}{% if f.paiement %}paiement={{ f.paiement }}&{% endif %}{% if f.du %}du={{ f.du }}&{% endif %}{% if f.au %}au={{ f.au }}&{% endif %}{% if valeur %}statut={{ valeur }}{% endif %}"
+   class="text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition {% if f.statut == valeur %}bg-accent text-white border-accent{% else %}border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-accent{% endif %}">
+  {{ libelle }}{% if valeur %}{% for code, n in compteurs.items %}{% if code == valeur %} <span class="opacity-70">({{ n }})</span>{% endif %}{% endfor %}{% endif %}
+</a>

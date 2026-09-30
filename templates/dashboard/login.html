@@ -1,166 +1,161 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fr" class="">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="{% static 'manifest.json' %}">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/icon-192.png' %}">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>Connexion Admin — TechShop</title>
+  <title>Premium Admin | TechShop</title>
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000000;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    .premium-card {
+      background: rgba(10, 10, 10, 0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 30px 60px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .premium-input {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .premium-input:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1), inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .premium-button {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid rgba(255, 255, 255, 1);
+      box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    .premium-button:hover {
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .glow-line {
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+      opacity: 0.5;
+    }
+    
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
 </head>
-<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
+<body class="text-slate-300 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-white/30 selection:text-white">
 
-  <div class="flex-1 flex items-center justify-center px-4 py-10">
-    <div class="w-full max-w-sm">
-
-      <div class="text-center mb-8">
-        <a href="{% url 'produits:liste' %}" class="text-2xl font-bold text-slate-900 dark:text-white">TECH<span class="text-accent">SHOP</span></a>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Espace administration</p>
-      </div>
-
-      {% if messages %}
-        {% for message in messages %}
-          <div class="mb-4 px-4 py-3 rounded-md text-sm border
-            {% if message.tags == 'error' %}bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300{% endif %}
-            {% if message.tags == 'success' %}bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700 text-green-700 dark:text-green-300{% endif %}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-
-      <form method="post" class="bg-surface dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 md:p-8 shadow-sm">
-        {% csrf_token %}
-        <div class="mb-5">
-          <label for="username" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Nom d'utilisateur</label>
-          <input type="text" name="username" id="username" required autocomplete="username" autofocus
-                 placeholder="Entrez votre identifiant"
-                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
-        </div>
-        <div class="mb-6">
-          <label for="password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Mot de passe</label>
-          <input type="password" name="password" id="password" required autocomplete="current-password"
-                 placeholder="Entrez votre mot de passe"
-                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
-        </div>
-        <button type="submit"
-                class="w-full bg-accent hover:bg-accentdark text-white font-semibold py-2.5 rounded-md text-sm transition">
-          Se connecter
-        </button>
-        <div class="flex items-center justify-between mt-4 text-sm">
-          <a href="{% url 'dashboard:mot_de_passe_oublie' %}" class="text-slate-500 dark:text-slate-400 hover:text-accent dark:hover:text-accent transition">Mot de passe oublié ?</a>
-        </div>
-      </form>
-
-      <div class="text-center mt-6">
-        <a href="{% url 'produits:liste' %}" class="text-sm text-slate-500 dark:text-slate-400 hover:text-accent dark:hover:text-accent transition">← Retour à la boutique</a>
-      </div>
+  <!-- Logo Premium -->
+  <div class="mb-10 text-center z-10 animate-float">
+    <a href="{% url 'produits:liste' %}" class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl mb-4 group hover:bg-white/10 transition-all duration-500">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+    </a>
+    <h1 class="text-3xl font-bold tracking-tight text-white flex items-center justify-center gap-1">
+      TECH<span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-white">SHOP</span>
+    </h1>
+    <p class="text-xs font-medium text-slate-500 tracking-[0.2em] uppercase mt-2">Admin Portal</p>
   </div>
 
-  <!-- Bouton flottant : installer l'application -->
-  <button type="button" id="install-pwa"
-          class="fixed bottom-4 left-4 z-50 inline-flex items-center gap-2 border border-accent bg-white dark:bg-slate-800 text-accent hover:bg-accent hover:text-white font-semibold px-4 py-2.5 rounded-full shadow-lg text-sm transition">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-    </svg>
-    Installer
-  </button>
+  <div class="w-full max-w-[400px] z-10">
+    <div class="premium-card rounded-2xl p-8 relative overflow-hidden">
+      <!-- Glow Decoratif Top -->
+      <div class="glow-line"></div>
 
-  <button id="theme-toggle" type="button"
-          class="fixed bottom-4 right-4 w-10 h-10 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 hover:border-accent hover:text-accent dark:hover:border-accent dark:hover:text-accent flex items-center justify-center shadow-md transition z-50"
-          aria-label="Basculer le mode sombre/clair">
-    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-    </svg>
-    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-    </svg>
-  </button>
+      <!-- Messages -->
+      {% if messages %}
+        <div class="mb-6 space-y-3">
+        {% for message in messages %}
+          <div class="px-4 py-3 rounded-lg text-xs font-medium flex items-center gap-3 border
+            {% if message.tags == 'error' %}bg-red-500/10 text-red-400 border-red-500/20{% endif %}
+            {% if message.tags == 'success' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20{% endif %}">
+            {% if message.tags == 'error' %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {% endif %}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
 
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+        
+        <div>
+          <label for="username" class="block text-xs font-medium text-slate-400 mb-2">Identifiant</label>
+          <input type="text" name="username" id="username" required autocomplete="username" autofocus
+                 placeholder="nom.utilisateur"
+                 class="premium-input block w-full px-4 py-3 text-sm text-white rounded-lg focus:outline-none placeholder-slate-600" />
+        </div>
 
-  <script>
-    (function() {
-      const installBtn = document.getElementById('install-pwa');
-      let deferredPrompt = null;
-      let estInstalle = window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label for="password" class="block text-xs font-medium text-slate-400">Mot de passe</label>
+            <a href="{% url 'dashboard:mot_de_passe_oublie' %}" class="text-xs text-slate-500 hover:text-white transition-colors">Récupération</a>
+          </div>
+          <input type="password" name="password" id="password" required autocomplete="current-password"
+                 placeholder="••••••••"
+                 class="premium-input block w-full px-4 py-3 text-sm text-white rounded-lg focus:outline-none placeholder-slate-600" />
+        </div>
 
-      if (estInstalle) {
-        if (installBtn) installBtn.style.display = 'none';
-        return;
-      }
+        <div class="pt-2">
+          <button type="submit"
+                  class="premium-button w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold rounded-lg">
+            S'authentifier
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
 
-      window.addEventListener('appinstalled', function() {
-        if (installBtn) installBtn.style.display = 'none';
-      });
-
-      window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        deferredPrompt = e;
-      });
-
-      if (installBtn) {
-        installBtn.addEventListener('click', async function() {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const choix = await deferredPrompt.userChoice;
-            if (choix.outcome === 'accepted') {
-              installBtn.style.display = 'none';
-            }
-            deferredPrompt = null;
-          } else {
-            installBtn.textContent = 'Menu ⋮ → Ajouter à l\'écran d\'accueil';
-            installBtn.classList.add('!w-auto');
-            setTimeout(function() {
-              installBtn.textContent = '';
-              installBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg> Installer';
-            }, 3500);
-          }
-        });
-      }
-    })();
-  </script>
-
-  <script>
-    (function() {
-      const htmlEl = document.documentElement;
-      const storedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
-        htmlEl.classList.add('dark');
-      } else {
-        htmlEl.classList.remove('dark');
-      }
-      const toggleBtn = document.getElementById('theme-toggle');
-      const iconSun = document.getElementById('theme-icon-sun');
-      const iconMoon = document.getElementById('theme-icon-moon');
-      function updateIcons() {
-        const isDark = htmlEl.classList.contains('dark');
-        iconSun.classList.toggle('hidden', !isDark);
-        iconMoon.classList.toggle('hidden', isDark);
-      }
-      updateIcons();
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', function() {
-          htmlEl.classList.toggle('dark');
-          const isDark = htmlEl.classList.contains('dark');
-          localStorage.setItem('theme', isDark ? 'dark' : 'light');
-          updateIcons();
-        });
-      }
-    })();
-  </script>
-
-  <script>
-    if ('serviceWorker' in navigator && (window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('{% static "sw.js" %}')
-          .catch(function(err) { console.warn('PWA non enregistré:', err); });
-      });
-    }
-  </script>
+    <!-- Footer Links -->
+    <div class="mt-8 text-center flex items-center justify-center gap-4 text-xs text-slate-600">
+      <a href="{% url 'produits:liste' %}" class="hover:text-white transition-colors">← Retour à la vitrine</a>
+      <span class="w-1 h-1 rounded-full bg-slate-800"></span>
+      <span>TechShop © 2026</span>
+    </div>
+  </div>
 
 </body>
 </html>

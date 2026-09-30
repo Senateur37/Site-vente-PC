@@ -1,43 +1,40 @@
 {% extends "dashboard/base_admin.html" %}
 {% load produit_tags %}
-{% block title %}Clients — TechShop{% endblock %}
+{% block title %}Clients — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
 {% block content %}
 
-<div class="flex items-center justify-between mb-6">
+<div class="mb-5">
   <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Clients</h1>
+  <p class="text-sm text-slate-500">{{ total }} client{{ total|pluralize }} — regroupés par numéro de téléphone (commandes avec ou sans compte).</p>
 </div>
 
-<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-x-auto">
-  {% if stats %}
-  <table class="w-full border-collapse text-sm">
-    <thead>
-      <tr class="border-b border-slate-200 dark:border-slate-700 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 text-left">
-        <th class="py-3 px-4">Client</th>
-        <th class="py-3 px-4">Email</th>
-        <th class="py-3 px-4">Commandes</th>
-        <th class="py-3 px-4">Total dépensé</th>
-        <th class="py-3 px-4">Dernière commande</th>
-      </tr>
+<form method="get" class="dash-card p-3 md:p-4 mb-5 flex gap-2">
+  <input type="search" name="q" value="{{ f.q }}" placeholder="Rechercher un nom, un téléphone, un email…" class="dash-input" aria-label="Recherche">
+  <button class="dash-btn-primary">Rechercher</button>
+  {% if f.q %}<a href="{% url 'dashboard:clients_liste' %}" class="dash-btn-ghost">✕</a>{% endif %}
+</form>
+
+{% if clients %}
+<div class="dash-card overflow-x-auto">
+  <table class="w-full min-w-[640px]">
+    <thead class="border-b border-slate-200 dark:border-slate-700">
+      <tr><th class="dash-th">Client</th><th class="dash-th">Contact</th><th class="dash-th">Commandes</th><th class="dash-th">Total dépensé</th><th class="dash-th">Dernière commande</th></tr>
     </thead>
-    <tbody>
-      {% for s in stats %}
-      <tr class="border-b border-slate-100 dark:border-slate-700">
-        <td class="py-3 px-4 font-medium text-slate-900 dark:text-white">{{ s.client.username }}</td>
-        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ s.client.email|default:'—' }}</td>
-        <td class="py-3 px-4 text-slate-600 dark:text-slate-300">{{ s.nb_commandes }}</td>
-        <td class="py-3 px-4 font-semibold text-accent">{{ s.total_depense|prix_fcfa }} FCFA</td>
-        <td class="py-3 px-4 text-slate-500 dark:text-slate-400">
-          {% if s.derniere_commande %}
-            #{{ s.derniere_commande.id }} — {{ s.derniere_commande.date_creation|date:"d/m/Y" }}
-          {% else %}—{% endif %}
-        </td>
+    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+      {% for c in clients %}
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+        <td class="dash-td"><p class="font-medium text-slate-900 dark:text-white">{{ c.nom }}</p>{% if c.compte %}<p class="text-xs text-slate-400">Compte : {{ c.compte }}</p>{% endif %}</td>
+        <td class="dash-td"><p>{{ c.telephone }}</p><p class="text-xs text-slate-400">{{ c.email|default:'—' }}</p></td>
+        <td class="dash-td">{{ c.nb_commandes }}</td>
+        <td class="dash-td font-semibold text-accent whitespace-nowrap">{{ c.total_depense|prix_fcfa }} FCFA</td>
+        <td class="dash-td"><a href="{% url 'dashboard:commande_detail' c.derniere.id %}" class="hover:text-accent">#{{ c.derniere.id }} — {{ c.derniere.date_creation|date:"d/m/Y" }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  {% else %}
-  <p class="p-8 text-sm text-slate-400">Aucun client inscrit pour le moment.</p>
-  {% endif %}
 </div>
-
+{% include "dashboard/_pagination.html" %}
+{% else %}
+<div class="dash-card p-10 text-center text-slate-500">Aucun client pour le moment.</div>
+{% endif %}
 {% endblock %}

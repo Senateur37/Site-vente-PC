@@ -19,7 +19,11 @@ def validate_image_file(value):
             raise ValidationError(f"Type MIME '{value.content_type}' non autorisé.")
     
     # Vérification du fichier image
-    if value.size > 0:
+    try:
+        size = value.size
+    except (FileNotFoundError, OSError):
+        size = 0
+    if size > 0:
         if ext not in ['.svg', '.avif']:
             try:
                 value.seek(0)
@@ -30,7 +34,7 @@ def validate_image_file(value):
                 raise ValidationError("Le fichier ne semble pas être une image valide.")
     
     # Limite de taille : 5 Mo
-    if value.size > 5 * 1024 * 1024:
+    if size > 5 * 1024 * 1024:
         raise ValidationError("L'image ne doit pas dépasser 5 Mo.")
 
 
@@ -151,3 +155,24 @@ class SiteSettings(models.Model):
         self.id = 1
         super().save(*args, **kwargs)
         cache.delete(self.CACHE_KEY)
+
+
+class ActiviteLog(models.Model):
+    """Journal d'activité du dashboard (qui a fait quoi, quand)."""
+    utilisateur = models.ForeignKey(
+        'auth.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='activites',
+    )
+    nom_utilisateur = models.CharField(max_length=150, blank=True)
+    action = models.CharField(max_length=40, db_index=True)
+    objet = models.CharField(max_length=200, blank=True)
+    detail = models.TextField(blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-date', '-id']
+        verbose_name = "Activité"
+        verbose_name_plural = "Journal d'activité"
+
+    def __str__(self):
+        return f"{self.nom_utilisateur} — {self.action} — {self.objet}"

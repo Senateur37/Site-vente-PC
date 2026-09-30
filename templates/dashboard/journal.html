@@ -1,0 +1,53 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Journal d'activité — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+{% block content %}
+
+<div class="mb-5">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Journal d'activité</h1>
+  <p class="text-sm text-slate-500">{{ total }} événement{{ total|pluralize }} — qui a fait quoi, et quand.</p>
+</div>
+
+<form method="get" class="dash-card p-3 md:p-4 mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6 items-end">
+  <label class="lg:col-span-2 text-xs font-medium text-slate-500">Recherche
+    <input type="search" name="q" value="{{ f.q }}" placeholder="Objet, détail…" class="dash-input mt-1">
+  </label>
+  <label class="text-xs font-medium text-slate-500">Membre
+    <select name="utilisateur" class="dash-input mt-1"><option value="">Tous</option>
+      {% for m in membres %}<option value="{{ m.id }}" {% if f.utilisateur == m.id|stringformat:"s" %}selected{% endif %}>{{ m.username }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Action
+    <select name="action" class="dash-input mt-1"><option value="">Toutes</option>
+      {% for a in actions %}<option value="{{ a }}" {% if f.action == a %}selected{% endif %}>{{ a|capfirst }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="text-xs font-medium text-slate-500">Du<input type="date" name="du" value="{{ f.du }}" class="dash-input mt-1"></label>
+  <label class="text-xs font-medium text-slate-500">Au<input type="date" name="au" value="{{ f.au }}" class="dash-input mt-1"></label>
+  <div class="flex gap-2 sm:col-span-2 lg:col-span-6 justify-end">
+    {% if querystring %}<a href="{% url 'dashboard:journal' %}" class="dash-btn-ghost">Réinitialiser</a>{% endif %}
+    <button class="dash-btn-primary">Filtrer</button>
+  </div>
+</form>
+
+{% if activites %}
+<div class="dash-card overflow-x-auto">
+  <table class="w-full min-w-[640px]">
+    <thead class="border-b border-slate-200 dark:border-slate-700"><tr><th class="dash-th">Date</th><th class="dash-th">Membre</th><th class="dash-th">Action</th><th class="dash-th">Objet</th><th class="dash-th">Détail</th></tr></thead>
+    <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+      {% for a in activites %}
+      <tr>
+        <td class="dash-td whitespace-nowrap">{{ a.date|date:"d/m/Y H:i" }}</td>
+        <td class="dash-td font-medium text-slate-900 dark:text-white">{{ a.nom_utilisateur|default:"—" }}</td>
+        <td class="dash-td"><span class="badge bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">{{ a.action }}</span></td>
+        <td class="dash-td">{{ a.objet }}</td>
+        <td class="dash-td text-slate-500 max-w-xs truncate" title="{{ a.detail }}">{{ a.detail }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "dashboard/_pagination.html" %}
+{% else %}
+<div class="dash-card p-10 text-center text-slate-500">Aucune activité enregistrée pour ces critères.</div>
+{% endif %}
+{% endblock %}
