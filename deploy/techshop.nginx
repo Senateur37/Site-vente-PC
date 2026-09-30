@@ -1,13 +1,24 @@
-# Configuration Nginx pour TechShop
+# Configuration Nginx pour TechShop (front React + API Django)
 # Remplacer example.com par votre domaine
+#
+# Le build React (frontend/dist) est servi directement par Nginx ;
+# seules l'API, le dashboard, l'admin, les médias et le webhook de paiement passent par Django.
+
+upstream techshop_django {
+    server unix:/home/techshop/techshop/techshop.sock;
+}
 
 server {
     listen 80;
     server_name example.com www.example.com;
 
     client_max_body_size 10M;
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
 
-    # Fichiers statiques
+    root /home/techshop/techshop/frontend/dist;
+
+    # Fichiers statiques Django (dashboard, admin)
     location /static/ {
         alias /home/techshop/techshop/staticfiles/;
     }
@@ -17,12 +28,24 @@ server {
         alias /home/techshop/techshop/media/;
     }
 
-    # Application Django via Gunicorn
-    location / {
-        proxy_pass http://unix:/home/techshop/techshop/techshop.sock;
+    # Assets du build React : fichiers hachés, cache longue durée
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Backend Django
+    location ~ ^/(api|dashboard|admin|paiement|sitemap\.xml|robots\.txt)(/|$) {
+        proxy_pass http://techshop_django;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Front React : toute autre URL renvoie index.html (routage côté client)
+    location / {
+        try_files $uri /index.html;
     }
 }

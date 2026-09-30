@@ -33,9 +33,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'rest_framework',
     'produits',
     'commandes',
     'dashboard',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -143,6 +145,17 @@ CINETPAY_API_KEY = os.getenv('CINETPAY_API_KEY', '')
 CINETPAY_SITE_ID = os.getenv('CINETPAY_SITE_ID', '')
 CINETPAY_ACTIF = bool(CINETPAY_API_KEY and CINETPAY_SITE_ID)
 SITE_URL = os.getenv('SITE_URL', '').rstrip('/')
+
+# API JSON consommée par le front React (dossier frontend/)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ['api.auth.SessionCsrfAuthentication'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'COERCE_DECIMAL_TO_STRING': False,
+}
+# URL publique du front React (pour les retours de paiement) ; vide = même domaine
+FRONTEND_URL = os.getenv('FRONTEND_URL', '').rstrip('/')
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'

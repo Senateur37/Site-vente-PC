@@ -1,5 +1,4 @@
 from django.contrib.sitemaps import Sitemap
-from django.urls import reverse
 from .models import Produit
 
 
@@ -15,11 +14,12 @@ class ProduitSitemap(Sitemap):
 
 
 class PagesStatiquesSitemap(Sitemap):
+    """Pages du front React (routes du SPA)."""
     changefreq = "monthly"
     priority = 0.5
 
     def items(self):
-        return ['produits:liste', 'produits:contact', 'produits:apropos']
+        return ['/', '/boutique', '/contact', '/a-propos']
 
     def location(self, item):
-        return reverse(item)
+        return item

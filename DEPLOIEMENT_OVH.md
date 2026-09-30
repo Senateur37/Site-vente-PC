@@ -142,3 +142,24 @@ Voir `.env.example`. Points clés :
 ```bash
 python manage.py test
 ```
+
+## Front-end React (Vite)
+
+Le site public est une application React dans `frontend/`. Django ne sert plus que l'API (`/api/`), le dashboard (`/dashboard/`), l'admin et le webhook de paiement.
+
+```bash
+cd frontend
+npm ci
+npm run build        # produit frontend/dist, servi par Nginx
+```
+
+Mettre à jour Nginx avec `deploy/techshop.nginx` (il sert `frontend/dist` et relaie le reste à Gunicorn), puis `sudo nginx -t && sudo systemctl reload nginx`. Après chaque modification du front : `npm run build`.
+
+### Développement local
+
+```bash
+python manage.py runserver          # terminal 1 : API sur :8000
+cd frontend && npm run dev          # terminal 2 : site sur http://localhost:5173
+```
+
+Vite relaie `/api`, `/media`, `/static`, `/dashboard` vers Django (voir `frontend/vite.config.js`), donc cookies de session et CSRF fonctionnent sans configuration. Tests : `npm test` (front) et `python manage.py test` (API).
