@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, query } from '../api'
 import { useShop } from '../context/ShopContext'
+import Icon from './Icon'
+import ProductImage from './Media'
 
-export default function SearchBox() {
+export default function SearchBox({ className = '', autoFocus = false, onNavigate }) {
   const [q, setQ] = useState('')
   const [resultats, setResultats] = useState(null)
   const [ouvert, setOuvert] = useState(false)
@@ -29,44 +31,43 @@ export default function SearchBox() {
     return () => document.removeEventListener('click', fermer)
   }, [])
 
+  const terminer = () => { setOuvert(false); onNavigate?.() }
   const valider = (e) => {
     e.preventDefault()
-    setOuvert(false)
+    terminer()
     navigate(`/boutique${query({ q: q.trim() })}`)
   }
 
   return (
-    <form ref={conteneur} onSubmit={valider} role="search" className="relative flex order-last md:order-none w-full md:w-auto mt-2 md:mt-0">
+    <form ref={conteneur} onSubmit={valider} role="search" className={`relative ${className}`}>
+      <Icon nom="search" className="w-[18px] h-[18px] absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
       <input
-        type="search" value={q} onChange={(e) => setQ(e.target.value)}
+        type="search" value={q} onChange={(e) => setQ(e.target.value)} autoFocus={autoFocus}
         onFocus={() => resultats && setOuvert(true)}
         onKeyDown={(e) => e.key === 'Escape' && setOuvert(false)}
-        placeholder="Rechercher un produit..." autoComplete="off" aria-label="Rechercher un produit"
-        className="bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-sm rounded-l-full px-5 py-2.5 w-full md:w-64 lg:w-80 focus:outline-none focus:ring-2 focus:ring-accent/50 dark:text-slate-100 dark:placeholder-slate-400"
+        placeholder="Rechercher un ordinateur, une marque…" autoComplete="off" aria-label="Rechercher un produit"
+        className="w-full rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 pl-11 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 transition focus:outline-none focus:bg-white dark:focus:bg-white/10 focus:border-accent focus:ring-4 focus:ring-accent/10"
       />
-      <button type="submit" aria-label="Rechercher" className="bg-accent text-white px-5 rounded-r-full hover:bg-accentdark shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </button>
-
       {ouvert && resultats && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden z-50 text-left">
+        <div className="absolute left-0 right-0 top-full mt-2 card !rounded-2xl shadow-premium overflow-hidden z-50 animate-fade-in">
           {resultats.length === 0 ? (
-            <p className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">Aucun résultat</p>
+            <p className="px-4 py-5 text-sm text-slate-500 text-center">Aucun résultat pour « {q} »</p>
           ) : (
             <>
-              {resultats.map((r) => (
-                <Link
-                  key={r.slug} to={`/produit/${r.slug}`} onClick={() => setOuvert(false)}
-                  className="flex items-center justify-between gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
-                >
-                  <span className="truncate">{r.nom}</span>
-                  <span className="text-accent font-semibold shrink-0 whitespace-nowrap">{prix(r.prix)}</span>
-                </Link>
-              ))}
-              <button type="submit" className="block w-full text-left px-4 py-2 text-xs text-accent font-medium border-t border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700">
-                Voir tous les résultats →
+              <ul className="p-2">
+                {resultats.map((r) => (
+                  <li key={r.slug}>
+                    <Link to={`/produit/${r.slug}`} onClick={terminer}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                      <ProductImage src={r.image} nom={r.nom} className="w-11 h-11 rounded-lg shrink-0 overflow-hidden" />
+                      <span className="flex-1 min-w-0 text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{r.nom}</span>
+                      <span className="text-sm font-bold text-accent shrink-0 whitespace-nowrap">{prix(r.prix)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <button type="submit" className="flex items-center justify-between w-full px-4 py-3 text-xs font-bold text-accent border-t border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5">
+                Voir tous les résultats <Icon nom="arrow" className="w-4 h-4" />
               </button>
             </>
           )}

@@ -12,6 +12,8 @@ export function ShopProvider({ children }) {
   const [erreurSite, setErreurSite] = useState(false)
   const [panier, setPanier] = useState(PANIER_VIDE)
   const [toasts, setToasts] = useState([])
+  const [panierOuvert, setPanierOuvert] = useState(false)
+  const [menuOuvert, setMenuOuvert] = useState(false)
   const [sombre, setSombre] = useState(() => document.documentElement.classList.contains('dark'))
 
   useEffect(() => {
@@ -71,8 +73,12 @@ export function ShopProvider({ children }) {
     }
   }, [notifier])
 
-  const ajouter = useCallback((produitId, quantite = 1) =>
-    actionPanier(() => api.post('/api/panier/ajouter/', { produit_id: produitId, quantite })), [actionPanier])
+  // Ajout au panier : le panier latéral s'ouvre pour confirmer l'action (pas de toast redondant)
+  const ajouter = useCallback(async (produitId, quantite = 1) => {
+    const ok = await actionPanier(() => api.post('/api/panier/ajouter/', { produit_id: produitId, quantite }), true)
+    if (ok) setPanierOuvert(true)
+    return ok
+  }, [actionPanier])
   const modifier = useCallback((produitId, quantite) =>
     actionPanier(() => api.post(`/api/panier/${produitId}/modifier/`, { quantite }), true), [actionPanier])
   const supprimer = useCallback((produitId) =>
@@ -80,9 +86,9 @@ export function ShopProvider({ children }) {
   const rafraichirPanier = useCallback(() => api.get('/api/panier/').then(setPanier).catch(() => {}), [])
 
   const valeur = useMemo(() => ({
-    site, erreurSite, panier, toasts, sombre, monnaie, prix,
+    site, erreurSite, panier, toasts, sombre, monnaie, prix, panierOuvert, setPanierOuvert, menuOuvert, setMenuOuvert,
     notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier,
-  }), [site, erreurSite, panier, toasts, sombre, monnaie, prix, notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier])
+  }), [site, erreurSite, panier, toasts, sombre, monnaie, prix, panierOuvert, menuOuvert, notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier])
 
   return <ShopContext.Provider value={valeur}>{children}</ShopContext.Provider>
 }
