@@ -6,12 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   {% block meta_description %}{% if site_settings.site_description %}<meta name="description" content="{{ site_settings.site_description }}">{% endif %}{% endblock %}
   <title>{% block title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}</title>
+  <meta name="theme-color" content="#2563eb">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site_settings.site_nom|default:'TechShop' }}">
+  <meta property="og:title" content="{% block og_title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}">
+  {% if site_settings.site_description %}<meta property="og:description" content="{{ site_settings.site_description }}">{% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
           colors: {
             accent: '#2563eb',
             accentdark: '#1d4ed8',
@@ -22,14 +31,20 @@
     }
   </script>
   <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
     img { max-width: 100%; height: auto; }
+    :focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    main { animation: fade-up .4s ease-out both; }
+    @media (prefers-reduced-motion: reduce) { main { animation: none; } html { scroll-behavior: auto; } }
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col overflow-x-hidden">
 
-  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
+  <header class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-700/80 sticky top-0 z-50">
     <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4">
       <a href="{% url 'produits:liste' %}" class="flex items-center gap-2 shrink-0">
         {% if site_settings and site_settings.logo %}
@@ -90,17 +105,38 @@
 
   {% block extra_js %}{% endblock %}
 
-  <footer class="border-t border-slate-200 dark:border-slate-700 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
-    <div class="mb-2 flex items-center justify-center gap-4">
-      <a href="{% url 'produits:liste' %}" class="hover:text-accent">Boutique</a>
-      <a href="{% url 'produits:apropos' %}" class="hover:text-accent">À propos</a>
-      <a href="{% url 'produits:contact' %}" class="hover:text-accent">Contact</a>
+  <footer class="mt-8 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50">
+    <div class="max-w-6xl mx-auto px-4 md:px-6 py-10 grid gap-8 sm:grid-cols-2 md:grid-cols-4 text-sm">
+      <div class="sm:col-span-2 md:col-span-1">
+        <p class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ site_settings.site_nom|default:'TechShop' }}</p>
+        <p class="text-slate-500 dark:text-slate-400 leading-relaxed">{{ site_settings.site_description|default:"Ordinateurs, accessoires et composants garantis, livrés partout à Bamako." }}</p>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-900 dark:text-white mb-3">Boutique</p>
+        <ul class="space-y-2 text-slate-500 dark:text-slate-400">
+          <li><a href="{% url 'produits:liste' %}" class="hover:text-accent">Tous les produits</a></li>
+          <li><a href="{% url 'commandes:voir_panier' %}" class="hover:text-accent">Mon panier</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-900 dark:text-white mb-3">Informations</p>
+        <ul class="space-y-2 text-slate-500 dark:text-slate-400">
+          <li><a href="{% url 'produits:apropos' %}" class="hover:text-accent">À propos</a></li>
+          <li><a href="{% url 'produits:contact' %}" class="hover:text-accent">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-900 dark:text-white mb-3">Nos engagements</p>
+        <ul class="space-y-2 text-slate-500 dark:text-slate-400">
+          <li>✓ Paiement à la livraison</li>
+          <li>✓ Produits garantis</li>
+          <li>✓ Livraison à Bamako</li>
+        </ul>
+      </div>
     </div>
-    {% if site_settings and site_settings.copyright_texte %}
-      {{ site_settings.copyright_texte }}
-    {% else %}
-      &copy; {% now "Y" %} SACKOTECH — Ordinateurs &amp; accessoires. Paiement à la livraison.
-    {% endif %}
+    <div class="border-t border-slate-200 dark:border-slate-800 py-4 text-center text-xs text-slate-400 dark:text-slate-500 px-4">
+      {% if site_settings and site_settings.copyright_texte %}{{ site_settings.copyright_texte }}{% else %}&copy; {% now "Y" %} SACKOTECH — Tous droits réservés.{% endif %}
+    </div>
   </footer>
 
   <script>

@@ -17,11 +17,20 @@
       <img src="{{ site_settings.banniere.url }}" alt="Bannière" class="w-full h-auto object-cover rounded-xl" loading="lazy">
     </div>
   {% else %}
-    <div class="relative mb-6 md:mb-8 rounded-xl overflow-hidden bg-gradient-to-r from-accent to-purple-600 text-white">
-      <div class="relative z-10 p-5 md:p-8">
-        <h2 class="text-lg md:text-2xl font-bold mb-1">Le meilleur du matériel informatique, au meilleur prix</h2>
-        <p class="text-sm md:text-base opacity-90">Ordinateurs, accessoires et composants garantis, livrés partout à Bamako.</p>
+    <div class="relative mb-6 md:mb-8 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-accent text-white">
+      <div class="absolute -right-16 -top-16 w-72 h-72 rounded-full bg-white/10 blur-3xl"></div>
+      <div class="absolute -left-10 -bottom-20 w-64 h-64 rounded-full bg-purple-500/20 blur-3xl"></div>
+      <div class="relative z-10 p-6 md:p-12 max-w-2xl">
+        <span class="inline-block text-[11px] font-semibold uppercase tracking-wider bg-white/15 rounded-full px-3 py-1 mb-4">Matériel informatique · Bamako</span>
+        <h1 class="text-2xl md:text-4xl font-extrabold leading-tight mb-3">Le meilleur du matériel informatique, au meilleur prix</h1>
+        <p class="text-sm md:text-base text-blue-100 mb-6">Ordinateurs, accessoires et composants garantis, livrés partout à Bamako.</p>
+        <a href="#tous-les-produits" class="inline-flex items-center gap-2 bg-white text-slate-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-blue-50 transition">Découvrir la boutique <span aria-hidden="true">→</span></a>
       </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 md:mb-8 text-sm">
+      <div class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3"><span class="text-xl">🚚</span><div><p class="font-semibold text-slate-900 dark:text-white">Livraison rapide</p><p class="text-xs text-slate-500 dark:text-slate-400">Partout à Bamako</p></div></div>
+      <div class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3"><span class="text-xl">💳</span><div><p class="font-semibold text-slate-900 dark:text-white">Paiement à la livraison</p><p class="text-xs text-slate-500 dark:text-slate-400">Payez à réception</p></div></div>
+      <div class="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3"><span class="text-xl">🛡️</span><div><p class="font-semibold text-slate-900 dark:text-white">Produits garantis</p><p class="text-xs text-slate-500 dark:text-slate-400">Qualité vérifiée</p></div></div>
     </div>
   {% endif %}
 {% endif %}
@@ -130,7 +139,7 @@
 {% endfor %}
 
 <!-- Tous les produits -->
-<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+<div id="tous-les-produits" class="scroll-mt-24 flex flex-wrap items-center justify-between gap-3 mb-5">
   <div>
     <h2 class="text-lg font-bold text-slate-900 dark:text-white">Tous les produits</h2>
     <p class="text-xs text-slate-400">{% with total=produits.paginator.count %}{{ total }} produit{{ total|pluralize }}{% endwith %}</p>
