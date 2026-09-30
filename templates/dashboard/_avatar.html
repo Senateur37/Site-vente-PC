@@ -1,0 +1,1 @@
+{% if photo %}<img src="{{ photo }}" alt="" class="{{ taille }} rounded-full object-cover shadow-md ring-2 ring-white/60 dark:ring-white/10">{% else %}<span class="{{ taille }} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md">{{ initiale|make_list|first|upper }}</span>{% endif %}

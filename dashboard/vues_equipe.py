@@ -32,8 +32,8 @@ def _admins_actifs_hors(user):
 @acces('equipe')
 def equipe_liste(request):
     membres = [
-        {'user': u, 'role': role_de(u)}
-        for u in User.objects.filter(is_staff=True).prefetch_related('groups').order_by('-is_active', 'username')
+        {'user': u, 'role': role_de(u), 'photo': u.profil.photo.url if hasattr(u, 'profil') and u.profil.photo else ''}
+        for u in User.objects.filter(is_staff=True).select_related('profil').prefetch_related('groups').order_by('-is_active', 'username')
     ]
     return render(request, 'dashboard/equipe_liste.html', {
         'membres': membres, 'roles': [(nom, sorted(DOMAINES[d] for d in doms)) for nom, doms in ROLES.items()],

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import stats, views, vues_catalogue, vues_commandes, vues_contenu, vues_equipe
+from . import stats, views, vues_catalogue, vues_commandes, vues_contenu, vues_equipe, vues_profil
 
 app_name = 'dashboard'
 
@@ -58,6 +58,9 @@ urlpatterns = [
     path('codes-promo/ajouter/', vues_contenu.code_promo_editer, name='code_promo_ajouter'),
     path('codes-promo/<int:pk>/modifier/', vues_contenu.code_promo_editer, name='code_promo_modifier'),
     path('codes-promo/<int:pk>/supprimer/', vues_contenu.code_promo_supprimer, name='code_promo_supprimer'),
+
+    # Profil du membre connecté
+    path('profil/', vues_profil.profil, name='profil'),
 
     # Équipe, rôles et journal d'activité
     path('equipe/', vues_equipe.equipe_liste, name='equipe_liste'),

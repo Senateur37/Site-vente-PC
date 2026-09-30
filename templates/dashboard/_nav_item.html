@@ -1,9 +1,12 @@
 <a href="{% url url %}"
-   class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition {% if actif %}bg-accent/10 text-accent{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700{% endif %}"
+   class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
+          {% if actif %}bg-blue-600 text-white shadow-md shadow-blue-500/20{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white{% endif %}"
    {% if actif %}aria-current="page"{% endif %}>
-  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0 {% if not actif %}group-hover:scale-110 transition-transform{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
     <path stroke-linecap="round" stroke-linejoin="round" d="{{ icone }}"/>
   </svg>
   <span class="truncate">{{ label }}</span>
-  {% if badge %}<span class="ml-auto text-[10px] font-bold {{ couleur_badge|default:'bg-red-500' }} text-white px-2 py-0.5 rounded-full">{{ badge }}</span>{% endif %}
+  {% if badge %}
+    <span class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full {{ couleur_badge|default:'bg-slate-200 text-slate-700' }}">{{ badge }}</span>
+  {% endif %}
 </a>

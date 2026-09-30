@@ -176,3 +176,30 @@ class ActiviteLog(models.Model):
 
     def __str__(self):
         return f"{self.nom_utilisateur} — {self.action} — {self.objet}"
+
+
+def valider_photo_profil(fichier):
+    """Photo de profil : JPEG, PNG, WebP ou GIF uniquement (pas de SVG, qui peut contenir du script)."""
+    ext = os.path.splitext(fichier.name)[1].lower()
+    if ext not in ('.jpg', '.jpeg', '.png', '.webp', '.gif'):
+        raise ValidationError("Format non accepté. Utilisez une image JPEG, PNG, WebP ou GIF.")
+    if fichier.size > 5 * 1024 * 1024:
+        raise ValidationError("L'image ne doit pas dépasser 5 Mo.")
+    try:
+        fichier.seek(0)
+        Image.open(fichier).verify()
+        fichier.seek(0)
+    except Exception:
+        raise ValidationError("Le fichier ne semble pas être une image valide.")
+
+
+class ProfilStaff(models.Model):
+    """Informations de profil d'un membre de l'équipe (photo affichée dans le dashboard)."""
+    utilisateur = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profil')
+    photo = models.ImageField(upload_to='profils/', blank=True, null=True, validators=[valider_photo_profil])
+
+    class Meta:
+        verbose_name = "Profil"
+
+    def __str__(self):
+        return f"Profil de {self.utilisateur.username}"

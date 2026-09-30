@@ -36,6 +36,10 @@ def droits_dashboard(request):
         return {}
     acces = domaines_de(user)
     contexte = {'acces': acces, 'role_dashboard': role_de(user)}
+    try:
+        contexte['photo_profil'] = user.profil.photo.url if user.profil.photo else ''
+    except Exception:   # pas encore de fiche profil
+        contexte['photo_profil'] = ''
     if 'commandes' in acces:
         from commandes.models import Commande
         contexte['nb_a_traiter_menu'] = Commande.objects.filter(statut='en_attente').count()

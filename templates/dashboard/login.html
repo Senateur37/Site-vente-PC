@@ -5,143 +5,155 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="{% static 'manifest.json' %}">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#030712">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/icon-192.png' %}">
-  <title>Premium Admin | TechShop</title>
+  <title>Connexion | TechShop Admin</title>
   <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
     
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #000000;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(29, 78, 216, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      font-family: 'Outfit', sans-serif;
+      background-color: #030712;
+      overflow: hidden;
     }
 
-    .premium-card {
-      background: rgba(10, 10, 10, 0.6);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.5), 0 30px 60px -12px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-
-    .premium-input {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
-    }
-    
-    .premium-input:focus {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.1), inset 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .premium-button {
-      background: #ffffff;
-      color: #000000;
-      border: 1px solid rgba(255, 255, 255, 1);
-      box-shadow: 0 4px 14px 0 rgba(255, 255, 255, 0.25);
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-    
-    .premium-button:hover {
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .glow-line {
+    /* Animated Glowing Blobs */
+    .blob {
       position: absolute;
-      top: 0;
-      left: 10%;
-      right: 10%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-      opacity: 0.5;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.6;
+      animation: blob-bounce 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, #7e22ce, #3b82f6); }
+    .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, #db2777, #4f46e5); animation-delay: -5s; }
+    
+    @keyframes blob-bounce {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(5%, 10%) scale(1.1); }
+      100% { transform: translate(-5%, -10%) scale(0.9); }
+    }
+
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Modern Inputs */
+    .modern-input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modern-input:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(168, 85, 247, 0.5); /* purple-500 */
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 0 0 1px rgba(168, 85, 247, 0.2);
+      transform: translateY(-2px);
     }
     
-    .animate-float {
-      animation: float 6s ease-in-out infinite;
+    .modern-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Animated Gradient Button */
+    .gradient-btn {
+      background-size: 200% 200%;
+      background-image: linear-gradient(to right, #4f46e5, #c026d3, #db2777, #4f46e5);
+      animation: gradient-shift 4s ease infinite;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px -5px rgba(192, 38, 211, 0.4);
+    }
+    .gradient-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 15px 30px -5px rgba(192, 38, 211, 0.6);
     }
     
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Entrance Animation */
+    .fade-up {
+      animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
-<body class="text-slate-300 min-h-screen flex flex-col items-center justify-center p-4 selection:bg-white/30 selection:text-white">
+<body class="min-h-screen flex items-center justify-center relative px-4">
 
-  <!-- Logo Premium -->
-  <div class="mb-10 text-center z-10 animate-float">
-    <a href="{% url 'produits:liste' %}" class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl mb-4 group hover:bg-white/10 transition-all duration-500">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white group-hover:scale-110 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-      </svg>
-    </a>
-    <h1 class="text-3xl font-bold tracking-tight text-white flex items-center justify-center gap-1">
-      TECH<span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-400 to-white">SHOP</span>
-    </h1>
-    <p class="text-xs font-medium text-slate-500 tracking-[0.2em] uppercase mt-2">Admin Portal</p>
-  </div>
+  <!-- Animated Background -->
+  <div class="blob blob-1 rounded-full"></div>
+  <div class="blob blob-2 rounded-full"></div>
 
-  <div class="w-full max-w-[400px] z-10">
-    <div class="premium-card rounded-2xl p-8 relative overflow-hidden">
-      <!-- Glow Decoratif Top -->
-      <div class="glow-line"></div>
+  <!-- Main Container -->
+  <div class="w-full max-w-[420px] relative z-10 fade-up">
+    
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-white/5 border border-white/10 shadow-2xl backdrop-blur-md mb-6 rotate-3 hover:rotate-0 transition-transform duration-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">TECH<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">SHOP</span></h1>
+      <p class="text-sm font-medium text-slate-400/80 uppercase tracking-[0.25em]">Control Panel</p>
+    </div>
 
+    <!-- Login Card -->
+    <div class="glass-card rounded-[2rem] p-8 sm:p-10 relative">
+      
       <!-- Messages -->
       {% if messages %}
         <div class="mb-6 space-y-3">
         {% for message in messages %}
-          <div class="px-4 py-3 rounded-lg text-xs font-medium flex items-center gap-3 border
-            {% if message.tags == 'error' %}bg-red-500/10 text-red-400 border-red-500/20{% endif %}
-            {% if message.tags == 'success' %}bg-emerald-500/10 text-emerald-400 border-emerald-500/20{% endif %}">
-            {% if message.tags == 'error' %}
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            {% else %}
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            {% endif %}
+          <div class="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 border backdrop-blur-md
+            {% if message.tags == 'error' %}bg-red-500/10 text-red-300 border-red-500/30{% endif %}
+            {% if message.tags == 'success' %}bg-emerald-500/10 text-emerald-300 border-emerald-500/30{% endif %}">
             <span>{{ message }}</span>
           </div>
         {% endfor %}
         </div>
       {% endif %}
 
-      <form method="post" class="space-y-5">
+      <form method="post" class="space-y-6">
         {% csrf_token %}
         <input type="hidden" name="next" value="{{ request.GET.next }}">
         
-        <div>
-          <label for="username" class="block text-xs font-medium text-slate-400 mb-2">Identifiant</label>
+        <div class="space-y-2">
+          <label for="username" class="block text-xs font-semibold text-slate-300 uppercase tracking-widest pl-1">Identifiant</label>
           <input type="text" name="username" id="username" required autocomplete="username" autofocus
-                 placeholder="nom.utilisateur"
-                 class="premium-input block w-full px-4 py-3 text-sm text-white rounded-lg focus:outline-none placeholder-slate-600" />
+                 placeholder="admin"
+                 class="modern-input block w-full px-5 py-4 text-base rounded-2xl outline-none" />
         </div>
 
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <label for="password" class="block text-xs font-medium text-slate-400">Mot de passe</label>
-            <a href="{% url 'dashboard:mot_de_passe_oublie' %}" class="text-xs text-slate-500 hover:text-white transition-colors">Récupération</a>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between pl-1">
+            <label for="password" class="block text-xs font-semibold text-slate-300 uppercase tracking-widest">Mot de passe</label>
+            <a href="{% url 'dashboard:mot_de_passe_oublie' %}" class="text-xs font-medium text-purple-400 hover:text-pink-400 transition-colors">Oublié ?</a>
           </div>
           <input type="password" name="password" id="password" required autocomplete="current-password"
                  placeholder="••••••••"
-                 class="premium-input block w-full px-4 py-3 text-sm text-white rounded-lg focus:outline-none placeholder-slate-600" />
+                 class="modern-input block w-full px-5 py-4 text-base rounded-2xl outline-none" />
         </div>
 
-        <div class="pt-2">
+        <div class="pt-4">
           <button type="submit"
-                  class="premium-button w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold rounded-lg">
+                  class="gradient-btn w-full flex items-center justify-center gap-2 py-4 px-6 text-base font-bold text-white rounded-2xl shadow-lg">
             S'authentifier
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>
           </button>
@@ -149,11 +161,11 @@
       </form>
     </div>
 
-    <!-- Footer Links -->
-    <div class="mt-8 text-center flex items-center justify-center gap-4 text-xs text-slate-600">
-      <a href="{% url 'produits:liste' %}" class="hover:text-white transition-colors">← Retour à la vitrine</a>
-      <span class="w-1 h-1 rounded-full bg-slate-800"></span>
-      <span>TechShop © 2026</span>
+    <div class="mt-8 text-center">
+      <a href="{% url 'produits:liste' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Retour à la boutique
+      </a>
     </div>
   </div>
 

@@ -5,7 +5,7 @@ from django import forms
 from commandes.models import CodePromo
 from produits.models import SectionAccueil
 
-from .models import Engagement, SiteSettings
+from .models import Engagement, SiteSettings, valider_photo_profil
 
 CLASSE = 'dash-input'
 HEX = re.compile(r'^#[0-9a-fA-F]{6}$')
@@ -151,3 +151,16 @@ class MembreModifierForm(StyleMixin, forms.ModelForm):
         if p:
             password_validation.validate_password(p, self.instance)
         return p
+
+
+class ProfilForm(StyleMixin, forms.ModelForm):
+    photo = forms.ImageField(
+        label="Photo de profil", required=False, validators=[valider_photo_profil],
+        widget=forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png,image/webp,image/gif'}),
+        help_text="JPEG, PNG, WebP ou GIF, 5 Mo maximum. Elle sera recadrée en carré.")
+    supprimer_photo = forms.BooleanField(label="Supprimer ma photo actuelle", required=False)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        labels = {'first_name': "Prénom", 'last_name': "Nom", 'email': "Email"}

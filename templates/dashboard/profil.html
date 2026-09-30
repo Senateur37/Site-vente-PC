@@ -1,0 +1,112 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}Mon profil — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+{% block content %}
+
+<div class="mb-7">
+  <h1 class="dash-title">Mon profil</h1>
+  <p class="dash-subtitle">Votre photo et vos informations, visibles par l'équipe dans le dashboard.</p>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6 max-w-5xl">
+
+  <!-- Carte d'identité + photo -->
+  <div class="dash-card p-6 text-center h-fit">
+    <div class="relative inline-block mb-4">
+      <div id="apercu-photo">
+        {% if fiche.photo %}
+          <img src="{{ fiche.photo.url }}" alt="Ma photo de profil" class="w-32 h-32 rounded-full object-cover shadow-xl ring-4 ring-white dark:ring-white/10">
+        {% else %}
+          <span class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-5xl font-extrabold shadow-xl ring-4 ring-white dark:ring-white/10">{{ request.user.username|make_list|first|upper }}</span>
+        {% endif %}
+      </div>
+      <label for="id_photo" class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center cursor-pointer shadow-lg ring-2 ring-white dark:ring-[#0c1527] transition" title="Changer la photo">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="sr-only">Changer la photo</span>
+      </label>
+    </div>
+    <p class="text-lg font-extrabold text-slate-900 dark:text-white">{{ request.user.get_full_name|default:request.user.username }}</p>
+    <p class="text-sm text-slate-400">@{{ request.user.username }}</p>
+    <span class="badge bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 mt-3">{{ role }}</span>
+    <dl class="mt-5 pt-5 border-t border-slate-100 dark:border-white/5 text-sm space-y-2 text-left">
+      <div class="flex justify-between gap-2"><dt class="text-slate-400">Membre depuis</dt><dd class="font-semibold text-slate-700 dark:text-slate-200">{{ request.user.date_joined|date:"d/m/Y" }}</dd></div>
+      <div class="flex justify-between gap-2"><dt class="text-slate-400">Dernière connexion</dt><dd class="font-semibold text-slate-700 dark:text-slate-200">{{ request.user.last_login|date:"d/m/Y H:i"|default:"—" }}</dd></div>
+    </dl>
+  </div>
+
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Informations -->
+    <form method="post" enctype="multipart/form-data" class="dash-card p-6 space-y-5">
+      {% csrf_token %}
+      <h2 class="font-bold text-slate-900 dark:text-white">Informations personnelles</h2>
+      {% if form.non_field_errors %}<div class="px-4 py-3 rounded-lg text-sm border bg-red-50 border-red-300 text-red-700" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+      <div>
+        <label for="id_photo" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Photo de profil</label>
+        <input type="file" name="photo" id="id_photo" accept="image/jpeg,image/png,image/webp,image/gif"
+               class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 dark:file:bg-blue-500/10 dark:file:text-blue-400">
+        {% if form.photo.errors %}<p class="text-red-500 text-xs mt-1">{{ form.photo.errors.0 }}</p>{% endif %}
+        <p class="text-xs text-slate-400 mt-1">{{ form.photo.help_text }}</p>
+        {% if fiche.photo %}
+        <label class="inline-flex items-center gap-2 mt-2 cursor-pointer text-sm text-slate-600 dark:text-slate-300">
+          <input type="checkbox" name="supprimer_photo" class="w-4 h-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"> Supprimer ma photo actuelle
+        </label>
+        {% endif %}
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        {% for champ in form %}{% if champ.name == 'first_name' or champ.name == 'last_name' %}
+          {% include "dashboard/_champ.html" with champ=champ %}
+        {% endif %}{% endfor %}
+      </div>
+      {% include "dashboard/_champ.html" with champ=form.email %}
+
+      <div class="flex gap-3 pt-1">
+        <button type="submit" class="dash-btn-primary">Enregistrer</button>
+        <a href="{% url 'dashboard:index' %}" class="dash-btn-ghost">Annuler</a>
+      </div>
+    </form>
+
+    <!-- Mot de passe -->
+    <form method="post" class="dash-card p-6 space-y-4" autocomplete="off">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="mot_de_passe">
+      <h2 class="font-bold text-slate-900 dark:text-white">Changer mon mot de passe</h2>
+      {% if form_mdp.non_field_errors %}<div class="px-4 py-3 rounded-lg text-sm border bg-red-50 border-red-300 text-red-700" role="alert">{{ form_mdp.non_field_errors }}</div>{% endif %}
+      {% for champ in form_mdp %}
+      <div>
+        <label for="{{ champ.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">{{ champ.label }}</label>
+        {{ champ }}
+        {% if champ.errors %}<p class="text-red-500 text-xs mt-1">{{ champ.errors.0 }}</p>{% endif %}
+        {% if champ.help_text and champ.name == 'new_password1' %}<div class="text-xs text-slate-400 mt-1">{{ champ.help_text|safe }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="dash-btn-ghost">Modifier le mot de passe</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Aperçu immédiat de la photo choisie (avant l'enregistrement)
+(function () {
+  const champ = document.getElementById('id_photo');
+  const zone = document.getElementById('apercu-photo');
+  if (!champ || !zone) return;
+  champ.addEventListener('change', function () {
+    const fichier = champ.files && champ.files[0];
+    if (!fichier || !fichier.type.startsWith('image/')) return;
+    const lecteur = new FileReader();
+    lecteur.onload = function (e) {
+      zone.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.alt = 'Aperçu de la nouvelle photo';
+      img.className = 'w-32 h-32 rounded-full object-cover shadow-xl ring-4 ring-white dark:ring-white/10';
+      zone.appendChild(img);
+    };
+    lecteur.readAsDataURL(fichier);
+  });
+})();
+</script>
+{% endblock %}
