@@ -126,3 +126,19 @@ sudo -u techshop ./venv/bin/python manage.py backup_db
 | `deploy/techshop.nginx`    | Configuration Nginx               |
 
 En cas de souci pendant l'installation, copiez l'erreur affichée : je pourrai vous aider.
+
+
+## Variables d'environnement importantes
+
+Voir `.env.example`. Points clés :
+
+- `SECRET_KEY` est **obligatoire** quand `DEBUG=False` (le site refuse de démarrer sinon).
+- Derrière Nginx, activer `USE_PROXY_HEADERS=True` avec `USE_HTTPS=True`, sinon la redirection HTTPS boucle et la limitation de tentatives voit l'IP de Nginx.
+- `REDIS_URL` (paquet `redis` à installer) rend la limitation de tentatives fiable avec plusieurs workers Gunicorn.
+- Paiement en ligne : renseigner `CINETPAY_API_KEY` et `CINETPAY_SITE_ID`, puis déclarer dans CinetPay l'URL de notification `https://votre-domaine/paiement/notification/`. Sans ces clés, seul le paiement à la livraison est proposé.
+
+## Tests
+
+```bash
+python manage.py test
+```

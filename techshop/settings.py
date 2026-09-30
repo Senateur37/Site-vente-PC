@@ -21,6 +21,8 @@ load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-a-changer-avant-production')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
+if not DEBUG and SECRET_KEY.startswith('django-insecure'):
+    raise RuntimeError("SECRET_KEY doit être défini dans .env quand DEBUG=False.")
 ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
 INSTALLED_APPS = [
@@ -88,7 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'fr-fr'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Abidjan'
 USE_I18N = True
 USE_TZ = True
 
@@ -104,15 +106,54 @@ EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes', 'on')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+# Les mots de passe d'application Gmail s'affichent avec des espaces
+# ("xxxx xxxx xxxx xxxx") : on les retire car SMTP les refuse parfois.
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').replace(' ', '')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 15
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'dashboard:login'
 LOGIN_REDIRECT_URL = 'dashboard:index'
 
+# Cache : Redis si REDIS_URL est défini (partagé entre workers Gunicorn, requis pour
+# que la limitation de tentatives soit fiable), sinon mémoire locale.
+if os.getenv('REDIS_URL'):
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.getenv('REDIS_URL'),
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'techshop-cache',
+        }
+    }
+
+# Derrière Nginx : faire confiance à X-Forwarded-Proto / X-Real-IP
+USE_PROXY_HEADERS = os.getenv('USE_PROXY_HEADERS', 'False').lower() in ('1', 'true', 'yes', 'on')
+if USE_PROXY_HEADERS:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Paiement en ligne CinetPay (laisser vide = option désactivée dans le tunnel de commande)
+CINETPAY_API_KEY = os.getenv('CINETPAY_API_KEY', '')
+CINETPAY_SITE_ID = os.getenv('CINETPAY_SITE_ID', '')
+CINETPAY_ACTIF = bool(CINETPAY_API_KEY and CINETPAY_SITE_ID)
+SITE_URL = os.getenv('SITE_URL', '').rstrip('/')
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+
 # Sécurité production (activé quand DEBUG=False)
 if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
     if os.getenv('USE_HTTPS', 'False').lower() in ('1', 'true', 'yes', 'on'):
         SECURE_SSL_REDIRECT = True
         SESSION_COOKIE_SECURE = True

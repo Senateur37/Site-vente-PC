@@ -204,6 +204,9 @@
     <h3 class="font-semibold text-slate-900 dark:text-white mb-3">Laisser un avis</h3>
     <form method="post" class="space-y-4">
       {% csrf_token %}
+      <div style="position:absolute;left:-9999px" aria-hidden="true">
+        <label>Ne pas remplir <input type="text" name="site_web" tabindex="-1" autocomplete="off"></label>
+      </div>
       <div>
         <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Note</label>
         <div id="note-etoiles" class="flex flex-wrap items-center gap-1">

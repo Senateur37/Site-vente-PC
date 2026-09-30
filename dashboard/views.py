@@ -1,23 +1,32 @@
 ﻿from django.shortcuts import render, redirect, get_object_or_404
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import Sum, Count, F, ExpressionWrapper
 from django.db.models.fields import DecimalField
 from django.db.models.functions import TruncMonth
 from django.http import HttpResponse
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
-import secrets, random
+import hmac, logging, secrets
 
 from produits.models import Produit, Categorie, LogoMarque, ImageProduit, Avis
 from produits.forms import ProduitForm, CategorieForm, LogoMarqueForm
 from commandes.models import Commande, LigneCommande
 from dashboard.models import SiteSettings
+from dashboard import throttle
+
+logger = logging.getLogger(__name__)
 
 
 def connexion(request):
@@ -27,11 +36,17 @@ def connexion(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        ip = throttle.client_ip(request)
+        if throttle.bloque('login', ip, username, maximum=5):
+            messages.error(request, "Trop de tentatives. Réessayez dans 15 minutes.")
+            return render(request, 'dashboard/login.html', status=429)
         user = authenticate(request, username=username, password=password)
         if user is not None and user.is_staff:
+            throttle.reinitialiser('login', ip, username)
             login(request, user)
             return redirect('dashboard:index')
         else:
+            throttle.echec('login', ip, username)
             messages.error(request, "Identifiants incorrects ou accès non autorisé.")
 
     return render(request, 'dashboard/login.html')
@@ -69,37 +84,52 @@ def inscription(request):
 
 # ---------- Dashboard ----------
 
+def _vider_session_reset(request):
+    for cle in ('reset_code', 'reset_email', 'reset_code_exp', 'reset_code_verifie', 'reset_essais'):
+        request.session.pop(cle, None)
+
+
 def mot_de_passe_oublie(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-        try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            messages.error(request, "Aucun compte n'est associé à cet email.")
-            return redirect('dashboard:mot_de_passe_oublie')
+        ip = throttle.client_ip(request)
+        if throttle.bloque('reset_demande', ip, maximum=5) or throttle.bloque('reset_demande', email, maximum=3):
+            messages.error(request, "Trop de demandes. Réessayez dans 15 minutes.")
+            return render(request, 'dashboard/mot_de_passe_oublie.html', status=429)
+        throttle.echec('reset_demande', ip)
+        throttle.echec('reset_demande', email)
 
-        code = str(random.randint(100000, 999999))
-        request.session['reset_code'] = code
+        _vider_session_reset(request)
         request.session['reset_email'] = email
-        request.session['reset_code_exp'] = (timezone.now() + timedelta(minutes=10)).isoformat()
+        user = User.objects.filter(email__iexact=email).first() if email else None
 
-        try:
-            send_mail(
-                subject=f"Votre code de vérification TechShop : {code}",
-                message=(
-                    f"Bonjour {user.username},\n\n"
-                    f"Votre code de vérification pour réinitialiser votre mot de passe est :\n\n"
-                    f"   {code}\n\n"
-                    f"Ce code est valable 10 minutes. Si vous n'avez pas fait cette demande, ignorez cet email.\n\n"
-                    f"L'équipe TechShop"
-                ),
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            return redirect('dashboard:verifier_code')
-        except Exception:
-            messages.error(request, "Impossible d'envoyer l'email. Vérifiez la configuration SMTP.")
+        if user:
+            code = f"{secrets.randbelow(1_000_000):06d}"
+            request.session['reset_code'] = code
+            request.session['reset_code_exp'] = (timezone.now() + timedelta(minutes=10)).isoformat()
+            try:
+                send_mail(
+                    subject=f"Votre code de vérification TechShop : {code}",
+                    message=(
+                        f"Bonjour {user.username},\n\n"
+                        f"Votre code de vérification pour réinitialiser votre mot de passe est :\n\n"
+                        f"   {code}\n\n"
+                        f"Ce code est valable 10 minutes. Si vous n'avez pas fait cette demande, ignorez cet email.\n\n"
+                        f"L'équipe TechShop"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                logger.exception("Echec envoi email reset")
+                _vider_session_reset(request)
+                messages.error(request, "Impossible d'envoyer l'email pour le moment. Réessayez plus tard.")
+                return render(request, 'dashboard/mot_de_passe_oublie.html')
+
+        # Même réponse que l'email existe ou non (pas d'énumération de comptes)
+        messages.info(request, "Si un compte correspond à cet email, un code vient d'être envoyé.")
+        return redirect('dashboard:verifier_code')
 
     return render(request, 'dashboard/mot_de_passe_oublie.html')
 
@@ -113,23 +143,28 @@ def verifier_code(request):
         code_attendu = request.session.get('reset_code')
         expiration = request.session.get('reset_code_exp')
 
+        essais = request.session.get('reset_essais', 0) + 1
+        request.session['reset_essais'] = essais
+        if essais > 5:
+            _vider_session_reset(request)
+            messages.error(request, "Trop d'essais. Veuillez demander un nouveau code.")
+            return redirect('dashboard:mot_de_passe_oublie')
+
         if expiration:
             try:
                 exp = timezone.datetime.fromisoformat(expiration)
                 if timezone.now() > exp:
+                    _vider_session_reset(request)
                     messages.error(request, "Ce code a expiré. Veuillez en demander un nouveau.")
-                    request.session.pop('reset_code', None)
-                    request.session.pop('reset_email', None)
-                    request.session.pop('reset_code_exp', None)
                     return redirect('dashboard:mot_de_passe_oublie')
             except (ValueError, TypeError):
                 pass
 
-        if code_attendu and code_saisi == code_attendu:
+        if code_attendu and hmac.compare_digest(code_saisi, code_attendu):
             request.session['reset_code_verifie'] = True
+            request.session.pop('reset_code', None)
             return redirect('dashboard:nouveau_mot_de_passe')
-        else:
-            messages.error(request, "Code incorrect. Vérifiez votre email.")
+        messages.error(request, "Code incorrect. Vérifiez votre email.")
 
     return render(request, 'dashboard/verifier_code.html')
 
@@ -146,17 +181,18 @@ def nouveau_mot_de_passe(request):
             messages.error(request, "Tous les champs sont obligatoires.")
         elif password != password2:
             messages.error(request, "Les mots de passe ne correspondent pas.")
-        elif len(password) < 8:
-            messages.error(request, "Le mot de passe doit contenir au moins 8 caractères.")
         else:
             try:
                 user = User.objects.get(email__iexact=email)
+                try:
+                    validate_password(password, user)
+                except ValidationError as e:
+                    for err in e.messages:
+                        messages.error(request, err)
+                    return render(request, 'dashboard/nouveau_mot_de_passe.html')
                 user.set_password(password)
                 user.save()
-                request.session.pop('reset_code', None)
-                request.session.pop('reset_email', None)
-                request.session.pop('reset_code_exp', None)
-                request.session.pop('reset_code_verifie', None)
+                _vider_session_reset(request)
                 messages.success(request, "Mot de passe réinitialisé ! Vous pouvez vous connecter.")
                 return redirect('dashboard:login')
             except User.DoesNotExist:
@@ -216,23 +252,19 @@ def index(request):
         cle = f"{a}-{m:02d}"
         mois_ventes.append({'mois': cle, 'total': total_par_mois.get(cle, 0)})
 
-    top_produits_vendus = []
-    top_quantites = LigneCommande.objects.values('nom_produit').annotate(
-        quantite=Sum('quantite')
-    ).order_by('-quantite')[:5]
-    for row in top_quantites:
-        total = LigneCommande.objects.filter(nom_produit=row['nom_produit']).aggregate(
-            total=Sum(
-                ExpressionWrapper(
-                    F('prix_unitaire') * F('quantite'),
-                    output_field=DecimalField(max_digits=14, decimal_places=2),
-                )
-            )
-        )['total'] or 0
-        top_produits_vendus.append({'nom_produit': row['nom_produit'], 'quantite': row['quantite'], 'total': total})
+    top_produits_vendus = list(
+        LigneCommande.objects.values('nom_produit').annotate(
+            total=Sum(ExpressionWrapper(
+                F('prix_unitaire') * F('quantite'),
+                output_field=DecimalField(max_digits=14, decimal_places=2),
+            )),
+            quantite=Sum('quantite'),
+        ).order_by('-quantite')[:5]
+    )
 
+    par_statut = {r['statut']: r['n'] for r in Commande.objects.values('statut').annotate(n=Count('id'))}
     repartition_statuts = [
-        {'statut': label, 'total': Commande.objects.filter(statut=code).count()}
+        {'statut': label, 'total': par_statut.get(code, 0)}
         for code, label in Commande.STATUT_CHOICES
     ]
 
@@ -369,6 +401,7 @@ def liste_avis(request):
 
 
 @staff_member_required(login_url='dashboard:login')
+@require_POST
 def approuver_avis(request, avis_id):
     avis = get_object_or_404(Avis, id=avis_id)
     avis.approuve = True
@@ -378,6 +411,7 @@ def approuver_avis(request, avis_id):
 
 
 @staff_member_required(login_url='dashboard:login')
+@require_POST
 def supprimer_avis(request, avis_id):
     avis = get_object_or_404(Avis, id=avis_id)
     avis.delete()
@@ -389,7 +423,7 @@ def supprimer_avis(request, avis_id):
 
 @staff_member_required(login_url='dashboard:login')
 def liste_commandes(request):
-    commandes = Commande.objects.all()
+    commandes = Commande.objects.prefetch_related('lignes')
     statut = request.GET.get('statut')
     if statut:
         commandes = commandes.filter(statut=statut)
@@ -405,9 +439,15 @@ def detail_commande(request, commande_id):
     commande = get_object_or_404(Commande, id=commande_id)
     if request.method == 'POST':
         nouveau_statut = request.POST.get('statut')
-        if nouveau_statut in dict(Commande.STATUT_CHOICES):
-            commande.statut = nouveau_statut
-            commande.save()
+        if commande.statut == 'annulee' and nouveau_statut != 'annulee':
+            messages.error(request, "Une commande annulée ne peut pas être rouverte (le stock a été remis en rayon).")
+        elif nouveau_statut in dict(Commande.STATUT_CHOICES):
+            with transaction.atomic():
+                if nouveau_statut == 'annulee' and commande.statut != 'annulee':
+                    for ligne in commande.lignes.exclude(produit__isnull=True):
+                        Produit.objects.filter(pk=ligne.produit_id).update(stock=F('stock') + ligne.quantite)
+                commande.statut = nouveau_statut
+                commande.save()
             messages.success(request, "Statut de la commande mis à jour.")
             return redirect('dashboard:commande_detail', commande_id=commande.id)
     return render(request, 'dashboard/commande_detail.html', {'commande': commande})
@@ -450,6 +490,7 @@ def parametres(request):
 # ---------- Supprimer image produit ----------
 
 @staff_member_required(login_url='dashboard:login')
+@require_POST
 def supprimer_image_produit(request, image_id):
     image = get_object_or_404(ImageProduit, id=image_id)
     produit_id = image.produit.id
@@ -491,14 +532,14 @@ def export_commandes(request):
 
 @staff_member_required(login_url='dashboard:login')
 def liste_clients(request):
-    clients = User.objects.filter(is_staff=False).order_by('username')
+    clients = User.objects.filter(is_staff=False).order_by('username').prefetch_related('commandes__lignes')
     stats = []
     for client in clients:
-        commandes = Commande.objects.filter(utilisateur=client)
+        commandes = list(client.commandes.all())
         stats.append({
             'client': client,
-            'nb_commandes': commandes.count(),
+            'nb_commandes': len(commandes),
             'total_depense': sum(c.total for c in commandes),
-            'derniere_commande': commandes.first(),
+            'derniere_commande': commandes[0] if commandes else None,
         })
     return render(request, 'dashboard/clients_liste.html', {'stats': stats})

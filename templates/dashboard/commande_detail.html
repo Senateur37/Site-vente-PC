@@ -34,7 +34,7 @@
       </div>
       <div>
         <p class="text-slate-400 dark:text-slate-500">Paiement</p>
-        <p class="font-medium text-slate-900 dark:text-white">{{ commande.get_methode_paiement_display }}</p>
+        <p class="font-medium text-slate-900 dark:text-white">{{ commande.get_methode_paiement_display }} — <span class="text-slate-500">{{ commande.get_paiement_statut_display }}</span></p>
       </div>
       <div class="sm:col-span-2">
         <p class="text-slate-400 dark:text-slate-500">Adresse</p>

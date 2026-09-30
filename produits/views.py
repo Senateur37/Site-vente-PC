@@ -1,9 +1,12 @@
+import logging
 from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.validators import validate_email
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q, Sum, F, Count
@@ -11,6 +14,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Produit, Categorie, SectionAccueil, LogoMarque, Avis, Favori
 from .forms import AvisForm
 from commandes.models import LigneCommande
+from dashboard import throttle
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_prix(value):
@@ -37,16 +43,13 @@ def _get_section_produits(section, limit=None):
         ).filter(produit_id__isnull=False).order_by('-total_vendu')
         if limit:
             ids = ids[:limit]
-        produits = []
-        for item in ids:
-            try:
-                p = Produit.objects.get(id=item['produit_id'], disponible=True)
-                produits.append(p)
-            except Produit.DoesNotExist:
-                pass
+        ids_list = [item['produit_id'] for item in ids]
+        produits_qs = Produit.objects.avec_notes().filter(id__in=ids_list, disponible=True).select_related('categorie')
+        produits_dict = {p.id: p for p in produits_qs}
+        produits = [produits_dict[pid] for pid in ids_list if pid in produits_dict]
         return produits
     elif section.type_section == 'nouveautes':
-        qs = Produit.objects.filter(disponible=True).order_by('-date_ajout')
+        qs = Produit.objects.avec_notes().filter(disponible=True).order_by('-date_ajout')
         return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'plus_aimes':
         ids = Favori.objects.values('produit_id').annotate(
@@ -54,28 +57,25 @@ def _get_section_produits(section, limit=None):
         ).filter(produit_id__isnull=False).order_by('-nb')
         if limit:
             ids = ids[:limit]
-        produits = []
-        for item in ids:
-            try:
-                p = Produit.objects.get(id=item['produit_id'], disponible=True)
-                produits.append(p)
-            except Produit.DoesNotExist:
-                pass
+        ids_list = [item['produit_id'] for item in ids]
+        produits_qs = Produit.objects.avec_notes().filter(id__in=ids_list, disponible=True).select_related('categorie')
+        produits_dict = {p.id: p for p in produits_qs}
+        produits = [produits_dict[pid] for pid in ids_list if pid in produits_dict]
         return produits
     elif section.type_section == 'categorie' and section.categorie:
-        qs = Produit.objects.filter(disponible=True, categorie=section.categorie)
+        qs = Produit.objects.avec_notes().filter(disponible=True, categorie=section.categorie).select_related('categorie')
         return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'marque' and section.marque:
-        qs = Produit.objects.filter(disponible=True, marque=section.marque)
+        qs = Produit.objects.avec_notes().filter(disponible=True, marque=section.marque)
         return list(qs[:limit]) if limit else list(qs)
     elif section.type_section == 'personnalise':
-        qs = section.produits_personnalises.filter(disponible=True)
+        qs = section.produits_personnalises.avec_notes().filter(disponible=True)
         return list(qs[:limit]) if limit else list(qs)
     return []
 
 
 def liste_produits(request):
-    produits_qs = Produit.objects.filter(disponible=True)
+    produits_qs = Produit.objects.avec_notes().filter(disponible=True).select_related('categorie')
     categories = Categorie.objects.all()
     tri = request.GET.get('tri', '')
     vue = request.GET.get('vue', 'grille')
@@ -129,18 +129,13 @@ def liste_produits(request):
         ids = LigneCommande.objects.values('produit_id').annotate(
             total_vendu=Sum('quantite')
         ).filter(produit_id__isnull=False).order_by('-total_vendu')
-        produits_list = []
-        seen_ids = set()
+        seen_ids = []
         for item in ids:
-            pid = item['produit_id']
-            if pid in seen_ids:
-                continue
-            seen_ids.add(pid)
-            try:
-                p = Produit.objects.get(id=pid, disponible=True)
-                produits_list.append(p)
-            except Produit.DoesNotExist:
-                pass
+            if item['produit_id'] not in seen_ids:
+                seen_ids.append(item['produit_id'])
+                
+        produits_dict = {p.id: p for p in Produit.objects.avec_notes().filter(id__in=seen_ids, disponible=True).select_related('categorie')}
+        produits_list = [produits_dict[pid] for pid in seen_ids if pid in produits_dict]
 
     filtres_actifs = {}
     if recherche:
@@ -183,7 +178,7 @@ def liste_produits(request):
                 })
 
     produits_defilement = list(
-        Produit.objects.filter(disponible=True).order_by('-date_ajout')[:16]
+        Produit.objects.avec_notes().filter(disponible=True).order_by('-date_ajout')[:16]
     )
 
     # Top marques
@@ -229,7 +224,7 @@ def liste_produits(request):
         'produits': produits_page,
         'produits_defilement': produits_defilement,
         'produits_a_la_une': list(
-            Produit.objects.filter(disponible=True, a_la_une=True)[:12]
+            Produit.objects.avec_notes().filter(disponible=True, a_la_une=True)[:12]
         ),
         'top_marques': top_marques,
         'categories': categories,
@@ -249,11 +244,11 @@ def liste_produits(request):
 
 def detail_produit(request, slug):
     produit = get_object_or_404(
-        Produit.objects.prefetch_related("images_supplementaires"),
+        Produit.objects.avec_notes().prefetch_related("images_supplementaires"),
         slug=slug,
         disponible=True,
     )
-    produits_similaires = Produit.objects.filter(
+    produits_similaires = Produit.objects.avec_notes().filter(
         categorie=produit.categorie, disponible=True
     ).exclude(id=produit.id)[:4]
 
@@ -262,7 +257,13 @@ def detail_produit(request, slug):
 
     if request.method == 'POST':
         avis_form = AvisForm(request.POST)
-        if avis_form.is_valid():
+        ip = throttle.client_ip(request)
+        if request.POST.get('site_web'):  # champ piège pour les robots
+            return redirect('produits:detail', slug=produit.slug)
+        if throttle.bloque('avis', ip, maximum=5):
+            messages.error(request, "Trop d'avis envoyés. Réessayez plus tard.")
+        elif avis_form.is_valid():
+            throttle.echec('avis', ip, fenetre=3600)
             avis = avis_form.save(commit=False)
             avis.produit = produit
             if request.user.is_authenticated:
@@ -310,20 +311,33 @@ def contact(request):
         email = request.POST.get('email', '').strip()
         sujet = request.POST.get('sujet', '').strip()
         message = request.POST.get('message', '').strip()
+        ip = throttle.client_ip(request)
+        if request.POST.get('site_web'):  # champ piège pour les robots
+            return redirect('produits:contact')
+        if throttle.bloque('contact', ip, maximum=5):
+            messages.error(request, "Trop de messages envoyés. Réessayez plus tard.")
+            return redirect('produits:contact')
+        try:
+            validate_email(email)
+        except ValidationError:
+            email = ''
         if nom and email and message:
+            throttle.echec('contact', ip, fenetre=3600)
+            sujet = sujet.replace('\n', ' ').replace('\r', ' ')[:150]
             try:
                 send_mail(
-                    subject=f"[Contact] {sujet or 'Demande'} - {nom}",
-                    message=f"Nom: {nom}\nEmail: {email}\n\n{message}",
-                    from_email=settings.EMAIL_HOST_USER,
+                    subject=f"[Contact] {sujet or 'Demande'} - {nom[:100]}",
+                    message=f"Nom: {nom}\nEmail: {email}\n\n{message[:5000]}",
+                    from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
                     recipient_list=[params.email] if params.email else [settings.EMAIL_HOST_USER],
-                    fail_silently=True,
+                    fail_silently=False,
                 )
                 messages.success(request, "Votre message a bien été envoyé.")
             except Exception:
+                logger.exception("Echec envoi message de contact")
                 messages.error(request, "Une erreur est survenue. Veuillez réessayer.")
             return redirect('produits:contact')
-        messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+        messages.error(request, "Veuillez remplir tous les champs obligatoires avec un email valide.")
 
     return render(request, 'produits/contact.html', {'params': params})
 

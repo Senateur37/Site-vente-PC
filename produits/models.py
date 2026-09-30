@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
-from django.db.models import Avg
+from django.db.models import Avg, Count, Q
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
@@ -61,6 +61,16 @@ class Categorie(models.Model):
         return self.nom
 
 
+class ProduitQuerySet(models.QuerySet):
+    def avec_notes(self):
+        """Annote note moyenne et nombre d'avis approuvés (évite une requête par carte produit)."""
+        ok = Q(avis__approuve=True)
+        return self.annotate(
+            _note_moy=Avg('avis__note', filter=ok),
+            _nb_avis=Count('avis', filter=ok),
+        )
+
+
 class Produit(models.Model):
     MARQUE_CHOICES = [
         ("hp", "HP"),
@@ -91,6 +101,8 @@ class Produit(models.Model):
     )
     date_ajout = models.DateTimeField(auto_now_add=True)
 
+    objects = ProduitQuerySet.as_manager()
+
     class Meta:
         ordering = ["-date_ajout"]
 
@@ -102,13 +114,15 @@ class Produit(models.Model):
 
     @property
     def note_moyenne(self):
-        avis = self.avis.filter(approuve=True)
-        if not avis.exists():
-            return 0
-        return round(avis.aggregate(Avg('note'))['note__avg'], 1)
+        if hasattr(self, '_note_moy'):
+            return round(self._note_moy, 1) if self._note_moy else 0
+        moyenne = self.avis.filter(approuve=True).aggregate(m=Avg('note'))['m']
+        return round(moyenne, 1) if moyenne else 0
 
     @property
     def nb_avis(self):
+        if hasattr(self, '_nb_avis'):
+            return self._nb_avis
         return self.avis.filter(approuve=True).count()
 
     @property

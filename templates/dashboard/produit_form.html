@@ -85,11 +85,11 @@
           <div class="relative w-20 h-20 rounded-lg border border-slate-200 dark:border-slate-600 overflow-hidden bg-slate-100 dark:bg-slate-700">
             <img src="{{ img.image.url }}" alt="{{ img.legende }}" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-              <a href="{% url 'dashboard:supprimer_image_produit' img.id %}"
+              <button type="submit" formaction="{% url 'dashboard:supprimer_image_produit' img.id %}" formmethod="post" formnovalidate
                  class="text-white text-xs bg-red-600 rounded px-2 py-1 hover:bg-red-700"
                  onclick="return confirm('Supprimer cette image ?')">
-                × Supprimer
-              </a>
+                Supprimer
+              </button>
             </div>
           </div>
           {% endfor %}

@@ -1,6 +1,7 @@
-import imghdr
 import os
+from PIL import Image
 
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -17,15 +18,15 @@ def validate_image_file(value):
         if value.content_type not in valid_mime_types:
             raise ValidationError(f"Type MIME '{value.content_type}' non autorisé.")
     
-    # Vérification par magic bytes
+    # Vérification du fichier image
     if value.size > 0:
-        value.seek(0)
-        header = value.read(32)
-        value.seek(0)
-        image_type = imghdr.what(None, h=header)
-        if image_type is None and ext not in ['.svg', '.avif']:
-            # svg et avif ne sont pas détectés par imghdr
-            if ext not in ['.svg', '.avif']:
+        if ext not in ['.svg', '.avif']:
+            try:
+                value.seek(0)
+                img = Image.open(value)
+                img.verify()
+                value.seek(0)
+            except Exception:
                 raise ValidationError("Le fichier ne semble pas être une image valide.")
     
     # Limite de taille : 5 Mo
@@ -92,11 +93,18 @@ class SiteSettings(models.Model):
     def __str__(self):
         return "Paramètres du site"
 
+    CACHE_KEY = 'site_settings'
+
     @classmethod
     def get_settings(cls):
-        obj, created = cls.objects.get_or_create(id=1)
+        """Singleton mis en cache (lu à chaque requête par un context processor)."""
+        obj = cache.get(cls.CACHE_KEY)
+        if obj is None:
+            obj, _ = cls.objects.get_or_create(id=1)
+            cache.set(cls.CACHE_KEY, obj, 300)
         return obj
 
     def save(self, *args, **kwargs):
         self.id = 1
         super().save(*args, **kwargs)
+        cache.delete(self.CACHE_KEY)
