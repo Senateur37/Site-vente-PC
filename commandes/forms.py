@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from .models import Commande, CodePromo
 
 
@@ -32,6 +33,14 @@ class CommandeForm(forms.ModelForm):
             'note': 'Note (optionnel)',
             'methode_paiement': 'Méthode de paiement',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Les moyens de paiement en ligne ne sont proposés que si CinetPay est configuré
+        if not settings.CINETPAY_ACTIF:
+            self.fields['methode_paiement'].choices = [
+                c for c in Commande.PAIEMENT_CHOICES if c[0] == 'a_la_livraison'
+            ]
 
     def get_code_promo(self):
         code = self.cleaned_data.get('code_promo', '').strip().upper()

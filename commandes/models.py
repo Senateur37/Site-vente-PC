@@ -54,7 +54,14 @@ class Commande(models.Model):
     ]
     PAIEMENT_CHOICES = [
         ("a_la_livraison", "Paiement à la livraison"),
-        ("mobile_money", "Mobile Money (confirmation par appel)"),
+        ("mobile_money", "Mobile Money (Orange/Moov/MTN via CinetPay)"),
+        ("carte_bancaire", "Carte bancaire (via CinetPay)"),
+    ]
+    PAIEMENT_STATUT_CHOICES = [
+        ("non_requis", "Paiement à la livraison"),
+        ("en_attente", "Paiement en attente"),
+        ("paye", "Payé en ligne"),
+        ("echoue", "Paiement échoué"),
     ]
 
     utilisateur = models.ForeignKey(
@@ -74,6 +81,11 @@ class Commande(models.Model):
         max_length=20, choices=PAIEMENT_CHOICES, default="a_la_livraison",
         verbose_name="Méthode de paiement",
     )
+    paiement_statut = models.CharField(
+        max_length=20, choices=PAIEMENT_STATUT_CHOICES, default="non_requis",
+        verbose_name="Statut du paiement en ligne",
+    )
+    transaction_id = models.CharField(max_length=60, blank=True, db_index=True)
     code_promo = models.ForeignKey(
         CodePromo, on_delete=models.SET_NULL, null=True, blank=True,
         verbose_name="Code promo appliqué",
