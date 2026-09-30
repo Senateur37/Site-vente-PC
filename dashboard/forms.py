@@ -7,10 +7,7 @@ from produits.models import SectionAccueil
 
 from .models import Engagement, SiteSettings
 
-CLASSE = (
-    'w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm '
-    'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-accent'
-)
+CLASSE = 'dash-input'
 HEX = re.compile(r'^#[0-9a-fA-F]{6}$')
 
 

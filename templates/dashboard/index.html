@@ -3,15 +3,19 @@
 {% block title %}Tableau de bord — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
 {% block content %}
 
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+<!-- En-tête -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-7">
   <div>
-    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Bonjour {{ request.user.first_name|default:request.user.username }} 👋</h1>
-    <p class="text-sm text-slate-500 dark:text-slate-400">Voici l'activité de la boutique.</p>
+    <p class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">{% now "l j F Y" %}</p>
+    <h1 class="dash-title">Bonjour, {{ request.user.first_name|default:request.user.username }} 👋</h1>
+    <p class="dash-subtitle">Voici un aperçu de l'activité de votre boutique.</p>
   </div>
   {% if peut_commandes %}
-  <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-sm self-start" role="group" aria-label="Période">
+  <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/5 self-start" role="group" aria-label="Période">
     {% for jours, libelle in periodes %}
-      <a href="?p={{ jours }}" class="px-3 py-1.5 {% if periode == jours %}bg-accent text-white{% else %}bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700{% endif %}" {% if periode == jours %}aria-current="true"{% endif %}>{{ libelle }}</a>
+      <a href="?p={{ jours }}"
+         class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition {% if periode == jours %}bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-sm{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}"
+         {% if periode == jours %}aria-current="true"{% endif %}>{{ libelle }}</a>
     {% endfor %}
   </div>
   {% endif %}
@@ -19,157 +23,195 @@
 
 {% if peut_commandes %}
 <!-- Indicateurs -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-  <div class="dash-card p-4 md:p-5 bg-gradient-to-br from-accent to-blue-800 text-white border-0">
-    <p class="text-xs font-medium uppercase tracking-wide text-blue-100 mb-1.5">Chiffre d'affaires</p>
-    <p class="text-xl md:text-2xl font-extrabold">{{ ca|prix_fcfa }} <span class="text-sm font-semibold">FCFA</span></p>
-    <p class="text-xs mt-2 text-blue-100">
-      {% if ca_variation is None %}—{% elif ca_variation >= 0 %}▲ +{{ ca_variation }} %{% else %}▼ {{ ca_variation }} %{% endif %}
-      <span class="opacity-80">vs période précédente</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+  <div class="relative overflow-hidden rounded-2xl p-5 text-white bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 shadow-xl shadow-blue-600/25">
+    <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10"></div>
+    <div class="absolute -right-2 -bottom-10 w-24 h-24 rounded-full bg-white/10"></div>
+    <div class="relative">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-bold uppercase tracking-wider text-blue-100">Chiffre d'affaires</p>
+        <span class="kpi-icon bg-white/15 backdrop-blur"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+      </div>
+      <p class="text-3xl font-extrabold tracking-tight">{{ ca|prix_fcfa }} <span class="text-base font-bold text-blue-100">FCFA</span></p>
+      <p class="mt-3 text-xs text-blue-100">
+        {% if ca_variation is None %}Pas de période précédente à comparer
+        {% else %}<span class="pill bg-white/20 text-white">{% if ca_variation >= 0 %}▲ +{{ ca_variation }} %{% else %}▼ {{ ca_variation }} %{% endif %}</span> vs période précédente{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="dash-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Commandes</p>
+      <span class="kpi-icon bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg></span>
+    </div>
+    <p class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">{{ nb_commandes }}</p>
+    <p class="mt-3 text-xs text-slate-400">
+      {% if nb_variation is None %}—{% else %}<span class="pill {% if nb_variation >= 0 %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400{% else %}bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400{% endif %}">{% if nb_variation >= 0 %}▲ +{{ nb_variation }} %{% else %}▼ {{ nb_variation }} %{% endif %}</span> vs précédente{% endif %}
     </p>
   </div>
-  <div class="dash-card p-4 md:p-5">
-    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Commandes</p>
-    <p class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">{{ nb_commandes }}</p>
-    <p class="text-xs mt-2 {% if nb_variation is not None and nb_variation < 0 %}text-red-500{% else %}text-green-600{% endif %}">
-      {% if nb_variation is None %}<span class="text-slate-400">—</span>{% elif nb_variation >= 0 %}▲ +{{ nb_variation }} %{% else %}▼ {{ nb_variation }} %{% endif %}
-      <span class="text-slate-400">vs précédente</span>
-    </p>
+
+  <div class="dash-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Panier moyen</p>
+      <span class="kpi-icon bg-violet-100 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg></span>
+    </div>
+    <p class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">{{ panier_moyen|prix_fcfa }} <span class="text-base font-bold text-slate-400">FCFA</span></p>
+    <p class="mt-3 text-xs text-slate-400">{{ livrees }} commande{{ livrees|pluralize }} livrée{{ livrees|pluralize }} et payée{{ livrees|pluralize }}</p>
   </div>
-  <div class="dash-card p-4 md:p-5">
-    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Panier moyen</p>
-    <p class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{{ panier_moyen|prix_fcfa }} <span class="text-sm font-semibold">FCFA</span></p>
-    <p class="text-xs mt-2 text-slate-400">{{ livrees }} commande{{ livrees|pluralize }} livrée{{ livrees|pluralize }} et payée{{ livrees|pluralize }}</p>
-  </div>
-  <div class="dash-card p-4 md:p-5">
-    <p class="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Taux d'annulation</p>
-    <p class="text-2xl md:text-3xl font-bold {% if taux_annulation > 20 %}text-red-500{% else %}text-slate-900 dark:text-white{% endif %}">{{ taux_annulation }} %</p>
-    <p class="text-xs mt-2 text-slate-400">Sur la période</p>
+
+  <div class="dash-card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Annulations</p>
+      <span class="kpi-icon bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+    </div>
+    <p class="text-3xl font-extrabold tracking-tight {% if taux_annulation > 20 %}text-rose-500{% else %}text-slate-900 dark:text-white{% endif %}">{{ taux_annulation }} <span class="text-base font-bold text-slate-400">%</span></p>
+    <div class="mt-3 h-1.5 rounded-full bg-slate-100 dark:bg-white/10 overflow-hidden"><div class="h-full rounded-full {% if taux_annulation > 20 %}bg-rose-500{% else %}bg-emerald-500{% endif %}" style="width: {{ taux_annulation }}%"></div></div>
   </div>
 </div>
 
 <!-- Alertes -->
-<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-  <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente" class="dash-card p-4 flex items-center gap-3 hover:border-amber-400 transition">
-    <span class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center text-lg" aria-hidden="true">⏳</span>
-    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_a_traiter }}</p><p class="text-xs text-slate-500">commande{{ nb_a_traiter|pluralize }} à traiter</p></div>
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
+  <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente" class="dash-card group p-4 flex items-center gap-3.5 hover:border-amber-400/60 hover:shadow-md transition-all">
+    <span class="kpi-icon bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 text-xl" aria-hidden="true">⏳</span>
+    <div class="min-w-0"><p class="text-2xl font-extrabold text-slate-900 dark:text-white leading-none">{{ nb_a_traiter }}</p><p class="text-xs font-medium text-slate-500 mt-1">commande{{ nb_a_traiter|pluralize }} à traiter</p></div>
+    <span class="ml-auto text-slate-300 group-hover:text-amber-500 group-hover:translate-x-0.5 transition">→</span>
   </a>
   {% if peut_catalogue %}
-  <a href="{% url 'dashboard:produits_liste' %}?stock=rupture" class="dash-card p-4 flex items-center gap-3 hover:border-red-400 transition">
-    <span class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center text-lg" aria-hidden="true">📦</span>
-    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_ruptures }}</p><p class="text-xs text-slate-500">produit{{ nb_ruptures|pluralize }} en rupture</p></div>
+  <a href="{% url 'dashboard:produits_liste' %}?stock=rupture" class="dash-card group p-4 flex items-center gap-3.5 hover:border-rose-400/60 hover:shadow-md transition-all">
+    <span class="kpi-icon bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 text-xl" aria-hidden="true">📦</span>
+    <div class="min-w-0"><p class="text-2xl font-extrabold text-slate-900 dark:text-white leading-none">{{ nb_ruptures }}</p><p class="text-xs font-medium text-slate-500 mt-1">produit{{ nb_ruptures|pluralize }} en rupture</p></div>
+    <span class="ml-auto text-slate-300 group-hover:text-rose-500 group-hover:translate-x-0.5 transition">→</span>
   </a>
-  <a href="{% url 'dashboard:produits_liste' %}?stock=faible" class="dash-card p-4 flex items-center gap-3 hover:border-amber-400 transition">
-    <span class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center text-lg" aria-hidden="true">⚠️</span>
-    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_stock_faible_total }}</p><p class="text-xs text-slate-500">stock{{ nb_stock_faible_total|pluralize }} faible{{ nb_stock_faible_total|pluralize }}</p></div>
+  <a href="{% url 'dashboard:produits_liste' %}?stock=faible" class="dash-card group p-4 flex items-center gap-3.5 hover:border-orange-400/60 hover:shadow-md transition-all">
+    <span class="kpi-icon bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400 text-xl" aria-hidden="true">⚠️</span>
+    <div class="min-w-0"><p class="text-2xl font-extrabold text-slate-900 dark:text-white leading-none">{{ nb_stock_faible_total }}</p><p class="text-xs font-medium text-slate-500 mt-1">stock{{ nb_stock_faible_total|pluralize }} faible{{ nb_stock_faible_total|pluralize }}</p></div>
+    <span class="ml-auto text-slate-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition">→</span>
   </a>
   {% endif %}
   {% if peut_avis %}
-  <a href="{% url 'dashboard:avis_liste' %}?statut=en_attente" class="dash-card p-4 flex items-center gap-3 hover:border-accent transition">
-    <span class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-accent flex items-center justify-center text-lg" aria-hidden="true">💬</span>
-    <div><p class="text-xl font-bold text-slate-900 dark:text-white">{{ nb_avis_attente }}</p><p class="text-xs text-slate-500">avis à modérer</p></div>
+  <a href="{% url 'dashboard:avis_liste' %}?statut=en_attente" class="dash-card group p-4 flex items-center gap-3.5 hover:border-blue-400/60 hover:shadow-md transition-all">
+    <span class="kpi-icon bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 text-xl" aria-hidden="true">💬</span>
+    <div class="min-w-0"><p class="text-2xl font-extrabold text-slate-900 dark:text-white leading-none">{{ nb_avis_attente }}</p><p class="text-xs font-medium text-slate-500 mt-1">avis à modérer</p></div>
+    <span class="ml-auto text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition">→</span>
   </a>
   {% endif %}
 </div>
 
-<div class="grid lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-  <div class="dash-card p-5 lg:col-span-2">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Chiffre d'affaires{% for j, l in periodes %}{% if j == periode %} · {{ l }}{% endif %}{% endfor %}</h2>
-    <div class="relative" style="height: 280px;"><canvas id="chart-ca" aria-label="Graphique du chiffre d'affaires" role="img"></canvas></div>
+<!-- Graphiques -->
+<div class="grid xl:grid-cols-3 gap-4 md:gap-6 mb-6">
+  <div class="dash-card p-5 md:p-6 xl:col-span-2">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="font-bold text-slate-900 dark:text-white">Chiffre d'affaires</h2>
+        <p class="text-xs text-slate-400">Commandes livrées et payées{% for j, l in periodes %}{% if j == periode %} · {{ l }}{% endif %}{% endfor %}</p>
+      </div>
+    </div>
+    <div class="relative" style="height: 290px;"><canvas id="chart-ca" aria-label="Graphique du chiffre d'affaires" role="img"></canvas></div>
   </div>
-  <div class="dash-card p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Commandes par statut</h2>
-    <div class="relative" style="height: 280px;"><canvas id="chart-statuts" aria-label="Répartition des commandes par statut" role="img"></canvas></div>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-1">Commandes par statut</h2>
+    <p class="text-xs text-slate-400 mb-5">Sur la période</p>
+    <div class="relative" style="height: 290px;"><canvas id="chart-statuts" aria-label="Répartition des commandes par statut" role="img"></canvas></div>
   </div>
 </div>
 
 <div class="grid lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-  <div class="dash-card p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Top produits</h2>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-5">Top produits</h2>
     {% if top_produits %}
-    <ul class="space-y-3">
+    <ul class="space-y-4">
       {% for p in top_produits %}
       <li>
-        <div class="flex justify-between text-sm gap-2"><span class="text-slate-700 dark:text-slate-200 truncate">{{ p.nom_produit }}</span><span class="font-semibold text-slate-900 dark:text-white shrink-0">{{ p.quantite }} ×</span></div>
-        <p class="text-xs text-slate-400">{{ p.total|prix_fcfa }} FCFA</p>
+        <div class="flex justify-between items-center gap-3 text-sm mb-1.5">
+          <span class="flex items-center gap-2.5 min-w-0"><span class="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold flex items-center justify-center shrink-0">{{ forloop.counter }}</span><span class="font-semibold text-slate-800 dark:text-slate-100 truncate">{{ p.nom_produit }}</span></span>
+          <span class="font-bold text-slate-900 dark:text-white shrink-0">{{ p.quantite }}×</span>
+        </div>
+        <p class="text-xs text-slate-400 pl-[34px]">{{ p.total|prix_fcfa }} FCFA</p>
       </li>
       {% endfor %}
     </ul>
     {% else %}<p class="text-sm text-slate-400">Aucune vente sur la période.</p>{% endif %}
   </div>
 
-  <div class="dash-card p-5">
-    <div class="flex items-center justify-between mb-3">
-      <h2 class="font-semibold text-slate-900 dark:text-white">À traiter</h2>
-      <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente&tri=ancien" class="text-xs text-accent hover:underline">Tout voir</a>
+  <div class="dash-card p-5 md:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-bold text-slate-900 dark:text-white">À traiter</h2>
+      <a href="{% url 'dashboard:commandes_liste' %}?statut=en_attente&tri=ancien" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Tout voir</a>
     </div>
     {% if a_traiter %}
-    <div class="space-y-1">
+    <div class="space-y-1 -mx-2">
       {% for cmd in a_traiter %}
-      <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="flex justify-between items-center p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-        <div class="min-w-0"><p class="text-sm font-medium text-slate-900 dark:text-white truncate">#{{ cmd.id }} — {{ cmd.nom_client }}</p><p class="text-xs text-slate-400">{{ cmd.date_creation|timesince }}</p></div>
-        <span class="text-sm font-semibold text-slate-900 dark:text-white shrink-0 ml-2">{{ cmd.total|prix_fcfa }}</span>
+      <a href="{% url 'dashboard:commande_detail' cmd.id %}" class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition">
+        <span class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-extrabold flex items-center justify-center shrink-0">{{ cmd.nom_client|make_list|first|upper }}</span>
+        <div class="min-w-0 flex-1"><p class="text-sm font-semibold text-slate-900 dark:text-white truncate">#{{ cmd.id }} · {{ cmd.nom_client }}</p><p class="text-xs text-slate-400">il y a {{ cmd.date_creation|timesince }}</p></div>
+        <span class="text-sm font-bold text-slate-900 dark:text-white shrink-0">{{ cmd.total|prix_fcfa }}</span>
       </a>
       {% endfor %}
     </div>
-    {% else %}<p class="text-sm text-slate-400">Rien à traiter 🎉</p>{% endif %}
+    {% else %}<div class="text-center py-6"><p class="text-3xl mb-2">🎉</p><p class="text-sm text-slate-400">Tout est à jour, rien à traiter.</p></div>{% endif %}
   </div>
 
-  <div class="dash-card p-5">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-3">Paiements</h2>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-4">Paiements</h2>
     {% if graph_paiements %}
-    <ul class="space-y-2 text-sm">
-      {% for p in graph_paiements %}<li class="flex justify-between"><span class="text-slate-600 dark:text-slate-300">{{ p.label }}</span><span class="font-semibold text-slate-900 dark:text-white">{{ p.total }}</span></li>{% endfor %}
+    <ul class="space-y-3 text-sm">
+      {% for p in graph_paiements %}<li class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-300">{{ p.label }}</span><span class="pill bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200">{{ p.total }}</span></li>{% endfor %}
     </ul>
     {% else %}<p class="text-sm text-slate-400">Aucune commande sur la période.</p>{% endif %}
-    <div class="border-t border-slate-100 dark:border-slate-700 mt-4 pt-3">
-      <p class="text-xs text-slate-400">C.A. depuis l'ouverture</p>
-      <p class="text-lg font-bold text-accent">{{ ca_total|prix_fcfa }} FCFA</p>
+    <div class="mt-5 p-4 rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 dark:from-white/5 dark:to-blue-500/10 border border-slate-100 dark:border-white/5">
+      <p class="text-xs font-semibold text-slate-500">C.A. depuis l'ouverture</p>
+      <p class="text-xl font-extrabold text-blue-600 dark:text-blue-400 mt-0.5">{{ ca_total|prix_fcfa }} FCFA</p>
     </div>
   </div>
 </div>
 
-<div class="dash-card p-5 mb-6">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="font-semibold text-slate-900 dark:text-white">Dernières commandes</h2>
-    <a href="{% url 'dashboard:commandes_liste' %}" class="text-xs text-accent hover:underline">Toutes les commandes</a>
+<div class="dash-card overflow-hidden mb-6">
+  <div class="flex items-center justify-between px-5 md:px-6 py-4">
+    <h2 class="font-bold text-slate-900 dark:text-white">Dernières commandes</h2>
+    <a href="{% url 'dashboard:commandes_liste' %}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Toutes les commandes →</a>
   </div>
   {% if dernieres_commandes %}
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
-      <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+      <thead><tr><th class="dash-th">Commande</th><th class="dash-th">Client</th><th class="dash-th hidden sm:table-cell">Date</th><th class="dash-th">Total</th><th class="dash-th text-right">Statut</th></tr></thead>
+      <tbody class="divide-y divide-slate-100 dark:divide-white/5">
         {% for cmd in dernieres_commandes %}
-        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/40">
-          <td class="py-2.5 pr-3 font-medium"><a href="{% url 'dashboard:commande_detail' cmd.id %}" class="text-slate-900 dark:text-white hover:text-accent">#{{ cmd.id }}</a></td>
-          <td class="py-2.5 pr-3 text-slate-600 dark:text-slate-300">{{ cmd.nom_client }}</td>
-          <td class="py-2.5 pr-3 text-slate-400 hidden sm:table-cell">{{ cmd.date_creation|date:"d/m/Y H:i" }}</td>
-          <td class="py-2.5 pr-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap">{{ cmd.total|prix_fcfa }} FCFA</td>
-          <td class="py-2.5 text-right">{% include "dashboard/_badge_statut.html" with statut=cmd.statut libelle=cmd.get_statut_display %}</td>
+        <tr class="hover:bg-slate-50/70 dark:hover:bg-white/[.03] transition">
+          <td class="dash-td font-bold"><a href="{% url 'dashboard:commande_detail' cmd.id %}" class="text-slate-900 dark:text-white hover:text-blue-600">#{{ cmd.id }}</a></td>
+          <td class="dash-td">{{ cmd.nom_client }}</td>
+          <td class="dash-td text-slate-400 hidden sm:table-cell">{{ cmd.date_creation|date:"d/m/Y H:i" }}</td>
+          <td class="dash-td font-bold text-slate-900 dark:text-white whitespace-nowrap">{{ cmd.total|prix_fcfa }} FCFA</td>
+          <td class="dash-td text-right">{% include "dashboard/_badge_statut.html" with statut=cmd.statut libelle=cmd.get_statut_display %}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% else %}<p class="text-sm text-slate-400">Aucune commande pour le moment.</p>{% endif %}
+  {% else %}<p class="px-6 pb-6 text-sm text-slate-400">Aucune commande pour le moment.</p>{% endif %}
 </div>
 {% endif %}
 
 {% if peut_catalogue and stock_faible %}
-<div class="dash-card p-5 mb-6">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="font-semibold text-slate-900 dark:text-white">Stock à réapprovisionner</h2>
-    <a href="{% url 'dashboard:produits_liste' %}?stock=faible&tri=stock_asc" class="text-xs text-accent hover:underline">Voir tout</a>
+<div class="dash-card p-5 md:p-6 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="font-bold text-slate-900 dark:text-white">Stock à réapprovisionner</h2>
+    <a href="{% url 'dashboard:produits_liste' %}?stock=faible&tri=stock_asc" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Voir tout →</a>
   </div>
-  <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
+  <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
     {% for p in stock_faible %}
-    <li class="flex justify-between text-sm"><a href="{% url 'dashboard:produit_modifier' p.id %}" class="text-slate-600 dark:text-slate-300 hover:text-accent truncate">{{ p.nom }}</a><span class="font-semibold text-red-500 ml-2 shrink-0">{{ p.stock }}</span></li>
+    <li><a href="{% url 'dashboard:produit_modifier' p.id %}" class="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 dark:border-white/5 hover:border-orange-300 dark:hover:border-orange-500/40 transition">
+      <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{{ p.nom }}</span>
+      <span class="pill bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 shrink-0">{{ p.stock }} restant{{ p.stock|pluralize }}</span>
+    </a></li>
     {% endfor %}
   </ul>
 </div>
 {% endif %}
 
 {% if not peut_commandes and not peut_catalogue and not peut_avis %}
-<div class="dash-card p-8 text-center text-slate-500">Utilisez le menu pour accéder à vos sections.</div>
+<div class="dash-card p-10 text-center text-slate-500">Utilisez le menu pour accéder à vos sections.</div>
 {% endif %}
 
 {% endblock %}
@@ -184,41 +226,55 @@
   if (typeof Chart === 'undefined') return;
   const lire = (id) => { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { return null; } };
   const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v);
-  const palette = ['#f59e0b', '#2563eb', '#16a34a', '#ef4444'];
+  const sombre = () => document.documentElement.classList.contains('dark');
+  const grille = () => sombre() ? 'rgba(255,255,255,.06)' : 'rgba(15,23,42,.06)';
+  const texte = () => sombre() ? '#94a3b8' : '#64748b';
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.font.weight = 600;
+  const charts = [];
 
   const ca = lire('data-ca');
   const c1 = document.getElementById('chart-ca');
   if (ca && c1) {
     if (!ca.valeurs.some((v) => v > 0)) {
-      c1.parentElement.innerHTML = '<p class="text-sm text-slate-400">Pas encore de ventes livrées et payées sur cette période.</p>';
+      c1.parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-sm text-slate-400">Pas encore de ventes livrées et payées sur cette période.</div>';
     } else {
-      new Chart(c1, {
+      const ctx = c1.getContext('2d');
+      const degrade = ctx.createLinearGradient(0, 0, 0, 290);
+      degrade.addColorStop(0, 'rgba(37,99,235,.35)');
+      degrade.addColorStop(1, 'rgba(37,99,235,0)');
+      charts.push(new Chart(c1, {
         type: ca.valeurs.length > 45 ? 'bar' : 'line',
         data: { labels: ca.labels, datasets: [{
-          label: 'C.A. (FCFA)', data: ca.valeurs, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.15)',
-          fill: true, tension: .3, pointRadius: ca.valeurs.length > 31 ? 0 : 3, borderRadius: 4,
+          label: 'C.A. (FCFA)', data: ca.valeurs, borderColor: '#2563eb', backgroundColor: ca.valeurs.length > 45 ? '#2563eb' : degrade,
+          fill: true, tension: .35, borderWidth: 3, borderRadius: 8,
+          pointRadius: ca.valeurs.length > 31 ? 0 : 4, pointBackgroundColor: '#fff', pointBorderColor: '#2563eb', pointBorderWidth: 2, pointHoverRadius: 6,
         }] },
         options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' ' + fmt(c.parsed.y) + ' FCFA' } } },
-          scales: { y: { beginAtZero: true, ticks: { callback: fmt } }, x: { ticks: { maxTicksLimit: 10 } } },
+          responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
+          plugins: { legend: { display: false }, tooltip: { padding: 12, cornerRadius: 10, callbacks: { label: (c) => ' ' + fmt(c.parsed.y) + ' FCFA' } } },
+          scales: {
+            y: { beginAtZero: true, border: { display: false }, grid: { color: grille() }, ticks: { color: texte(), callback: fmt } },
+            x: { border: { display: false }, grid: { display: false }, ticks: { color: texte(), maxTicksLimit: 10 } },
+          },
         },
-      });
+      }));
     }
   }
 
   const st = lire('data-statuts');
   const c2 = document.getElementById('chart-statuts');
   if (st && c2) {
+    const couleurs = { 'En attente': '#f59e0b', 'En cours de livraison': '#3b82f6', 'Livrée et payée': '#10b981', 'Annulée': '#f43f5e' };
     const actifs = st.filter((d) => d.total > 0);
     if (!actifs.length) {
-      c2.parentElement.innerHTML = '<p class="text-sm text-slate-400">Aucune commande sur la période.</p>';
+      c2.parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-sm text-slate-400">Aucune commande sur la période.</div>';
     } else {
-      new Chart(c2, {
+      charts.push(new Chart(c2, {
         type: 'doughnut',
-        data: { labels: actifs.map((d) => d.statut), datasets: [{ data: actifs.map((d) => d.total), backgroundColor: palette, borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } },
-      });
+        data: { labels: actifs.map((d) => d.statut), datasets: [{ data: actifs.map((d) => d.total), backgroundColor: actifs.map((d) => couleurs[d.statut] || '#94a3b8'), borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { color: texte(), usePointStyle: true, pointStyle: 'circle', padding: 16 } } } },
+      }));
     }
   }
 })();

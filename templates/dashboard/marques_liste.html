@@ -3,12 +3,12 @@
 {% block content %}
 
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Marques</h1>
+  <h1 class="dash-title">Marques</h1>
 </div>
 
 <div class="grid md:grid-cols-2 gap-6">
   <!-- Liste des marques -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+  <div class="dash-card p-5">
     {% if marques %}
     <ul class="divide-y divide-slate-100 dark:divide-slate-700">
       {% for m in marques %}
@@ -28,7 +28,7 @@
         <button type="button"
                 data-delete-url="{% url 'dashboard:marque_supprimer' m.id %}"
                 data-objet-nom="{{ m.get_marque_display }}"
-                class="delete-btn text-xs bg-red-500 text-white rounded-md px-3 py-1.5 hover:bg-red-600 transition shrink-0">
+                class="delete-btn text-xs border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-lg px-3 py-1.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition font-semibold shrink-0">
           Supprimer
         </button>
       </li>
@@ -40,7 +40,7 @@
   </div>
 
   <!-- Ajouter une marque -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+  <div class="dash-card p-5">
     <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ajouter une marque</h2>
     <form method="post" enctype="multipart/form-data" class="space-y-4">
       {% csrf_token %}
@@ -68,7 +68,7 @@
         <p class="text-xs text-slate-400 mt-1">PNG transparent recommandé, format carré (ex. 200×200px).</p>
       </div>
 
-      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-5 py-2.5 rounded-md text-sm">
+      <button type="submit" class="dash-btn-primary">
         Ajouter
       </button>
     </form>
@@ -90,10 +90,10 @@
     </p>
     <form id="delete-form" method="post" class="flex flex-col sm:flex-row gap-3 justify-center">
       {% csrf_token %}
-      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">
+      <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm text-center">
         Oui, supprimer
       </button>
-      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-md hover:border-accent text-sm text-center">
+      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-lg hover:border-accent text-sm text-center">
         Annuler
       </button>
     </form>

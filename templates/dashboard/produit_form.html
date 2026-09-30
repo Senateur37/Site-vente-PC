@@ -3,14 +3,14 @@
 {% block content %}
 
 <div class="max-w-2xl mx-auto">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">{{ titre }}</h1>
+  <h1 class="dash-title mb-6">{{ titre }}</h1>
 
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6">
+  <div class="dash-card p-4 md:p-6">
     <form method="post" enctype="multipart/form-data" class="space-y-5">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
-        <div class="px-4 py-3 rounded-md text-sm border bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300">
+        <div class="px-4 py-3 rounded-lg text-sm border bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300">
           {{ form.non_field_errors }}
         </div>
       {% endif %}
@@ -25,7 +25,7 @@
         {% if field.name == 'description' %}
           <textarea name="{{ field.name }}" id="{{ field.id_for_label }}"
                     rows="4"
-                    class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400">{{ field.value|default:'' }}</textarea>
+                    class="dash-input">{{ field.value|default:'' }}</textarea>
 
         {% elif field.name == 'disponible' or field.name == 'a_la_une' %}
           <label class="inline-flex items-center gap-2 cursor-pointer">
@@ -38,14 +38,14 @@
         {% elif field.field.widget.input_type == 'file' %}
           <input type="file" name="{{ field.name }}" id="{{ field.id_for_label }}"
                  accept="image/*"
-                 class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
+                 class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
           {% if field.value and field.name == 'image' %}
             <p class="text-xs text-slate-400 mt-1">Image actuelle : {{ field.value }}</p>
           {% endif %}
 
         {% elif field.field.widget.input_type == 'select' %}
           <select name="{{ field.name }}" id="{{ field.id_for_label }}"
-                  class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200">
+                  class="dash-input">
             {% for choice in field.field.choices %}
               <option value="{{ choice.0 }}" {% if field.value|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>{{ choice.1 }}</option>
             {% endfor %}
@@ -59,7 +59,7 @@
                  {% if field.field.required %}required{% endif %}
                  {% if field.name == 'prix' or field.name == 'prix_barre' %}step="0.01" min="0"{% endif %}
                  {% if field.name == 'stock' %}min="0"{% endif %}
-                 class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
+                 class="dash-input"
                  placeholder="{{ field.help_text|default:'' }}">
           {% endwith %}
         {% endif %}
@@ -98,15 +98,15 @@
 
         <input type="file" name="images_supplementaires" id="id_images_supplementaires"
                accept="image/*" multiple
-               class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
+               class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
         <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Vous pouvez sélectionner plusieurs images à la fois (Ctrl+clic).</p>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 pt-2">
-        <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center text-sm">
+        <button type="submit" class="dash-btn-primary">
           {% if 'Ajouter' in titre %}Ajouter le produit{% else %}Enregistrer les modifications{% endif %}
         </button>
-        <a href="{% url 'dashboard:produits_liste' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent text-center text-sm">
+        <a href="{% url 'dashboard:produits_liste' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-lg hover:border-accent text-center text-sm">
           Annuler
         </a>
       </div>

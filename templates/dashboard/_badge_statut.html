@@ -1,6 +1,6 @@
 <span class="badge
-  {% if statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300
-  {% elif statut == 'en_livraison' %}bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300
-  {% elif statut == 'livree_payee' %}bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300
-  {% elif statut == 'annulee' %}bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300
-  {% else %}bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300{% endif %}">{{ libelle }}</span>
+  {% if statut == 'en_attente' %}bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400
+  {% elif statut == 'en_livraison' %}bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400
+  {% elif statut == 'livree_payee' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+  {% elif statut == 'annulee' %}bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400
+  {% else %}bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300{% endif %}"><span class="w-1.5 h-1.5 rounded-full mr-1.5 {% if statut == 'en_attente' %}bg-amber-500{% elif statut == 'en_livraison' %}bg-blue-500{% elif statut == 'livree_payee' %}bg-emerald-500{% elif statut == 'annulee' %}bg-rose-500{% else %}bg-slate-400{% endif %}"></span>{{ libelle }}</span>

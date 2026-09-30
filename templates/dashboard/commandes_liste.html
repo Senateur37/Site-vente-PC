@@ -5,7 +5,7 @@
 
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
   <div>
-    <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Commandes</h1>
+    <h1 class="dash-title">Commandes</h1>
     <p class="text-sm text-slate-500">{{ total }} résultat{{ total|pluralize }}</p>
   </div>
   <a href="{% url 'dashboard:commandes_export' %}?{{ querystring }}" class="dash-btn-ghost self-start">⬇ Exporter en CSV{% if querystring %} (filtre actif){% endif %}</a>

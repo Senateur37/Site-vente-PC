@@ -2,12 +2,12 @@
 {% block title %}{{ titre }} — Tableau de bord{% endblock %}
 {% block content %}
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{{ titre }}</h1>
-  <a href="{% url url_ajouter %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">+ Ajouter</a>
+  <h1 class="dash-title">{{ titre }}</h1>
+  <a href="{% url url_ajouter %}" class="dash-btn-primary">+ Ajouter</a>
 </div>
 {% if aide %}<p class="text-sm text-slate-500 dark:text-slate-400 mb-6">{{ aide }}</p>{% endif %}
 
-<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-x-auto">
+<div class="dash-card overflow-x-auto">
   {% if lignes %}
   <table class="w-full text-sm">
     <thead class="bg-slate-50 dark:bg-slate-700/50 text-left text-slate-500 dark:text-slate-400">

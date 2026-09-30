@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="max-w-3xl">
-  <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Paramètres du site</h1>
+  <h1 class="dash-title mb-2">Paramètres du site</h1>
   <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
     Tout ce qui est modifié ici s'affiche immédiatement sur la vitrine : nom, logo, textes de l'accueil, contact, couleurs, livraison…
   </p>
@@ -11,11 +11,11 @@
   <form method="post" enctype="multipart/form-data" class="space-y-6">
     {% csrf_token %}
     {% if form.non_field_errors %}
-      <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-300 text-red-700">{{ form.non_field_errors }}</div>
+      <div class="px-4 py-3 rounded-lg text-sm border bg-red-50 border-red-300 text-red-700">{{ form.non_field_errors }}</div>
     {% endif %}
 
     {% for titre, champs in form.groupes %}
-    <fieldset class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+    <fieldset class="dash-card p-5">
       <legend class="font-semibold text-slate-900 dark:text-white px-2">{{ titre }}</legend>
       <div class="mt-4 grid gap-4 {% if champs|length > 1 and titre == 'Apparence' or titre == 'Livraison et monnaie' %}sm:grid-cols-2{% endif %}">
         {% for champ in champs %}{% include "dashboard/_champ.html" with champ=champ %}{% endfor %}
@@ -24,7 +24,7 @@
     {% endfor %}
 
     <div class="flex gap-3 pt-2">
-      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md transition">
+      <button type="submit" class="dash-btn-primary">
         Enregistrer
       </button>
     </div>

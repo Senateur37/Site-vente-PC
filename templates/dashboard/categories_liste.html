@@ -3,12 +3,12 @@
 {% block content %}
 
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">Catégories</h1>
+  <h1 class="dash-title">Catégories</h1>
 </div>
 
 <div class="grid md:grid-cols-2 gap-6">
   <!-- Liste des catégories -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+  <div class="dash-card p-5">
     {% if categories %}
     <ul class="divide-y divide-slate-100 dark:divide-slate-700">
       {% for cat in categories %}
@@ -20,7 +20,7 @@
         <button type="button"
                 data-delete-url="{% url 'dashboard:categorie_supprimer' cat.id %}"
                 data-objet-nom="{{ cat.nom }}"
-                class="delete-btn text-xs bg-red-500 text-white rounded-md px-3 py-1.5 hover:bg-red-600 transition">
+                class="delete-btn text-xs border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 rounded-lg px-3 py-1.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition font-semibold">
           Supprimer
         </button>
       </li>
@@ -32,7 +32,7 @@
   </div>
 
   <!-- Ajouter une catégorie -->
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+  <div class="dash-card p-5">
     <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Ajouter une catégorie</h2>
     <form method="post" class="space-y-4">
       {% csrf_token %}
@@ -45,14 +45,14 @@
         <input type="text" name="{{ field.name }}" id="{{ field.id_for_label }}"
                value="{{ field.value|default:'' }}"
                {% if field.field.required %}required{% endif %}
-               class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
+               class="dash-input"
                placeholder="Nom de la catégorie">
         {% if field.errors %}
           <p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ field.errors.0 }}</p>
         {% endif %}
       </div>
       {% endfor %}
-      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-5 py-2.5 rounded-md text-sm">
+      <button type="submit" class="dash-btn-primary">
         Ajouter
       </button>
     </form>
@@ -74,10 +74,10 @@
     </p>
     <form id="delete-form" method="post" class="flex flex-col sm:flex-row gap-3 justify-center">
       {% csrf_token %}
-      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">
+      <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-2.5 rounded-lg text-sm text-center">
         Oui, supprimer
       </button>
-      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-md hover:border-accent text-sm text-center">
+      <button type="button" id="delete-cancel-btn" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-5 py-2.5 rounded-lg hover:border-accent text-sm text-center">
         Annuler
       </button>
     </form>
