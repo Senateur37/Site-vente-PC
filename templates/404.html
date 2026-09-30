@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Page introuvable — TechShop{% endblock %}
+{% block content %}
+<div class="py-16 md:py-24 text-center max-w-md mx-auto">
+  <p class="text-6xl md:text-7xl font-extrabold text-accent mb-4">404</p>
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">Page introuvable</h1>
+  <p class="text-slate-500 dark:text-slate-400 mb-8">La page que vous cherchez n'existe pas ou a été déplacée.</p>
+  <a href="{% url 'produits:liste' %}" class="inline-flex items-center gap-2 bg-accent hover:bg-accentdark text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition">← Retour à la boutique</a>
+</div>
+{% endblock %}

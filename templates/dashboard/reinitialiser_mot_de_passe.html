@@ -1,20 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr" class="">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nouveau mot de passe — TechShop</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: { accent: '#2563eb', accentdark: '#1d4ed8', surface: '#f8fafc' }
-        }
-      }
-    }
-  </script>
+  <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
 </head>
 <body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col">
 

@@ -88,3 +88,13 @@ techshop/
 Les paramètres du site (nom, description, logo, contact) se modifient depuis le dashboard :
 **Dashboard → Paramètres**
 
+
+## Front-end (Tailwind CSS)
+
+Le CSS est compilé (plus de CDN) dans `static/css/tailwind.css`, fichier versionné : le serveur de production n'a pas besoin de Node.
+Après avoir ajouté ou changé des classes Tailwind dans les templates :
+
+```bash
+npm install        # une seule fois
+npm run build:css  # ou : npm run watch:css pendant le développement
+```

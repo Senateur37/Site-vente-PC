@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'techshop-v2';
+const CACHE_VERSION = 'techshop-v3';
 const PRECACHE = [
   '/',
   '/static/manifest.json'
