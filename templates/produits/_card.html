@@ -1,46 +1,46 @@
 {% load static %}
 {% load produit_tags %}
 <a href="{% url 'produits:detail' produit.slug %}"
-   class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden hover:border-accent/60 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col relative">
+   class="group bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-white/40 dark:border-slate-700/50 rounded-[1.25rem] overflow-hidden hover:border-accent/50 hover:shadow-2xl hover:shadow-accent/10 hover:-translate-y-1 transition-all duration-500 flex flex-col relative">
 
   {# ─── BADGES ─── #}
-  <div class="absolute top-2 left-2 z-10 flex flex-col gap-1">
+  <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
     {% if produit.est_nouveau %}
-    <span class="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">Nouveau</span>
+    <span class="bg-gradient-to-r from-green-400 to-green-600 text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-green-500/30">Nouveau</span>
     {% endif %}
     {% if produit.en_promo and produit.prix_barre %}
-    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">-{{ produit.pourcentage_reduction }}%</span>
+    <span class="bg-gradient-to-r from-red-500 to-rose-600 text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-red-500/30">-{{ produit.pourcentage_reduction }}%</span>
     {% endif %}
   </div>
   {% if not produit.en_stock %}
-  <div class="absolute top-2 right-2 z-10">
-    <span class="bg-red-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">Rupture</span>
+  <div class="absolute top-3 right-3 z-10">
+    <span class="bg-slate-900/80 backdrop-blur-sm text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg">Rupture</span>
   </div>
   {% endif %}
 
   {# ─── IMAGE ─── #}
-  <div class="aspect-[4/3] bg-surface dark:bg-slate-700 flex items-center justify-center text-slate-400 text-xs overflow-hidden relative">
+  <div class="aspect-square bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center text-slate-400 text-xs overflow-hidden relative">
     {% if produit.image %}
       <img src="{{ produit.image.url }}" alt="{{ produit.nom }}"
-           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
            loading="lazy">
     {% else %}
-      <div class="flex flex-col items-center gap-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <div class="flex flex-col items-center gap-2 opacity-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
-        <span>pas d'image</span>
       </div>
     {% endif %}
 
-    {# ─── BOUTON AJOUT (toujours visible) ─── #}
+    {# ─── BOUTON AJOUT (survol) ─── #}
     {% if produit.en_stock %}
-    <div class="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/50 to-transparent">
+    <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/60 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300">
       <form method="post" action="{% url 'commandes:ajouter' produit.id %}" class="quick-add-form">
         {% csrf_token %}
         <input type="hidden" name="quantite" value="1">
-        <button type="submit" class="w-full bg-accent hover:bg-accentdark text-white text-xs font-semibold py-2 rounded-lg shadow-lg transition-colors">
-          Ajouter au panier
+        <button type="submit" class="w-full bg-white text-slate-900 hover:bg-accent hover:text-white text-xs font-bold py-2.5 rounded-xl shadow-lg transition-colors flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          Ajouter
         </button>
       </form>
     </div>
@@ -48,44 +48,44 @@
   </div>
 
   {# ─── INFOS ─── #}
-  <div class="p-3 flex flex-col gap-1 flex-1">
+  <div class="p-4 flex flex-col gap-2 flex-1">
     {# Catégorie + Marque #}
-    <div class="flex items-center gap-1.5 flex-wrap">
-      <span class="text-accent text-[10px] uppercase tracking-wide font-medium">{{ produit.categorie.nom }}</span>
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-accent text-[10px] font-extrabold uppercase tracking-widest">{{ produit.categorie.nom }}</span>
       {% if produit.marque %}
-        <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase">· {{ produit.get_marque_display }}</span>
+        <span class="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-medium border-l border-slate-300 dark:border-slate-600 pl-2">{{ produit.get_marque_display }}</span>
       {% endif %}
     </div>
 
     {# Nom #}
-    <span class="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-accent transition-colors line-clamp-1">{{ produit.nom }}</span>
+    <span class="font-bold text-sm md:text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors line-clamp-2 leading-snug">{{ produit.nom }}</span>
 
     {# Note #}
     {% if produit.nb_avis %}
-    <div class="flex items-center gap-1">
-      <span class="text-amber-500 text-xs">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
-      <span class="text-[11px] text-slate-400">{{ produit.note_moyenne }} ({{ produit.nb_avis }})</span>
+    <div class="flex items-center gap-1.5 mt-auto">
+      <span class="text-yellow-400 text-xs">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
+      <span class="text-xs text-slate-500 font-medium">{{ produit.note_moyenne }} ({{ produit.nb_avis }})</span>
     </div>
     {% endif %}
 
     {# Stock #}
     {% if produit.en_stock %}
-    <div class="flex items-center gap-1.5">
-      <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot shrink-0"></span>
-      <span class="text-[11px] text-slate-500 dark:text-slate-400">{{ produit.stock }} en stock</span>
+    <div class="flex items-center gap-1.5 mt-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot shrink-0 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+      <span class="text-[11px] text-green-600 dark:text-green-400 font-semibold">{{ produit.stock }} en stock</span>
     </div>
     {% else %}
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5 mt-1">
       <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
-      <span class="text-[11px] text-red-500 dark:text-red-400 font-medium">Rupture de stock</span>
+      <span class="text-[11px] text-red-500 dark:text-red-400 font-bold">Rupture de stock</span>
     </div>
     {% endif %}
 
     {# Prix #}
-    <div class="flex items-baseline gap-2 mt-1">
-      <span class="font-bold text-base text-slate-900 dark:text-white">{{ produit.prix|prix_fcfa }} FCFA</span>
+    <div class="flex items-baseline gap-2 mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50">
+      <span class="font-black text-lg text-slate-900 dark:text-white">{{ produit.prix|prix_fcfa }} <span class="text-xs font-semibold text-slate-500">FCFA</span></span>
       {% if produit.en_promo and produit.prix_barre %}
-        <span class="text-xs text-slate-400 line-through">{{ produit.prix_barre|prix_fcfa }} FCFA</span>
+        <span class="text-xs text-slate-400 line-through decoration-red-500/50 decoration-2">{{ produit.prix_barre|prix_fcfa }}</span>
       {% endif %}
     </div>
 
