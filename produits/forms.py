@@ -5,12 +5,13 @@ from .models import Produit, Categorie, LogoMarque, Avis
 class ProduitForm(forms.ModelForm):
     class Meta:
         model = Produit
-        fields = ['categorie', 'marque', 'nom', 'slug', 'description', 'prix', 'image', 'stock', 'disponible', 'a_la_une']
+        fields = ['categorie', 'marque', 'nom', 'slug', 'description', 'prix', 'prix_barre', 'image', 'stock', 'disponible', 'a_la_une']
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ex: hp-pavilion-15'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'prix': forms.NumberInput(attrs={'class': 'form-control'}),
+            'prix_barre': forms.NumberInput(attrs={'class': 'form-control'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'categorie': forms.Select(attrs={'class': 'form-control'}),
             'marque': forms.Select(attrs={'class': 'form-control'}),

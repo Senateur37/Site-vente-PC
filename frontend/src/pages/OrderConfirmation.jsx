@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { useApi, useTitre } from '../hooks'
-import { prixFcfa } from '../utils'
+import { useShop } from '../context/ShopContext'
 import NotFound from './NotFound'
 
 const PAIEMENT = {
@@ -11,6 +11,7 @@ const PAIEMENT = {
 
 export default function OrderConfirmation() {
   useTitre('Commande confirmée')
+  const { prix } = useShop()
   const { id } = useParams()
   const { data: c, chargement, erreur } = useApi(`/api/commandes/${id}/`)
 
@@ -33,15 +34,15 @@ export default function OrderConfirmation() {
           {c.lignes.map((l, i) => (
             <li key={i} className="flex justify-between gap-3 text-sm">
               <span className="text-slate-600 dark:text-slate-300">{l.nom_produit} × {l.quantite}</span>
-              <span className="font-medium whitespace-nowrap">{prixFcfa(l.sous_total)} FCFA</span>
+              <span className="font-medium whitespace-nowrap">{prix(l.sous_total)}</span>
             </li>
           ))}
         </ul>
         <div className="border-t border-slate-200 dark:border-slate-700 pt-3 space-y-2 text-sm">
-          <div className="flex justify-between"><span className="text-slate-500">Sous-total</span><span>{prixFcfa(c.sous_total)} FCFA</span></div>
-          {Number(c.reduction) > 0 && <div className="flex justify-between"><span className="text-slate-500">Réduction</span><span>-{prixFcfa(c.reduction)} FCFA</span></div>}
-          <div className="flex justify-between"><span className="text-slate-500">Livraison</span><span>{Number(c.frais_livraison) === 0 ? 'Gratuite' : `${prixFcfa(c.frais_livraison)} FCFA`}</span></div>
-          <div className="flex justify-between text-base font-bold"><span>Total</span><span className="text-accent">{prixFcfa(c.total)} FCFA</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">Sous-total</span><span>{prix(c.sous_total)}</span></div>
+          {Number(c.reduction) > 0 && <div className="flex justify-between"><span className="text-slate-500">Réduction</span><span>-{prix(c.reduction)}</span></div>}
+          <div className="flex justify-between"><span className="text-slate-500">Livraison</span><span>{Number(c.frais_livraison) === 0 ? 'Gratuite' : `${prix(c.frais_livraison)}`}</span></div>
+          <div className="flex justify-between text-base font-bold"><span>Total</span><span className="text-accent">{prix(c.total)}</span></div>
         </div>
         <div className="border-t border-slate-200 dark:border-slate-700 mt-4 pt-3 text-sm space-y-1">
           <p><span className="text-slate-500">Paiement :</span> {c.methode_paiement_label}</p>

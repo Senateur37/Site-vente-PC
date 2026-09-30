@@ -57,7 +57,7 @@
                  name="{{ field.name }}" id="{{ field.id_for_label }}"
                  value="{{ field.value|default:'' }}"
                  {% if field.field.required %}required{% endif %}
-                 {% if field.name == 'prix' %}step="0.01" min="0"{% endif %}
+                 {% if field.name == 'prix' or field.name == 'prix_barre' %}step="0.01" min="0"{% endif %}
                  {% if field.name == 'stock' %}min="0"{% endif %}
                  class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-accent dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-400"
                  placeholder="{{ field.help_text|default:'' }}">

@@ -5,7 +5,6 @@ import Stars from '../components/Stars'
 import { api } from '../api'
 import { useShop } from '../context/ShopContext'
 import { useApi, useTitre } from '../hooks'
-import { prixFcfa } from '../utils'
 import NotFound from './NotFound'
 
 function FormulaireAvis({ slug }) {
@@ -53,7 +52,7 @@ function FormulaireAvis({ slug }) {
 
 export default function ProductDetail() {
   const { slug } = useParams()
-  const { ajouter } = useShop()
+  const { ajouter, prix } = useShop()
   const { data: p, chargement, erreur } = useApi(`/api/produits/${slug}/`)
   const [qte, setQte] = useState(1)
   const [indexImage, setIndexImage] = useState(0)
@@ -98,10 +97,10 @@ export default function ProductDetail() {
               <span className="text-sm text-slate-500 underline">{p.note_moyenne}/5 ({p.nb_avis} avis)</span>
             </a>
           )}
-          <p className="text-3xl font-extrabold text-accent">{prixFcfa(p.prix)} FCFA</p>
+          <p className="text-3xl font-extrabold text-accent">{prix(p.prix)}</p>
           {p.en_promo && (
             <p className="text-sm text-slate-400 mb-2">
-              <span className="line-through">{prixFcfa(p.prix_barre)} FCFA</span>{' '}
+              <span className="line-through">{prix(p.prix_barre)}</span>{' '}
               <span className="text-red-500 font-bold">-{p.pourcentage_reduction}%</span>
             </p>
           )}

@@ -34,6 +34,22 @@ def validate_image_file(value):
         raise ValidationError("L'image ne doit pas dépasser 5 Mo.")
 
 
+class Engagement(models.Model):
+    """Argument commercial affiché sur la page d'accueil, le pied de page et « À propos »."""
+    icone = models.CharField(max_length=8, default="✓", verbose_name="Icône (emoji)")
+    titre = models.CharField(max_length=80)
+    texte = models.CharField(max_length=160, blank=True)
+    ordre = models.PositiveSmallIntegerField(default=0)
+    actif = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["ordre", "id"]
+        verbose_name = "Engagement"
+
+    def __str__(self):
+        return self.titre
+
+
 class SiteSettings(models.Model):
     # Identifiant unique (on utilise le pattern singleton)
     id = models.BigAutoField(primary_key=True)
@@ -76,6 +92,33 @@ class SiteSettings(models.Model):
         max_digits=10, decimal_places=2, default=0,
         verbose_name="Livraison gratuite à partir de (FCFA)",
         help_text="0 = jamais de livraison gratuite.",
+    )
+
+    # Page d'accueil (bandeau principal)
+    hero_titre = models.CharField(max_length=120, default="Le meilleur du", verbose_name="Bandeau : titre")
+    hero_titre_accent = models.CharField(
+        max_length=120, default="matériel informatique", blank=True,
+        verbose_name="Bandeau : fin du titre (mise en couleur)",
+    )
+    hero_texte = models.CharField(
+        max_length=255, blank=True,
+        default="Ordinateurs, accessoires et composants garantis, livrés au meilleur prix.",
+        verbose_name="Bandeau : texte",
+    )
+    hero_bouton = models.CharField(max_length=40, default="Découvrir la boutique", verbose_name="Bandeau : bouton")
+
+    # Page « À propos »
+    apropos_texte = models.TextField(
+        blank=True,
+        default=(
+            "Votre boutique en ligne de référence pour le matériel informatique : ordinateurs portables "
+            "et de bureau, PC gamer, composants et accessoires.\n\n"
+            "Nous sélectionnons avec soin des produits authentiques des plus grandes marques au meilleur prix, "
+            "avec la garantie d'un service après-vente sérieux.\n\n"
+            "Commandez en quelques clics : paiement à la livraison ou Mobile Money, et livraison rapide."
+        ),
+        verbose_name="Page « À propos » : texte",
+        help_text="Séparez les paragraphes par une ligne vide.",
     )
 
     # Mode sombre par défaut

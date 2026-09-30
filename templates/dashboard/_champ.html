@@ -1,0 +1,23 @@
+<div>
+  <label for="{{ champ.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+    {% if champ.field.widget.input_type != 'checkbox' %}{{ champ.label }}{% if champ.field.required %} <span class="text-red-500">*</span>{% endif %}{% endif %}
+  </label>
+
+  {% if champ.field.widget.input_type == 'checkbox' %}
+    <label class="inline-flex items-center gap-2 cursor-pointer">
+      {{ champ }}
+      <span class="text-sm text-slate-600 dark:text-slate-300">{{ champ.label }}</span>
+    </label>
+  {% elif champ.field.widget.input_type == 'file' %}
+    {% if champ.value %}
+      <p class="text-xs text-slate-400 mb-1">Actuel : {{ champ.value }}</p>
+    {% endif %}
+    <input type="file" name="{{ champ.html_name }}" id="{{ champ.id_for_label }}" accept="image/*"
+           class="block w-full text-sm text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-accent/10 file:text-accent hover:file:bg-accent/20">
+  {% else %}
+    {{ champ }}
+  {% endif %}
+
+  {% if champ.errors %}<p class="text-red-500 dark:text-red-400 text-xs mt-1">{{ champ.errors.0 }}</p>{% endif %}
+  {% if champ.help_text %}<p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ champ.help_text }}</p>{% endif %}
+</div>

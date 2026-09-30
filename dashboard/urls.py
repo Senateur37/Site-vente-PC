@@ -43,6 +43,20 @@ urlpatterns = [
     # Clients
     path('clients/', views.liste_clients, name='clients_liste'),
 
+    # Contenu du site affiché sur la vitrine
+    path('engagements/', views.engagements_liste, name='engagement_liste'),
+    path('engagements/ajouter/', views.engagement_editer, name='engagement_ajouter'),
+    path('engagements/<int:pk>/modifier/', views.engagement_editer, name='engagement_modifier'),
+    path('engagements/<int:pk>/supprimer/', views.engagement_supprimer, name='engagement_supprimer'),
+    path('sections/', views.sections_liste, name='section_liste'),
+    path('sections/ajouter/', views.section_editer, name='section_ajouter'),
+    path('sections/<int:pk>/modifier/', views.section_editer, name='section_modifier'),
+    path('sections/<int:pk>/supprimer/', views.section_supprimer, name='section_supprimer'),
+    path('codes-promo/', views.codes_promo_liste, name='code_promo_liste'),
+    path('codes-promo/ajouter/', views.code_promo_editer, name='code_promo_ajouter'),
+    path('codes-promo/<int:pk>/modifier/', views.code_promo_editer, name='code_promo_modifier'),
+    path('codes-promo/<int:pk>/supprimer/', views.code_promo_supprimer, name='code_promo_supprimer'),
+
     # Parametres
     path('parametres/', views.parametres, name='parametres'),
 

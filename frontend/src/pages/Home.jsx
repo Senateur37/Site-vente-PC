@@ -3,12 +3,6 @@ import ProductCard from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
 import { useApi, useTitre } from '../hooks'
 
-const ENGAGEMENTS = [
-  { icone: '🚚', titre: 'Livraison rapide', texte: 'Partout, à votre porte' },
-  { icone: '💳', titre: 'Paiement à la livraison', texte: 'Sécurité garantie' },
-  { icone: '🛡️', titre: 'Produits garantis', texte: 'Qualité 100% vérifiée' },
-]
-
 function Grille({ produits }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
@@ -33,6 +27,8 @@ export default function Home() {
   useTitre('')
   const { site } = useShop()
   const { data, chargement, erreur } = useApi('/api/accueil/')
+  const hero = site?.hero
+  const engagements = site?.engagements || []
 
   return (
     <>
@@ -46,19 +42,18 @@ export default function Home() {
             {site?.nom || 'TechShop'}
           </span>
           <h1 className="text-3xl md:text-5xl font-black leading-tight mb-4 tracking-tight">
-            Le meilleur du <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">matériel informatique</span>
+            {hero?.titre}{' '}
+            {hero?.titre_accent && <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">{hero.titre_accent}</span>}
           </h1>
-          <p className="text-sm md:text-base text-slate-300 mb-8 max-w-lg leading-relaxed">
-            {site?.description || 'Ordinateurs, accessoires et composants garantis, livrés au meilleur prix.'}
-          </p>
+          {hero?.texte && <p className="text-sm md:text-base text-slate-300 mb-8 max-w-lg leading-relaxed">{hero.texte}</p>}
           <Link to="/boutique" className="inline-flex items-center gap-3 bg-white text-slate-900 font-bold text-sm px-7 py-3.5 rounded-xl hover:scale-105 transition">
-            Découvrir la boutique →
+            {hero?.bouton || 'Découvrir la boutique'} →
           </Link>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 md:mb-10 text-sm">
-        {ENGAGEMENTS.map((e) => (
+        {engagements.map((e) => (
           <div key={e.titre} className="card flex items-center gap-4 px-5 py-4">
             <span className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl" aria-hidden="true">{e.icone}</span>
             <div>

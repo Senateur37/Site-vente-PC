@@ -23,7 +23,7 @@ from commandes.services import (
     StockInsuffisant, calculer_livraison, creer_commande, envoyer_confirmation,
 )
 from dashboard import throttle
-from dashboard.models import SiteSettings
+from dashboard.models import Engagement, SiteSettings
 from produits.forms import AvisForm
 from produits.models import Avis, Categorie, Favori, LogoMarque, Produit, SectionAccueil
 from produits.views import _get_section_produits
@@ -72,7 +72,18 @@ def site(request):
         'nom': p.site_nom,
         'description': p.site_description,
         'logo': _media(p.logo),
+        'favicon': _media(p.favicon),
         'banniere': _media(p.banniere),
+        'hero': {
+            'titre': p.hero_titre, 'titre_accent': p.hero_titre_accent,
+            'texte': p.hero_texte or p.site_description, 'bouton': p.hero_bouton,
+        },
+        'apropos': [t.strip() for t in p.apropos_texte.replace('\r', '').split('\n\n') if t.strip()],
+        'engagements': [
+            {'icone': e.icone, 'titre': e.titre, 'texte': e.texte}
+            for e in Engagement.objects.filter(actif=True)
+        ],
+        'couleurs': {'accent': p.accent_couleur, 'accent_sombre': p.accent_sombre},
         'telephone': p.telephone,
         'adresse': p.adresse,
         'email': p.email,

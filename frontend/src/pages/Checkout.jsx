@@ -3,7 +3,6 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useShop } from '../context/ShopContext'
 import { useTitre } from '../hooks'
-import { prixFcfa } from '../utils'
 
 function Champ({ label, erreurs, children }) {
   return (
@@ -18,7 +17,7 @@ function Champ({ label, erreurs, children }) {
 export default function Checkout() {
   useTitre('Commander')
   const navigate = useNavigate()
-  const { site, panier, notifier, rafraichirPanier } = useShop()
+  const { site, panier, notifier, rafraichirPanier, prix } = useShop()
   const [form, setForm] = useState({
     nom_client: '', telephone: '', email: '', adresse: '', note: '', code_promo: '', methode_paiement: 'a_la_livraison',
   })
@@ -79,7 +78,7 @@ export default function Checkout() {
             {erreurs.methode_paiement && <span className="text-xs text-red-600">{erreurs.methode_paiement[0]}</span>}
           </fieldset>
 
-          <button className="btn-primary w-full" disabled={envoi}>{envoi ? 'Envoi en cours…' : `Confirmer la commande · ${prixFcfa(panier.total)} FCFA`}</button>
+          <button className="btn-primary w-full" disabled={envoi}>{envoi ? 'Envoi en cours…' : `Confirmer la commande · ${prix(panier.total)}`}</button>
         </form>
 
         <aside className="card p-5 h-fit text-sm space-y-2">
@@ -87,11 +86,11 @@ export default function Checkout() {
           {panier.lignes.map(({ produit, quantite, sous_total }) => (
             <div key={produit.id} className="flex justify-between gap-3">
               <span className="text-slate-600 dark:text-slate-300">{produit.nom} × {quantite}</span>
-              <span className="whitespace-nowrap">{prixFcfa(sous_total)} FCFA</span>
+              <span className="whitespace-nowrap">{prix(sous_total)}</span>
             </div>
           ))}
-          <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-2"><span className="text-slate-500">Livraison</span><span>{Number(panier.frais_livraison) === 0 ? 'Gratuite' : `${prixFcfa(panier.frais_livraison)} FCFA`}</span></div>
-          <div className="flex justify-between font-bold text-base"><span>Total</span><span className="text-accent">{prixFcfa(panier.total)} FCFA</span></div>
+          <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-2"><span className="text-slate-500">Livraison</span><span>{Number(panier.frais_livraison) === 0 ? 'Gratuite' : `${prix(panier.frais_livraison)}`}</span></div>
+          <div className="flex justify-between font-bold text-base"><span>Total</span><span className="text-accent">{prix(panier.total)}</span></div>
           <Link to="/panier" className="text-xs text-accent hover:underline">Modifier le panier</Link>
         </aside>
       </div>

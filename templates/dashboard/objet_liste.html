@@ -1,0 +1,35 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}{{ titre }} — Tableau de bord{% endblock %}
+{% block content %}
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">{{ titre }}</h1>
+  <a href="{% url url_ajouter %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-5 py-2.5 rounded-md text-sm text-center">+ Ajouter</a>
+</div>
+{% if aide %}<p class="text-sm text-slate-500 dark:text-slate-400 mb-6">{{ aide }}</p>{% endif %}
+
+<div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-x-auto">
+  {% if lignes %}
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 dark:bg-slate-700/50 text-left text-slate-500 dark:text-slate-400">
+      <tr>
+        {% for e in entetes %}<th class="px-4 py-3 font-medium">{{ e }}</th>{% endfor %}
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+      {% for l in lignes %}
+      <tr>
+        {% for c in l.cellules %}<td class="px-4 py-3 text-slate-700 dark:text-slate-200">{{ c }}</td>{% endfor %}
+        <td class="px-4 py-3 text-right whitespace-nowrap">
+          <a href="{% url url_modifier l.obj.pk %}" class="text-accent hover:underline mr-3">Modifier</a>
+          <a href="{% url url_supprimer l.obj.pk %}" class="text-red-500 hover:underline">Supprimer</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="text-sm text-slate-400 text-center py-10">Aucun élément pour le moment.</p>
+  {% endif %}
+</div>
+{% endblock %}

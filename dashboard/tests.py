@@ -96,3 +96,114 @@ class CommandeStaffTests(DashboardBase):
         self.client.post(url, {'statut': 'en_attente'})
         c.refresh_from_db()
         self.assertEqual(c.statut, 'annulee')
+
+
+class ContenuDuSiteTests(DashboardBase):
+    """Ce qui est saisi dans le dashboard doit apparaître dans l'API de la vitrine."""
+
+    def setUp(self):
+        super().setUp()
+        self.client.login(username='admin', password='MotDePasse!2024')
+
+    def _params(self, **extra):
+        """Données POST du formulaire Paramètres, pré-remplies avec les valeurs actuelles."""
+        from django import forms
+        from dashboard.forms import SiteSettingsForm
+        from dashboard.models import SiteSettings
+        form = SiteSettingsForm(instance=SiteSettings.get_settings())
+        data = {}
+        for nom, champ in form.fields.items():
+            if isinstance(champ, forms.FileField):
+                continue
+            valeur = form[nom].value()
+            data[nom] = 'on' if valeur is True else valeur if valeur is not None else ''
+            if valeur is False:
+                del data[nom]
+        data.update(extra)
+        return data
+
+    def test_parametres_vers_api(self):
+        r = self.client.post(reverse('dashboard:parametres'), self._params(
+            site_nom='Ma Boutique', hero_titre='Bienvenue chez', hero_titre_accent='Ma Boutique',
+            hero_bouton='Entrer', telephone='01 02', whatsapp_number='+22370000000',
+            facebook_url='https://fb.com/x', footer_texte='Livraison 24h', monnaie_symbole='XOF',
+            accent_couleur='#ff0000', apropos_texte='Premier.\n\nSecond.',
+        ))
+        self.assertEqual(r.status_code, 302)
+        site = self.client.get('/api/site/').json()
+        self.assertEqual(site['nom'], 'Ma Boutique')
+        self.assertEqual(site['hero']['titre'], 'Bienvenue chez')
+        self.assertEqual(site['hero']['bouton'], 'Entrer')
+        self.assertEqual(site['telephone'], '01 02')
+        self.assertEqual(site['whatsapp'], '+22370000000')
+        self.assertEqual(site['facebook'], 'https://fb.com/x')
+        self.assertEqual(site['footer_texte'], 'Livraison 24h')
+        self.assertEqual(site['monnaie'], 'XOF')
+        self.assertEqual(site['couleurs']['accent'], '#ff0000')
+        self.assertEqual(site['apropos'], ['Premier.', 'Second.'])
+
+    def test_couleur_invalide_refusee(self):
+        r = self.client.post(reverse('dashboard:parametres'), self._params(accent_couleur='rouge'))
+        self.assertEqual(r.status_code, 200)
+        from dashboard.models import SiteSettings
+        self.assertEqual(SiteSettings.get_settings().accent_couleur, '#2563eb')
+
+    def test_engagements_par_defaut_et_crud(self):
+        from dashboard.models import Engagement
+        self.assertEqual(len(self.client.get('/api/site/').json()['engagements']), 3)
+        self.client.post(reverse('dashboard:engagement_ajouter'),
+                         {'icone': '⭐', 'titre': 'Service premium', 'texte': 'x', 'ordre': 0, 'actif': 'on'})
+        titres = [e['titre'] for e in self.client.get('/api/site/').json()['engagements']]
+        self.assertIn('Service premium', titres)
+        e = Engagement.objects.get(titre='Service premium')
+        self.client.post(reverse('dashboard:engagement_supprimer', args=[e.id]))
+        titres = [e['titre'] for e in self.client.get('/api/site/').json()['engagements']]
+        self.assertNotIn('Service premium', titres)
+
+    def test_engagement_inactif_masque(self):
+        from dashboard.models import Engagement
+        Engagement.objects.all().update(actif=False)
+        self.assertEqual(self.client.get('/api/site/').json()['engagements'], [])
+
+    def test_section_accueil_visible_sur_la_vitrine(self):
+        from produits.models import SectionAccueil
+        self.client.post(reverse('dashboard:section_ajouter'), {
+            'titre': 'Nouveautés du mois', 'type_section': 'nouveautes', 'marque': '',
+            'max_produits': 8, 'ordre': 1, 'active': 'on', 'afficher_voir_plus': 'on'})
+        self.assertTrue(SectionAccueil.objects.filter(titre='Nouveautés du mois').exists())
+        sections = self.client.get('/api/accueil/').json()['sections']
+        self.assertEqual([s['titre'] for s in sections], ['Nouveautés du mois'])
+
+    def test_code_promo_depuis_le_dashboard(self):
+        from commandes.models import CodePromo
+        self.client.post(reverse('dashboard:code_promo_ajouter'),
+                         {'code': 'bienvenue10', 'pourcentage': 10, 'montant': 0, 'utilisations_max': 0, 'actif': 'on'})
+        self.assertEqual(CodePromo.objects.get().code, 'BIENVENUE10')
+        r = self.client.post(reverse('dashboard:code_promo_ajouter'),
+                             {'code': 'VIDE', 'pourcentage': 0, 'montant': 0, 'utilisations_max': 0, 'actif': 'on'})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(CodePromo.objects.count(), 1)
+
+    def test_pages_reservees_au_staff(self):
+        self.client.logout()
+        for nom in ('engagement_liste', 'section_liste', 'code_promo_liste', 'parametres'):
+            self.assertEqual(self.client.get(reverse(f'dashboard:{nom}')).status_code, 302)
+
+    def test_prix_barre_modifiable(self):
+        r = self.client.post(reverse('dashboard:produit_modifier', args=[self.p.id]), {
+            'categorie': self.p.categorie_id, 'marque': '', 'nom': 'Laptop', 'slug': 'laptop',
+            'description': '', 'prix': '1000', 'prix_barre': '1500', 'stock': 5, 'disponible': 'on'})
+        self.assertEqual(r.status_code, 302)
+        d = self.client.get('/api/produits/laptop/').json()
+        self.assertTrue(d['en_promo'])
+        self.assertEqual(d['pourcentage_reduction'], 33)
+
+    def test_pages_du_contenu_s_affichent(self):
+        from dashboard.models import Engagement
+        e = Engagement.objects.first()
+        for nom, args in [('parametres', []), ('engagement_liste', []), ('engagement_ajouter', []),
+                          ('engagement_modifier', [e.id]), ('engagement_supprimer', [e.id]),
+                          ('section_liste', []), ('section_ajouter', []),
+                          ('code_promo_liste', []), ('code_promo_ajouter', [])]:
+            r = self.client.get(reverse(f'dashboard:{nom}', args=args))
+            self.assertEqual(r.status_code, 200, nom)

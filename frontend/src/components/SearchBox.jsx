@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, query } from '../api'
-import { prixFcfa } from '../utils'
+import { useShop } from '../context/ShopContext'
 
 export default function SearchBox() {
   const [q, setQ] = useState('')
@@ -9,6 +9,7 @@ export default function SearchBox() {
   const [ouvert, setOuvert] = useState(false)
   const conteneur = useRef(null)
   const navigate = useNavigate()
+  const { prix } = useShop()
 
   useEffect(() => {
     const terme = q.trim()
@@ -61,7 +62,7 @@ export default function SearchBox() {
                   className="flex items-center justify-between gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
                   <span className="truncate">{r.nom}</span>
-                  <span className="text-accent font-semibold shrink-0 whitespace-nowrap">{prixFcfa(r.prix)} FCFA</span>
+                  <span className="text-accent font-semibold shrink-0 whitespace-nowrap">{prix(r.prix)}</span>
                 </Link>
               ))}
               <button type="submit" className="block w-full text-left px-4 py-2 text-xs text-accent font-medium border-t border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700">

@@ -1,0 +1,20 @@
+{% extends "dashboard/base_admin.html" %}
+{% block title %}{{ titre }} — Tableau de bord{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-6">{{ titre }}</h1>
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 md:p-6">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-300 text-red-700">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for champ in form %}{% include "dashboard/_champ.html" with champ=champ %}{% endfor %}
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md">Enregistrer</button>
+        <a href="{% url retour %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

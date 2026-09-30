@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-      colors: { accent: '#2563eb', accentdark: '#1d4ed8', surface: '#f8fafc' },
+      colors: { accent: 'rgb(var(--accent) / <alpha-value>)', accentdark: 'rgb(var(--accent-dark) / <alpha-value>)', surface: '#f8fafc' },
     },
   },
   plugins: [],

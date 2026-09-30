@@ -17,6 +17,7 @@ const TRIS = [
 
 export default function Shop() {
   const { site } = useShop()
+  const monnaie = site?.monnaie || 'FCFA'
   const [params, setParams] = useSearchParams()
   const filtres = {
     q: params.get('q') || '', categorie: params.get('categorie') || '', marque: params.get('marque') || '',
@@ -67,10 +68,10 @@ export default function Shop() {
             {site?.marques.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
           </select>
         </label>
-        <label className="text-xs font-medium text-slate-500">Prix min (FCFA)
+        <label className="text-xs font-medium text-slate-500">Prix min ({monnaie})
           <input className="input mt-1" type="number" min="0" inputMode="numeric" value={prix.min} onChange={(e) => setPrix({ ...prix, min: e.target.value })} />
         </label>
-        <label className="text-xs font-medium text-slate-500">Prix max (FCFA)
+        <label className="text-xs font-medium text-slate-500">Prix max ({monnaie})
           <input className="input mt-1" type="number" min="0" inputMode="numeric" value={prix.max} onChange={(e) => setPrix({ ...prix, max: e.target.value })} />
         </label>
         <label className="text-xs font-medium text-slate-500">Trier par

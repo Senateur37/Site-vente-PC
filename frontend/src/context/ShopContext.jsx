@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
+import { prixFcfa } from '../utils'
 
 const ShopContext = createContext(null)
 export const useShop = () => useContext(ShopContext)
@@ -17,6 +18,30 @@ export function ShopProvider({ children }) {
     api.get('/api/site/').then(setSite).catch(() => setErreurSite(true))
     api.get('/api/panier/').then(setPanier).catch(() => {})
   }, [])
+
+  // Applique les réglages du dashboard : couleurs, favicon, thème par défaut
+  useEffect(() => {
+    if (!site) return
+    const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(' ')
+    const { accent, accent_sombre: sombreAccent } = site.couleurs || {}
+    const racine = document.documentElement.style
+    if (/^#[0-9a-f]{6}$/i.test(accent || '')) racine.setProperty('--accent', rgb(accent))
+    if (/^#[0-9a-f]{6}$/i.test(sombreAccent || '')) racine.setProperty('--accent-dark', rgb(sombreAccent))
+    if (site.favicon) {
+      let lien = document.querySelector('link[rel="icon"]')
+      if (!lien) { lien = document.createElement('link'); lien.rel = 'icon'; document.head.appendChild(lien) }
+      lien.href = site.favicon
+    }
+    let choisi = null
+    try { choisi = localStorage.getItem('theme') } catch { /* stockage indisponible */ }
+    if (!choisi && site.mode_sombre_defaut) {
+      document.documentElement.classList.add('dark')
+      setSombre(true)
+    }
+  }, [site])
+
+  const monnaie = site?.monnaie || 'FCFA'
+  const prix = useCallback((v) => `${prixFcfa(v)} ${monnaie}`, [monnaie])
 
   const notifier = useCallback((message, type = 'success') => {
     const id = Date.now() + Math.random()
@@ -55,9 +80,9 @@ export function ShopProvider({ children }) {
   const rafraichirPanier = useCallback(() => api.get('/api/panier/').then(setPanier).catch(() => {}), [])
 
   const valeur = useMemo(() => ({
-    site, erreurSite, panier, toasts, sombre,
+    site, erreurSite, panier, toasts, sombre, monnaie, prix,
     notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier,
-  }), [site, erreurSite, panier, toasts, sombre, notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier])
+  }), [site, erreurSite, panier, toasts, sombre, monnaie, prix, notifier, fermerToast, basculerTheme, ajouter, modifier, supprimer, rafraichirPanier])
 
   return <ShopContext.Provider value={valeur}>{children}</ShopContext.Provider>
 }

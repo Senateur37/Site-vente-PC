@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
 import { useTitre } from '../hooks'
-import { prixFcfa } from '../utils'
 
 export default function Cart() {
   useTitre('Panier')
-  const { panier, site, modifier, supprimer } = useShop()
+  const { panier, site, modifier, supprimer, prix } = useShop()
 
   if (panier.lignes.length === 0) {
     return (
@@ -33,7 +32,7 @@ export default function Cart() {
               </Link>
               <div className="flex-1 min-w-0">
                 <Link to={`/produit/${produit.slug}`} className="font-semibold text-slate-900 dark:text-white hover:text-accent line-clamp-2">{produit.nom}</Link>
-                <p className="text-sm text-slate-500">{prixFcfa(produit.prix)} FCFA</p>
+                <p className="text-sm text-slate-500">{prix(produit.prix)}</p>
                 <div className="flex flex-wrap items-center gap-3 mt-2">
                   <label className="flex items-center gap-2 text-sm">
                     <span className="sr-only">Quantité de {produit.nom}</span>
@@ -44,23 +43,23 @@ export default function Cart() {
                   <button type="button" onClick={() => supprimer(produit.id)} className="text-sm text-red-600 hover:underline">Retirer</button>
                 </div>
               </div>
-              <p className="font-bold text-slate-900 dark:text-white whitespace-nowrap">{prixFcfa(sous_total)} FCFA</p>
+              <p className="font-bold text-slate-900 dark:text-white whitespace-nowrap">{prix(sous_total)}</p>
             </li>
           ))}
         </ul>
 
         <aside className="card p-5 h-fit space-y-3 text-sm">
           <h2 className="font-semibold text-slate-900 dark:text-white text-base">Récapitulatif</h2>
-          <div className="flex justify-between"><span className="text-slate-500">Sous-total</span><span>{prixFcfa(panier.sous_total)} FCFA</span></div>
+          <div className="flex justify-between"><span className="text-slate-500">Sous-total</span><span>{prix(panier.sous_total)}</span></div>
           <div className="flex justify-between">
             <span className="text-slate-500">Livraison</span>
-            <span>{Number(panier.frais_livraison) === 0 ? 'Gratuite' : `${prixFcfa(panier.frais_livraison)} FCFA`}</span>
+            <span>{Number(panier.frais_livraison) === 0 ? 'Gratuite' : `${prix(panier.frais_livraison)}`}</span>
           </div>
           {seuil > 0 && reste > 0 && (
-            <p className="text-xs text-accent">Plus que {prixFcfa(reste)} FCFA pour la livraison gratuite.</p>
+            <p className="text-xs text-accent">Plus que {prix(reste)} pour la livraison gratuite.</p>
           )}
           <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-3 text-base font-bold">
-            <span>Total</span><span className="text-accent">{prixFcfa(panier.total)} FCFA</span>
+            <span>Total</span><span className="text-accent">{prix(panier.total)}</span>
           </div>
           <Link to="/commander" className="btn-primary w-full">Passer la commande</Link>
           <Link to="/boutique" className="btn-ghost w-full">Continuer mes achats</Link>

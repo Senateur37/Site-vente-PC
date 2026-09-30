@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
-import { prixFcfa } from '../utils'
 import Stars from './Stars'
 
 export default function ProductCard({ produit }) {
-  const { ajouter } = useShop()
+  const { ajouter, prix } = useShop()
   const lien = `/produit/${produit.slug}`
   return (
     <article className="card overflow-hidden flex flex-col hover:shadow-lg hover:border-accent/50 transition group">
@@ -34,8 +33,8 @@ export default function ProductCard({ produit }) {
           </div>
         )}
         <div className="mt-auto pt-1">
-          <p className="font-bold text-accent">{prixFcfa(produit.prix)} FCFA</p>
-          {produit.en_promo && <p className="text-xs text-slate-400 line-through">{prixFcfa(produit.prix_barre)} FCFA</p>}
+          <p className="font-bold text-accent">{prix(produit.prix)}</p>
+          {produit.en_promo && <p className="text-xs text-slate-400 line-through">{prix(produit.prix_barre)}</p>}
         </div>
         <button
           type="button" disabled={!produit.en_stock} onClick={() => ajouter(produit.id)}

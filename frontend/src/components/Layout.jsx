@@ -61,9 +61,13 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-10 grid gap-8 sm:grid-cols-2 md:grid-cols-4 text-sm">
         <div className="sm:col-span-2 md:col-span-1">
           <p className="text-lg font-bold text-slate-900 dark:text-white mb-2">{nom}</p>
-          <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-            {site?.description || 'Ordinateurs, accessoires et composants garantis.'}
-          </p>
+          <p className="text-slate-500 dark:text-slate-400 leading-relaxed">{site?.description}</p>
+          {site?.footer_texte && <p className="text-slate-400 dark:text-slate-500 mt-2 text-xs">{site.footer_texte}</p>}
+          <div className="flex gap-3 mt-3 text-xs">
+            {site?.facebook && <a href={site.facebook} target="_blank" rel="noreferrer" className="hover:text-accent">Facebook</a>}
+            {site?.instagram && <a href={site.instagram} target="_blank" rel="noreferrer" className="hover:text-accent">Instagram</a>}
+            {site?.whatsapp && <a href={`https://wa.me/${site.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="hover:text-accent">WhatsApp</a>}
+          </div>
         </div>
         <div>
           <p className="font-semibold text-slate-900 dark:text-white mb-3">Boutique</p>
@@ -82,9 +86,7 @@ function Footer() {
         <div>
           <p className="font-semibold text-slate-900 dark:text-white mb-3">Nos engagements</p>
           <ul className="space-y-2 text-slate-500 dark:text-slate-400">
-            <li>✓ Paiement à la livraison</li>
-            <li>✓ Produits garantis</li>
-            <li>✓ Livraison rapide</li>
+            {(site?.engagements || []).map((e) => <li key={e.titre}>✓ {e.titre}</li>)}
           </ul>
         </div>
       </div>
