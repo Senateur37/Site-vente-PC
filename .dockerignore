@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Environnement local
+.env
+*.env
+
+# SQLite (on utilise PostgreSQL en production)
+db.sqlite3
+backups/
+
+# Node / frontend build
+node_modules/
+frontend/node_modules/
+
+# Fichiers media (montés via volume Docker)
+media/
+
+# Dev / IDE
+.vscode/
+.idea/
+.qodo/
+*.DS_Store
+
+# Logs
+*.log

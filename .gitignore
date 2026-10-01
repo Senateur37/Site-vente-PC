@@ -38,3 +38,6 @@ Thumbs.db
 
 
 node_modules/
+
+# Coolify env
+.env.coolify
