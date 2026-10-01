@@ -36,8 +36,12 @@ RUN pip install --no-cache-dir --no-index --find-links=/wheels /wheels/*
 # Code source
 COPY . .
 
-# Collecte des fichiers statiques (sans base de données)
-RUN SECRET_KEY=build-only python manage.py collectstatic --noinput || true
+# Collecte des fichiers statiques au moment du build
+# DEBUG=False pour activer WhiteNoise storage, SQLite en mémoire pour éviter DATABASE_URL
+RUN SECRET_KEY=build-only-not-used-in-prod \
+    DEBUG=False \
+    DATABASE_URL=sqlite:////tmp/build.db \
+    python manage.py collectstatic --noinput
 
 # Utilisateur non-root
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
