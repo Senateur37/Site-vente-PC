@@ -8,8 +8,6 @@ services:
     build: .
     image: techshop-web
     restart: unless-stopped
-    ports:
-      - "${PORT:-8000}:8000"
     volumes:
       - media_data:/app/media
     environment:
