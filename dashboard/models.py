@@ -145,16 +145,26 @@ class SiteSettings(models.Model):
     @classmethod
     def get_settings(cls):
         """Singleton mis en cache (lu à chaque requête par un context processor)."""
-        obj = cache.get(cls.CACHE_KEY)
+        obj = None
+        try:
+            obj = cache.get(cls.CACHE_KEY)
+        except Exception:
+            obj = None
         if obj is None:
             obj, _ = cls.objects.get_or_create(id=1)
-            cache.set(cls.CACHE_KEY, obj, 300)
+            try:
+                cache.set(cls.CACHE_KEY, obj, 300)
+            except Exception:
+                pass
         return obj
 
     def save(self, *args, **kwargs):
         self.id = 1
         super().save(*args, **kwargs)
-        cache.delete(self.CACHE_KEY)
+        try:
+            cache.delete(self.CACHE_KEY)
+        except Exception:
+            pass
 
 
 class ActiviteLog(models.Model):

@@ -21,10 +21,7 @@ staticfiles/
 # Secrets
 .env
 
-# Media files (user uploads)
-media/produits/
-media/settings/
-media/marques/
+# Media files
 
 # IDE
 .vscode/

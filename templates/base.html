@@ -44,7 +44,9 @@
             <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_nom|default:'TechShop' }}" class="w-full h-full object-cover">
           </div>
         {% else %}
-          <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-sm shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 group-hover:scale-105 transition-transform duration-300 flex-shrink-0">TS</div>
+          <div class="relative w-11 h-11 rounded-full ring-2 ring-blue-500/30 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-lg shadow-blue-500/20 group-hover:ring-blue-500/60 group-hover:scale-105 transition-all duration-300 overflow-hidden bg-white dark:bg-slate-800 flex-shrink-0">
+            <img src="{% static 'img/logo.jpeg' %}" alt="{{ site_settings.site_nom|default:'TechShop' }}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-sm\'>TS</div>'">
+          </div>
         {% endif %}
         <span class="text-xl md:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 tracking-tight">{{ site_settings.site_nom|default:'TechShop' }}</span>
       </a>

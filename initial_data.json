@@ -1,0 +1,1086 @@
+[
+{
+  "model": "dashboard.engagement",
+  "pk": 1,
+  "fields": {
+    "icone": "🚚",
+    "titre": "Livraison rapide",
+    "texte": "Partout, à votre porte",
+    "ordre": 0,
+    "actif": true
+  }
+},
+{
+  "model": "dashboard.engagement",
+  "pk": 2,
+  "fields": {
+    "icone": "💳",
+    "titre": "Paiement à la livraison",
+    "texte": "Sécurité garantie",
+    "ordre": 1,
+    "actif": true
+  }
+},
+{
+  "model": "dashboard.engagement",
+  "pk": 3,
+  "fields": {
+    "icone": "🛡️",
+    "titre": "Produits garantis",
+    "texte": "Qualité 100% vérifiée",
+    "ordre": 2,
+    "actif": true
+  }
+},
+{
+  "model": "dashboard.sitesettings",
+  "pk": 1,
+  "fields": {
+    "site_nom": "Sack-Tech",
+    "site_description": "Ordinateurs & accessoires",
+    "logo": "settings/WhatsApp_Image_2026-09-30_at_10.53.26.jpeg",
+    "favicon": "settings/487f7c83f2da610539df774b9647f185.jpg",
+    "banniere": "settings/Le_meilleur_du_matériel_informatique_au_meilleur_prix_Ordinateurs_accessoires__EDFn2JS..png",
+    "accent_couleur": "#2563eb",
+    "accent_sombre": "#1d4ed8",
+    "surface_couleur": "#f8fafc",
+    "monnaie_symbole": "FCFA",
+    "monnaie_code": "XOF",
+    "telephone": "93012582",
+    "adresse": "Golf",
+    "email": "mahamadousacko599@gmail.com",
+    "footer_texte": "",
+    "copyright_texte": "",
+    "livraison_prix_fixe": "0.00",
+    "livraison_gratuite_des": "0.00",
+    "hero_titre": "Le meilleur du",
+    "hero_titre_accent": "matériel informatique",
+    "hero_texte": "Ordinateurs, accessoires et composants garantis, livrés au meilleur prix.",
+    "hero_bouton": "Découvrir la boutique",
+    "apropos_texte": "Votre boutique en ligne de référence pour le matériel informatique : ordinateurs portables et de bureau, PC gamer, composants et accessoires.\r\n\r\nNous sélectionnons avec soin des produits authentiques des plus grandes marques au meilleur prix, avec la garantie d'un service après-vente sérieux.\r\n\r\nCommandez en quelques clics : paiement à la livraison ou Mobile Money, et livraison rapide.",
+    "mode_sombre_defaut": false,
+    "facebook_url": "",
+    "instagram_url": "",
+    "whatsapp_number": "93012582"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 1,
+  "fields": {
+    "utilisateur": 1,
+    "nom_utilisateur": "sacko",
+    "action": "export",
+    "objet": "Commandes (CSV)",
+    "detail": "2 commande(s)",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T11:04:14.669Z"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 2,
+  "fields": {
+    "utilisateur": 3,
+    "nom_utilisateur": "Sacko",
+    "action": "connexion",
+    "objet": "Sacko",
+    "detail": "",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T11:10:11.837Z"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 3,
+  "fields": {
+    "utilisateur": 3,
+    "nom_utilisateur": "Sacko",
+    "action": "modification",
+    "objet": "Profil : Sacko",
+    "detail": "Champs :  · photo",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T11:29:50.142Z"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 4,
+  "fields": {
+    "utilisateur": 3,
+    "nom_utilisateur": "Sacko",
+    "action": "modification",
+    "objet": "Paramètres du site",
+    "detail": "Champs : site_nom",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T12:09:33.358Z"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 5,
+  "fields": {
+    "utilisateur": 3,
+    "nom_utilisateur": "Sacko",
+    "action": "modification",
+    "objet": "Paramètres du site",
+    "detail": "Champs : telephone, email, whatsapp_number",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T12:11:54.556Z"
+  }
+},
+{
+  "model": "dashboard.activitelog",
+  "pk": 6,
+  "fields": {
+    "utilisateur": 3,
+    "nom_utilisateur": "Sacko",
+    "action": "modification",
+    "objet": "Produit : Dell XPS 15 2026",
+    "detail": "Champs : prix_barre, image",
+    "ip": "127.0.0.1",
+    "date": "2026-09-30T12:40:46.197Z"
+  }
+},
+{
+  "model": "dashboard.profilstaff",
+  "pk": 1,
+  "fields": {
+    "utilisateur": 1,
+    "photo": ""
+  }
+},
+{
+  "model": "dashboard.profilstaff",
+  "pk": 2,
+  "fields": {
+    "utilisateur": 3,
+    "photo": "profils/a91c3f8bd31e4b3b8f07dc85595a34b3.webp"
+  }
+},
+{
+  "model": "produits.sectionaccueil",
+  "pk": 9,
+  "fields": {
+    "titre": "Produits les plus aimés",
+    "type_section": "plus_aimes",
+    "categorie": null,
+    "marque": "",
+    "max_produits": 8,
+    "afficher_voir_plus": true,
+    "ordre": 20,
+    "active": true,
+    "produits_personnalises": []
+  }
+},
+{
+  "model": "produits.sectionaccueil",
+  "pk": 10,
+  "fields": {
+    "titre": "Nouveautés Apple",
+    "type_section": "marque",
+    "categorie": null,
+    "marque": "apple",
+    "max_produits": 8,
+    "afficher_voir_plus": true,
+    "ordre": 1,
+    "active": true,
+    "produits_personnalises": []
+  }
+},
+{
+  "model": "produits.sectionaccueil",
+  "pk": 11,
+  "fields": {
+    "titre": "L'univers PC",
+    "type_section": "categorie",
+    "categorie": 13,
+    "marque": "",
+    "max_produits": 8,
+    "afficher_voir_plus": true,
+    "ordre": 2,
+    "active": true,
+    "produits_personnalises": []
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 9,
+  "fields": {
+    "nom": "PC de bureau",
+    "slug": "pc-de-bureau"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 10,
+  "fields": {
+    "nom": "Composants",
+    "slug": "composants"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 11,
+  "fields": {
+    "nom": "PC Gamer",
+    "slug": "pc-gamer"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 12,
+  "fields": {
+    "nom": "PC",
+    "slug": "PC"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 13,
+  "fields": {
+    "nom": "Ordinateurs",
+    "slug": "ordinateurs"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 14,
+  "fields": {
+    "nom": "Accessoires",
+    "slug": "accessoires"
+  }
+},
+{
+  "model": "produits.categorie",
+  "pk": 15,
+  "fields": {
+    "nom": "Smartphones",
+    "slug": "smartphones"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 8,
+  "fields": {
+    "categorie": 11,
+    "marque": "hp",
+    "nom": "HP OMEN Laptop 17-cb1",
+    "slug": "hp-omen-laptop-17-cb1",
+    "description": "Processeur : Intel Core i7‑10750H (6 cœurs / 12 threads, jusqu’à 5,0 GHz)\r\n\r\nMémoire : 16 Go DDR4 (extensible)\r\n\r\nStockage : 256 Go SSD NVMe + 1 To HDD\r\n\r\nCarte graphique : NVIDIA GeForce RTX 2070 8 Go GDDR6 (ray tracing, DLSS)\r\n\r\nÉcran : 17,3\" Full HD (1920×1080), IPS, 144 Hz\r\n\r\nClavier : QWERTY rétroéclairé RGB\r\n\r\nConnectivité : Wi‑Fi 6, Bluetooth 5, Ethernet Gigabit\r\n\r\nPorts : Thunderbolt 3 (USB‑C), 3× USB‑A, HDMI 2.0, Mini DisplayPort, RJ‑45, lecteur SD, combo casque/micro\r\n\r\nAudio : Bang & Olufsen avec DTS:X Ultra\r\n\r\nWebcam : HD 720p\r\n\r\nBatterie : 70 Wh\r\n\r\nPoids : environ 3,2 kg\r\n\r\nSystème : Windows 11",
+    "prix": "560000.00",
+    "prix_barre": null,
+    "image": "produits/1000029452.jpg",
+    "stock": 19,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-07-30T17:41:08.812Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 10,
+  "fields": {
+    "categorie": 13,
+    "marque": "apple",
+    "nom": "MacBook Pro M3 Max",
+    "slug": "macbook-pro-m3-max",
+    "description": "Superbe produit de la marque apple. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "850000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 14,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.685Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 11,
+  "fields": {
+    "categorie": 13,
+    "marque": "dell",
+    "nom": "Dell XPS 15 2026",
+    "slug": "dell-xps-15-2026",
+    "description": "Superbe produit de la marque dell. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "750000.00",
+    "prix_barre": "780000.00",
+    "image": "produits/3561f7f0-0131-481f-941b-a3ce5a32b7da-4_efc02ec7-1942-41f4-a3b8-bf61bac9824d.avif",
+    "stock": 8,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.691Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 12,
+  "fields": {
+    "categorie": 13,
+    "marque": "lenovo",
+    "nom": "Lenovo ThinkPad X1",
+    "slug": "lenovo-thinkpad-x1",
+    "description": "Superbe produit de la marque lenovo. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "650000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 12,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T10:18:25.698Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 13,
+  "fields": {
+    "categorie": 14,
+    "marque": "logitech",
+    "nom": "Souris Logitech MX Master 3S",
+    "slug": "souris-logitech-mx-master-3s",
+    "description": "Superbe produit de la marque logitech. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "65000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 50,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.705Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 14,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Clavier Mécanique Keychron K8",
+    "slug": "clavier-mecanique-keychron-k8",
+    "description": "Superbe produit de la marque autre. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "75000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 30,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T10:18:25.711Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 15,
+  "fields": {
+    "categorie": 14,
+    "marque": "sony",
+    "nom": "Casque Sony WH-1000XM5",
+    "slug": "casque-sony-wh-1000xm5",
+    "description": "Superbe produit de la marque sony. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "195000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 20,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.718Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 16,
+  "fields": {
+    "categorie": 15,
+    "marque": "samsung",
+    "nom": "Samsung Galaxy S24 Ultra",
+    "slug": "samsung-galaxy-s24-ultra",
+    "description": "Superbe produit de la marque samsung. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "650000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 25,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.723Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 17,
+  "fields": {
+    "categorie": 15,
+    "marque": "apple",
+    "nom": "iPhone 15 Pro Max",
+    "slug": "iphone-15-pro-max",
+    "description": "Superbe produit de la marque apple. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "750000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 10,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.730Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 18,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "Carte Graphique NVIDIA RTX 4090",
+    "slug": "carte-graphique-nvidia-rtx-4090",
+    "description": "Superbe produit de la marque autre. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "1250000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 2,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T10:18:25.738Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 19,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "Processeur AMD Ryzen 9",
+    "slug": "processeur-amd-ryzen-9",
+    "description": "Superbe produit de la marque autre. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "350000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 5,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T10:18:25.745Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 20,
+  "fields": {
+    "categorie": 13,
+    "marque": "dell",
+    "nom": "Ecran Dell UltraSharp 32",
+    "slug": "ecran-dell-ultrasharp-32",
+    "description": "Superbe produit de la marque dell. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "450000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 7,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.756Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 21,
+  "fields": {
+    "categorie": 15,
+    "marque": "apple",
+    "nom": "Tablette iPad Pro",
+    "slug": "tablette-ipad-pro",
+    "description": "Superbe produit de la marque apple. Achetez-le dès maintenant sur TechShop Bamako !",
+    "prix": "550000.00",
+    "prix_barre": null,
+    "image": "",
+    "stock": 18,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T10:18:25.766Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 22,
+  "fields": {
+    "categorie": 13,
+    "marque": "hp",
+    "nom": "Laptop HP 15s Core i5 8Go 512SSD",
+    "slug": "laptop-hp-15s-core-i5-8go-512ssd",
+    "description": "Laptop HP 15s Core i5 8Go 512SSD — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "650000.00",
+    "prix_barre": "720000.00",
+    "image": "produits/galerie/1000027905.jpg",
+    "stock": 5,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.420Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 23,
+  "fields": {
+    "categorie": 13,
+    "marque": "dell",
+    "nom": "Dell Latitude 3420 Core i5 16Go",
+    "slug": "dell-latitude-3420-core-i5-16go",
+    "description": "Dell Latitude 3420 Core i5 16Go — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "720000.00",
+    "prix_barre": "799000.00",
+    "image": "produits/galerie/1000028065.jpg",
+    "stock": 3,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.428Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 24,
+  "fields": {
+    "categorie": 13,
+    "marque": "lenovo",
+    "nom": "Lenovo IdeaPad 3 Ryzen 5 8Go 256SSD",
+    "slug": "lenovo-ideapad-3-ryzen-5-8go-256ssd",
+    "description": "Lenovo IdeaPad 3 Ryzen 5 8Go 256SSD — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "590000.00",
+    "prix_barre": "650000.00",
+    "image": "produits/galerie/1000028092.jpg",
+    "stock": 7,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.436Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 25,
+  "fields": {
+    "categorie": 13,
+    "marque": "asus",
+    "nom": "Asus VivoBook 15 Core i3 4Go 1To",
+    "slug": "asus-vivobook-15-core-i3-4go-1to",
+    "description": "Asus VivoBook 15 Core i3 4Go 1To — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "420000.00",
+    "prix_barre": "470000.00",
+    "image": "produits/galerie/1000028102.jpg",
+    "stock": 10,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.444Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 26,
+  "fields": {
+    "categorie": 13,
+    "marque": "acer",
+    "nom": "Acer Aspire 5 Core i7 16Go 512SSD",
+    "slug": "acer-aspire-5-core-i7-16go-512ssd",
+    "description": "Acer Aspire 5 Core i7 16Go 512SSD — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "790000.00",
+    "prix_barre": "870000.00",
+    "image": "produits/galerie/1000028109.jpg",
+    "stock": 2,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.450Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 27,
+  "fields": {
+    "categorie": 13,
+    "marque": "hp",
+    "nom": "HP ProBook 450 G8 Core i7 16Go",
+    "slug": "hp-probook-450-g8-core-i7-16go",
+    "description": "HP ProBook 450 G8 Core i7 16Go — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "850000.00",
+    "prix_barre": "950000.00",
+    "image": "produits/galerie/1000029452.jpg",
+    "stock": 4,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.458Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 28,
+  "fields": {
+    "categorie": 13,
+    "marque": "dell",
+    "nom": "Dell Inspiron 15 Core i5 8Go",
+    "slug": "dell-inspiron-15-core-i5-8go",
+    "description": "Dell Inspiron 15 Core i5 8Go — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "680000.00",
+    "prix_barre": "750000.00",
+    "image": "produits/galerie/1000029454.jpg",
+    "stock": 6,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.465Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 29,
+  "fields": {
+    "categorie": 13,
+    "marque": "lenovo",
+    "nom": "Lenovo ThinkBook 15 Core i5 512SSD",
+    "slug": "lenovo-thinkbook-15-core-i5-512ssd",
+    "description": "Lenovo ThinkBook 15 Core i5 512SSD — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "710000.00",
+    "prix_barre": "780000.00",
+    "image": "produits/galerie/1000029460.jpg",
+    "stock": 3,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.472Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 30,
+  "fields": {
+    "categorie": 14,
+    "marque": "hp",
+    "nom": "Souris sans fil HP X1000 Noir",
+    "slug": "souris-sans-fil-hp-x1000-noir",
+    "description": "Souris sans fil HP X1000 Noir — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "25000.00",
+    "prix_barre": "30000.00",
+    "image": "produits/galerie/1000029462.jpg",
+    "stock": 50,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.480Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 31,
+  "fields": {
+    "categorie": 14,
+    "marque": "dell",
+    "nom": "Clavier USB Dell KB216 AZERTY",
+    "slug": "clavier-usb-dell-kb216-azerty",
+    "description": "Clavier USB Dell KB216 AZERTY — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "18000.00",
+    "prix_barre": "22000.00",
+    "image": "produits/galerie/1000029474.jpg",
+    "stock": 40,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.486Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 32,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Casque JBL Tune 510BT Bluetooth",
+    "slug": "casque-jbl-tune-510bt-bluetooth",
+    "description": "Casque JBL Tune 510BT Bluetooth — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "75000.00",
+    "prix_barre": "90000.00",
+    "image": "produits/galerie/1000029478.jpg",
+    "stock": 20,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.494Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 33,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Sac a dos Laptop 15.6 pouces Noir",
+    "slug": "sac-a-dos-laptop-156-pouces-noir",
+    "description": "Sac a dos Laptop 15.6 pouces Noir — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "35000.00",
+    "prix_barre": "45000.00",
+    "image": "produits/galerie/1000029859.jpg",
+    "stock": 30,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.501Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 34,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Hub USB 4 ports 3.0",
+    "slug": "hub-usb-4-ports-30",
+    "description": "Hub USB 4 ports 3.0 — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "22000.00",
+    "prix_barre": "28000.00",
+    "image": "produits/galerie/1000029861.jpg",
+    "stock": 25,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.510Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 35,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Cable HDMI 1.8m 4K UHD",
+    "slug": "cable-hdmi-18m-4k-uhd",
+    "description": "Cable HDMI 1.8m 4K UHD — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "8000.00",
+    "prix_barre": "12000.00",
+    "image": "produits/galerie/1000029869.jpg",
+    "stock": 60,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.517Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 36,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Tapis de souris Gaming XL 80x40cm",
+    "slug": "tapis-de-souris-gaming-xl-80x40cm",
+    "description": "Tapis de souris Gaming XL 80x40cm — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "15000.00",
+    "prix_barre": "20000.00",
+    "image": "produits/galerie/1000029871.jpg",
+    "stock": 35,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.526Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 37,
+  "fields": {
+    "categorie": 14,
+    "marque": "autre",
+    "nom": "Webcam HD 1080p micro integre USB",
+    "slug": "webcam-hd-1080p-micro-integre-usb",
+    "description": "Webcam HD 1080p micro integre USB — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "55000.00",
+    "prix_barre": "70000.00",
+    "image": "produits/galerie/1000029877.jpg",
+    "stock": 15,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.535Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 38,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "Disque SSD 256Go SATA 2.5 pouces",
+    "slug": "disque-ssd-256go-sata-25-pouces",
+    "description": "Disque SSD 256Go SATA 2.5 pouces — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "85000.00",
+    "prix_barre": "100000.00",
+    "image": "produits/galerie/617C7auQLlL._AC_SL1500_.jpg",
+    "stock": 8,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.544Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 39,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "RAM DDR4 8Go 3200MHz",
+    "slug": "ram-ddr4-8go-3200mhz",
+    "description": "RAM DDR4 8Go 3200MHz — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "55000.00",
+    "prix_barre": "65000.00",
+    "image": "produits/galerie/71-dBRBiUyL._AC_SL1500_.jpg",
+    "stock": 15,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.553Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 40,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "Disque dur externe 1To USB 3.0",
+    "slug": "disque-dur-externe-1to-usb-30",
+    "description": "Disque dur externe 1To USB 3.0 — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "120000.00",
+    "prix_barre": "140000.00",
+    "image": "produits/galerie/71DAkphezyL._AC_SL1500_.jpg",
+    "stock": 10,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.562Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 41,
+  "fields": {
+    "categorie": 10,
+    "marque": "autre",
+    "nom": "SSD M2 NVMe 512Go PCIe",
+    "slug": "ssd-m2-nvme-512go-pcie",
+    "description": "SSD M2 NVMe 512Go PCIe — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "165000.00",
+    "prix_barre": "190000.00",
+    "image": "produits/galerie/71JCLaNguqL._AC_SL1500_.jpg",
+    "stock": 5,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.570Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 42,
+  "fields": {
+    "categorie": 15,
+    "marque": "samsung",
+    "nom": "Samsung Galaxy A54 5G 128Go Noir",
+    "slug": "samsung-galaxy-a54-5g-128go-noir",
+    "description": "Samsung Galaxy A54 5G 128Go Noir — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "420000.00",
+    "prix_barre": "480000.00",
+    "image": "produits/galerie/carousel-1.jpg",
+    "stock": 8,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.578Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 43,
+  "fields": {
+    "categorie": 15,
+    "marque": "samsung",
+    "nom": "Samsung Galaxy A34 5G 128Go",
+    "slug": "samsung-galaxy-a34-5g-128go",
+    "description": "Samsung Galaxy A34 5G 128Go — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "350000.00",
+    "prix_barre": "400000.00",
+    "image": "produits/galerie/carousel-1.png",
+    "stock": 12,
+    "disponible": true,
+    "a_la_une": false,
+    "date_ajout": "2026-09-30T11:54:04.586Z"
+  }
+},
+{
+  "model": "produits.produit",
+  "pk": 44,
+  "fields": {
+    "categorie": 15,
+    "marque": "apple",
+    "nom": "iPhone 14 128Go Bleu",
+    "slug": "iphone-14-128go-bleu",
+    "description": "iPhone 14 128Go Bleu — Disponible chez TechShop Bamako. Garantie incluse.",
+    "prix": "950000.00",
+    "prix_barre": "1050000.00",
+    "image": "produits/galerie/carousel-2.png",
+    "stock": 3,
+    "disponible": true,
+    "a_la_une": true,
+    "date_ajout": "2026-09-30T11:54:04.595Z"
+  }
+},
+{
+  "model": "produits.imageproduit",
+  "pk": 19,
+  "fields": {
+    "produit": 8,
+    "image": "produits/galerie/1000029454.jpg",
+    "legende": "",
+    "ordre": 0
+  }
+},
+{
+  "model": "produits.imageproduit",
+  "pk": 20,
+  "fields": {
+    "produit": 8,
+    "image": "produits/galerie/1000029460.jpg",
+    "legende": "",
+    "ordre": 0
+  }
+},
+{
+  "model": "produits.imageproduit",
+  "pk": 21,
+  "fields": {
+    "produit": 8,
+    "image": "produits/galerie/1000029462.jpg",
+    "legende": "",
+    "ordre": 0
+  }
+},
+{
+  "model": "produits.imageproduit",
+  "pk": 22,
+  "fields": {
+    "produit": 8,
+    "image": "produits/galerie/1000029478.jpg",
+    "legende": "",
+    "ordre": 0
+  }
+},
+{
+  "model": "produits.imageproduit",
+  "pk": 23,
+  "fields": {
+    "produit": 8,
+    "image": "produits/galerie/1000029474.jpg",
+    "legende": "",
+    "ordre": 0
+  }
+},
+{
+  "model": "produits.avis",
+  "pk": 3,
+  "fields": {
+    "produit": 8,
+    "utilisateur": null,
+    "auteur": "Isis",
+    "note": 5,
+    "commentaire": "Uxkkd",
+    "approuve": true,
+    "date_creation": "2026-08-13T17:05:37.959Z"
+  }
+},
+{
+  "model": "produits.avis",
+  "pk": 4,
+  "fields": {
+    "produit": 8,
+    "utilisateur": null,
+    "auteur": "issiaka",
+    "note": 5,
+    "commentaire": "ces un bon pc jai tester",
+    "approuve": true,
+    "date_creation": "2026-08-16T04:20:54.297Z"
+  }
+},
+{
+  "model": "produits.favori",
+  "pk": 3,
+  "fields": {
+    "produit": 8,
+    "session_id": "tbf07i1ush5y8f98qk2n1pqlnp85atii",
+    "utilisateur": 1,
+    "date_ajout": "2026-08-16T04:29:15.007Z"
+  }
+},
+{
+  "model": "produits.favori",
+  "pk": 4,
+  "fields": {
+    "produit": 44,
+    "session_id": "opwexsn4derpu0bkylz3n82r6zx4a7pn",
+    "utilisateur": null,
+    "date_ajout": "2026-09-30T13:08:01.118Z"
+  }
+},
+{
+  "model": "produits.favori",
+  "pk": 5,
+  "fields": {
+    "produit": 35,
+    "session_id": "xi1ducfh0qgpwa4jgzdiiw30wdey3rzm",
+    "utilisateur": 3,
+    "date_ajout": "2026-09-30T13:09:59.183Z"
+  }
+},
+{
+  "model": "produits.logomarque",
+  "pk": 7,
+  "fields": {
+    "marque": "lenovo",
+    "photo": "marques/télécharger_3_hc0BtOc.jpg"
+  }
+},
+{
+  "model": "produits.logomarque",
+  "pk": 8,
+  "fields": {
+    "marque": "hp",
+    "photo": "marques/487f7c83f2da610539df774b9647f185_4MDdS17.jpg"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$YbMLVpuSxiqqfe3sR1aREX$s9EY2olMBCw23Uf2+mpThG+LDfBrh0ulFFGlQglFWlU=",
+    "last_login": "2026-09-30T13:12:16.138Z",
+    "is_superuser": true,
+    "username": "sacko",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-07-22T03:05:25.491Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$X2ckttDiKePPjvLpyCjdOb$5rX6jdtwVdxwDBZHkUAN0j+0yS38mEwDSWhK+y6oslg=",
+    "last_login": "2026-09-26T20:26:43.445Z",
+    "is_superuser": false,
+    "username": "issa",
+    "first_name": "",
+    "last_name": "",
+    "email": "diassanaissiaka68@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-07-26T13:50:15.983Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$mlycMZYNilYXssPuOTvusV$MYQwDXXcNjUsCwLs1SHsNSXc4ZslNt2b3fMUcHVXPeY=",
+    "last_login": "2026-09-30T11:10:11.830Z",
+    "is_superuser": false,
+    "username": "Sacko",
+    "first_name": "",
+    "last_name": "",
+    "email": "mahamadousacko599@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-07-27T18:42:55.243Z",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

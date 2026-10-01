@@ -24,8 +24,7 @@ backups/
 node_modules/
 frontend/node_modules/
 
-# Fichiers media (montés via volume Docker)
-media/
+# Fichiers media initiaux (inclus dans l'image pour initialiser le volume Docker)
 
 # Dev / IDE
 .vscode/

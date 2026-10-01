@@ -95,7 +95,9 @@
             <img src="{{ site_settings.logo.url }}" alt="" class="w-full h-full object-cover">
           </div>
         {% else %}
-          <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">TS</div>
+          <div class="w-9 h-9 rounded-full ring-2 ring-blue-500/30 overflow-hidden bg-white flex-shrink-0 shadow-sm">
+            <img src="{% static 'img/logo.jpeg' %}" alt="" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-xs\'>TS</div>'">
+          </div>
         {% endif %}
         <span>{{ site_settings.site_nom|default:'TechShop' }}</span>
       </a>
@@ -124,7 +126,9 @@
             <img src="{{ site_settings.logo.url }}" alt="" class="w-full h-full object-cover">
           </div>
         {% else %}
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/30 flex-shrink-0 group-hover:scale-105 transition-transform">TS</div>
+          <div class="w-10 h-10 rounded-full ring-2 ring-blue-500/30 ring-offset-2 ring-offset-white dark:ring-offset-[#0c1527] shadow-md shadow-blue-500/20 overflow-hidden bg-white flex-shrink-0 group-hover:ring-blue-500/60 group-hover:scale-105 transition-all duration-300">
+            <img src="{% static 'img/logo.jpeg' %}" alt="" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-sm\'>TS</div>'">
+          </div>
         {% endif %}
         <span class="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">{{ site_settings.site_nom|default:'TechShop' }}</span>
       </a>

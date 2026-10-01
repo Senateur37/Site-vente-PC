@@ -145,9 +145,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'dashboard:login'
 LOGIN_REDIRECT_URL = 'dashboard:index'
 
-# Cache : Redis si REDIS_URL est défini (partagé entre workers Gunicorn, requis pour
-# que la limitation de tentatives soit fiable), sinon mémoire locale.
+# Cache : Redis si REDIS_URL est défini et que le module redis est installé,
+# sinon mémoire locale (ce qui évite un crash 500 si redis est indisponible).
+redis_disponible = False
 if os.getenv('REDIS_URL'):
+    try:
+        import redis  # noqa: F401
+        redis_disponible = True
+    except ImportError:
+        redis_disponible = False
+
+if redis_disponible:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.redis.RedisCache',

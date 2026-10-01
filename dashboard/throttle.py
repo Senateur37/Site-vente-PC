@@ -1,6 +1,9 @@
 """Limitation simple des tentatives (anti force brute), basée sur le cache Django."""
+import logging
 from django.conf import settings
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 
 def client_ip(request):
@@ -17,17 +20,28 @@ def _cle(nom, *parties):
 
 
 def bloque(nom, *parties, maximum=5):
-    return cache.get(_cle(nom, *parties), 0) >= maximum
+    try:
+        valeur = cache.get(_cle(nom, *parties), 0)
+        return (valeur or 0) >= maximum
+    except Exception as e:
+        logger.warning("Erreur cache throttle bloque: %s", e)
+        return False
 
 
 def echec(nom, *parties, fenetre=900):
     cle = _cle(nom, *parties)
-    cache.add(cle, 0, fenetre)
     try:
-        cache.incr(cle)
-    except ValueError:
-        cache.set(cle, 1, fenetre)
+        cache.add(cle, 0, fenetre)
+        try:
+            cache.incr(cle)
+        except ValueError:
+            cache.set(cle, 1, fenetre)
+    except Exception as e:
+        logger.warning("Erreur cache throttle echec: %s", e)
 
 
 def reinitialiser(nom, *parties):
-    cache.delete(_cle(nom, *parties))
+    try:
+        cache.delete(_cle(nom, *parties))
+    except Exception as e:
+        logger.warning("Erreur cache throttle reinitialiser: %s", e)
