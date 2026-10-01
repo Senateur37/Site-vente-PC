@@ -81,8 +81,15 @@ WSGI_APPLICATION = 'techshop.wsgi.application'
 # • DEBUG=True  → SQLite (développement, zéro config)
 # • DEBUG=False → PostgreSQL via DATABASE_URL (production / Coolify)
 # • DATABASE_URL défini → force PostgreSQL même si DEBUG=True
-if os.getenv('DATABASE_URL'):
-    DATABASES = {'default': dj_database_url.parse(os.getenv('DATABASE_URL'), conn_max_age=600)}
+_db_url = os.getenv('DATABASE_URL', '').strip()
+
+# Correction automatique si le schéma est manquant (ex: "://" au lieu de "postgres://")
+if _db_url and not _db_url.startswith(('postgres://', 'postgresql://')):
+    if _db_url.startswith('://'):
+        _db_url = 'postgres' + _db_url
+
+if _db_url:
+    DATABASES = {'default': dj_database_url.parse(_db_url, conn_max_age=600)}
 elif DEBUG:
     DATABASES = {
         'default': {
@@ -93,8 +100,9 @@ elif DEBUG:
 else:
     raise RuntimeError(
         "DATABASE_URL doit être défini en production (DEBUG=False). "
-        "Exemple : postgres://user:pass@db:5432/techshop"
+        "Exemple : postgres://user:pass@host:5432/dbname"
     )
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
