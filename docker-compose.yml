@@ -1,5 +1,5 @@
 # docker-compose.yml -- Deploiement Coolify
-# PostgreSQL : service externe Coolify (pas dans ce compose)
+# PostgreSQL : service externe Coolify (reseau coolify partage)
 # Redis     : service interne
 services:
 
@@ -8,6 +8,9 @@ services:
     build: .
     image: techshop-web
     restart: unless-stopped
+    networks:
+      - coolify
+      - default
     volumes:
       - media_data:/app/media
     environment:
@@ -36,9 +39,17 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      - default
     volumes:
       - redis_data:/data
     command: redis-server --save 60 1 --loglevel warning
+
+networks:
+  coolify:
+    external: true  # reseau partage Coolify (contient le service PostgreSQL)
+  default:
+    driver: bridge
 
 volumes:
   redis_data:
