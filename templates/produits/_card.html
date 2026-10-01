@@ -25,11 +25,9 @@
            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
            loading="lazy">
     {% else %}
-      <div class="flex flex-col items-center gap-2 opacity-50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-      </div>
+      <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=600&auto=format&fit=crop" alt="Image par défaut" 
+           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out opacity-80"
+           loading="lazy">
     {% endif %}
 
     {# ─── BOUTON AJOUT (survol) ─── #}
@@ -60,13 +58,16 @@
     {# Nom #}
     <span class="font-bold text-sm md:text-base text-slate-900 dark:text-white group-hover:text-accent transition-colors line-clamp-2 leading-snug">{{ produit.nom }}</span>
 
-    {# Note #}
-    {% if produit.nb_avis %}
-    <div class="flex items-center gap-1.5 mt-auto">
-      <span class="text-yellow-400 text-xs">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
-      <span class="text-xs text-slate-500 font-medium">{{ produit.note_moyenne }} ({{ produit.nb_avis }})</span>
+    {# Note (Toujours afficher pour éviter un trou) #}
+    <div class="flex items-center gap-1.5 mt-auto pt-2">
+      {% if produit.nb_avis %}
+        <span class="text-yellow-400 text-xs">{% for i in "12345" %}{% if forloop.counter <= produit.note_moyenne|add:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
+        <span class="text-xs text-slate-500 font-medium">{{ produit.note_moyenne }} ({{ produit.nb_avis }})</span>
+      {% else %}
+        <span class="text-slate-300 dark:text-slate-600 text-xs">★★★★★</span>
+        <span class="text-xs text-slate-400 italic">Nouveau</span>
+      {% endif %}
     </div>
-    {% endif %}
 
     {# Stock #}
     {% if produit.en_stock %}

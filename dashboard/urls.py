@@ -1,5 +1,5 @@
 from django.urls import path
-from . import stats, views, vues_catalogue, vues_commandes, vues_contenu, vues_equipe, vues_profil
+from . import rapport, stats, views, vues_catalogue, vues_commandes, vues_contenu, vues_equipe, vues_profil
 
 app_name = 'dashboard'
 
@@ -7,6 +7,9 @@ urlpatterns = [
     path('login/', views.connexion, name='login'),
     path('logout/', views.deconnexion, name='logout'),
     path('', stats.index, name='index'),
+    path('statistiques/', stats.statistiques, name='statistiques'),
+    path('rapport/', rapport.rapport, name='rapport'),
+    path('rapport/export/', rapport.rapport_csv, name='rapport_csv'),
 
     # Inscription (désactivée en production — seul l'admin crée les comptes)
     # path('inscription/', views.inscription, name='inscription'),
@@ -18,6 +21,7 @@ urlpatterns = [
 
     # Produits
     path('produits/', vues_catalogue.liste_produits, name='produits_liste'),
+    path('produits/recherche/', vues_catalogue.recherche_produits, name='produits_recherche'),
     path('produits/ajouter/', vues_catalogue.ajouter_produit, name='produit_ajouter'),
     path('produits/<int:produit_id>/modifier/', vues_catalogue.modifier_produit, name='produit_modifier'),
     path('produits/<int:produit_id>/supprimer/', vues_catalogue.supprimer_produit, name='produit_supprimer'),
@@ -36,6 +40,7 @@ urlpatterns = [
     path('commandes/export/', vues_commandes.export_commandes, name='commandes_export'),
     path('commandes/<int:commande_id>/facture/', vues_commandes.facture, name='commande_facture'),
     path('commandes/<int:commande_id>/bon-livraison/', vues_commandes.bon_livraison, name='commande_bon_livraison'),
+    path('api/nouvelles-commandes/', vues_commandes.api_nouvelles_commandes, name='api_nouvelles_commandes'),
 
     # Avis
     path('avis/', vues_catalogue.liste_avis, name='avis_liste'),
@@ -66,6 +71,7 @@ urlpatterns = [
     path('equipe/', vues_equipe.equipe_liste, name='equipe_liste'),
     path('equipe/ajouter/', vues_equipe.equipe_ajouter, name='equipe_ajouter'),
     path('equipe/<int:user_id>/', vues_equipe.equipe_modifier, name='equipe_modifier'),
+    path('equipe/<int:user_id>/supprimer/', vues_equipe.equipe_supprimer, name='equipe_supprimer'),
     path('journal/', vues_equipe.journal, name='journal'),
 
     # Parametres

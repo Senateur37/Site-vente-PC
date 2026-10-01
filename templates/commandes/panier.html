@@ -105,6 +105,13 @@
   <a href="{% url 'commandes:passer_commande' %}" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-center">
     Passer la commande →
   </a>
+  {% if site_settings.telephone %}
+  <a href="https://wa.me/{{ site_settings.telephone|cut:' '|cut:'+'|cut:'-' }}?text={{ 'Bonjour TechShop, je souhaite commander mon panier pour un montant total de '|urlencode }}{{ total_general|prix_fcfa|urlencode }}{{ ' FCFA.'|urlencode }}"
+     target="_blank" rel="noopener"
+     class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-2.5 rounded-md text-center flex items-center justify-center gap-2">
+    <span>💬</span> Commander via WhatsApp
+  </a>
+  {% endif %}
   <a href="{% url 'produits:liste' %}" class="border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-semibold px-6 py-2.5 rounded-md hover:border-accent text-center">
     Continuer mes achats
   </a>

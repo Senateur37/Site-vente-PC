@@ -91,6 +91,28 @@ def equipe_modifier(request, user_id):
     })
 
 
+@acces('equipe')
+def equipe_supprimer(request, user_id):
+    membre = get_object_or_404(User, pk=user_id, is_staff=True)
+    if membre.pk == request.user.pk:
+        messages.error(request, "Vous ne pouvez pas supprimer votre propre compte.")
+        return redirect('dashboard:equipe_liste')
+    if membre.is_superuser and not request.user.is_superuser:
+        messages.error(request, "Seul un super-utilisateur peut supprimer un super-utilisateur.")
+        return redirect('dashboard:equipe_liste')
+    if role_de(membre) == ADMIN and membre.is_active and _admins_actifs_hors(membre) == 0:
+        messages.error(request, "Il doit rester au moins un administrateur actif.")
+        return redirect('dashboard:equipe_liste')
+    if request.method == 'POST':
+        nom = membre.username
+        role = role_de(membre)
+        membre.delete()
+        journaliser(request, 'suppression', f"Membre : {nom}", f"Rôle : {role}")
+        messages.success(request, f"Compte « {nom} » supprimé.")
+        return redirect('dashboard:equipe_liste')
+    return render(request, 'dashboard/confirmer_suppression.html', {'objet': f"le compte « {membre.username} »"})
+
+
 ACTIONS = ['création', 'modification', 'suppression', 'statut', 'note', 'modération', 'export', 'connexion']
 
 

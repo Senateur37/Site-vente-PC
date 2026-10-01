@@ -1,65 +1,180 @@
 {% extends "base.html" %}
-{% block title %}Contact — TechShop{% endblock %}
+{% block title %}Contact — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+{% block meta_description %}<meta name="description" content="Contactez TechShop Bamako — Téléphone, email ou formulaire. Notre équipe répond rapidement à toutes vos questions.">{% endblock %}
+
 {% block content %}
 
-<div class="max-w-3xl mx-auto py-4">
-  <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Nous contacter</h1>
-  <p class="text-slate-500 dark:text-slate-400 text-sm mb-8">Une question ? Envoyez-nous un message, nous vous répondrons rapidement.</p>
+<!-- Header Contact -->
+<div class="text-center mb-10">
+  <span class="inline-block text-[11px] font-extrabold uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-full px-4 py-1.5 mb-4">Support client</span>
+  <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">Nous Contacter</h1>
+  <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-sm md:text-base">Une question, une commande, un conseil ? Notre équipe est disponible et répond rapidement.</p>
+</div>
 
-  <div class="grid md:grid-cols-2 gap-6 mb-8">
-    {% if params.telephone %}
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
-      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Téléphone</h2>
-      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.telephone }}</p>
+<!-- Cartes de contact -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-{{ params.adresse|yesno:'3,2,2' }} gap-4 mb-10">
+  {% if params.telephone %}
+  <a href="tel:{{ params.telephone }}" class="group flex items-center gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">📱</div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-0.5">Téléphone</p>
+      <p class="text-base font-bold text-slate-900 dark:text-white">{{ params.telephone }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">Disponible 8h–20h</p>
     </div>
-    {% endif %}
-    {% if params.email %}
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
-      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Email</h2>
-      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.email }}</p>
+  </a>
+  {% endif %}
+  {% if params.email %}
+  <a href="mailto:{{ params.email }}" class="group flex items-center gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-indigo-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+    <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">✉️</div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-0.5">Email</p>
+      <p class="text-base font-bold text-slate-900 dark:text-white">{{ params.email }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">Réponse sous 24h</p>
     </div>
-    {% endif %}
-    {% if params.adresse %}
-    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5 md:col-span-2">
-      <h2 class="font-semibold text-slate-900 dark:text-white mb-2">Adresse</h2>
-      <p class="text-slate-600 dark:text-slate-300 text-sm">{{ params.adresse }}</p>
+  </a>
+  {% endif %}
+  {% if params.adresse %}
+  <div class="group flex items-center gap-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 hover:border-emerald-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+    <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">📍</div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-0.5">Adresse</p>
+      <p class="text-base font-bold text-slate-900 dark:text-white">{{ params.adresse }}</p>
+      <p class="text-xs text-slate-400 mt-0.5">Bamako, Mali</p>
     </div>
-    {% endif %}
   </div>
+  {% endif %}
+</div>
 
-  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6">
-    <h2 class="font-semibold text-slate-900 dark:text-white mb-4">Envoyer un message</h2>
-    <form method="post" class="space-y-4">
+<!-- Grille principale : formulaire + infos -->
+<div class="grid lg:grid-cols-5 gap-6 mb-8">
+
+  <!-- Formulaire (large) -->
+  <div class="lg:col-span-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 md:p-8 shadow-sm">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-lg">💬</div>
+      <div>
+        <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Envoyer un message</h2>
+        <p class="text-xs text-slate-400">Nous vous répondons en moins de 24h</p>
+      </div>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="mb-4 p-4 rounded-xl {% if message.tags == 'success' %}bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300{% else %}bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300{% endif %} text-sm font-medium flex items-center gap-2">
+        <span>{% if message.tags == 'success' %}✅{% else %}❌{% endif %}</span>
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" class="space-y-5">
       {% csrf_token %}
+      <!-- Honeypot anti-spam -->
       <div style="position:absolute;left:-9999px" aria-hidden="true">
         <label>Ne pas remplir <input type="text" name="site_web" tabindex="-1" autocomplete="off"></label>
       </div>
+
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nom *</label>
-          <input type="text" name="nom" required
-            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+          <label for="contact-nom" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Nom complet <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="contact-nom" name="nom" required placeholder="Votre nom"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700/50 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors">
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email *</label>
-          <input type="email" name="email" required
-            class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+          <label for="contact-email" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <input type="email" id="contact-email" name="email" required placeholder="votre@email.com"
+            class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700/50 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors">
         </div>
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sujet</label>
-        <input type="text" name="sujet"
-          class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent">
+        <label for="contact-sujet" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Sujet</label>
+        <select id="contact-sujet" name="sujet"
+          class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700/50 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors">
+          <option value="">Choisir un sujet...</option>
+          <option value="Question sur un produit">Question sur un produit</option>
+          <option value="Commande en cours">Commande en cours</option>
+          <option value="Livraison">Livraison</option>
+          <option value="SAV / Garantie">SAV / Garantie</option>
+          <option value="Partenariat">Partenariat</option>
+          <option value="Autre">Autre</option>
+        </select>
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Message *</label>
-        <textarea name="message" rows="4" required
-          class="w-full border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2.5 text-sm bg-white dark:bg-slate-700 dark:text-slate-200 focus:outline-none focus:border-accent"></textarea>
+        <label for="contact-message" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+          Message <span class="text-red-500">*</span>
+        </label>
+        <textarea id="contact-message" name="message" rows="5" required placeholder="Décrivez votre demande en détail..."
+          class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700/50 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors resize-none"></textarea>
       </div>
-      <button type="submit" class="bg-accent hover:bg-accentdark text-white font-semibold px-6 py-2.5 rounded-md text-sm">
+
+      <button type="submit"
+        class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 py-3.5 rounded-xl hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
         Envoyer le message
       </button>
     </form>
+  </div>
+
+  <!-- Infos complémentaires -->
+  <div class="lg:col-span-2 flex flex-col gap-5">
+
+    <!-- Horaires -->
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-lg">🕐</div>
+        <h3 class="font-bold text-slate-900 dark:text-white">Horaires d'ouverture</h3>
+      </div>
+      <ul class="space-y-2.5 text-sm">
+        <li class="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400 font-medium">Lundi – Vendredi</span>
+          <span class="font-bold text-slate-900 dark:text-white">8h00 – 20h00</span>
+        </li>
+        <li class="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-slate-700">
+          <span class="text-slate-600 dark:text-slate-400 font-medium">Samedi</span>
+          <span class="font-bold text-slate-900 dark:text-white">9h00 – 18h00</span>
+        </li>
+        <li class="flex justify-between items-center">
+          <span class="text-slate-600 dark:text-slate-400 font-medium">Dimanche</span>
+          <span class="font-bold text-red-500">Fermé</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- WhatsApp -->
+    {% if params.telephone %}
+    <a href="https://wa.me/{{ params.telephone|cut:' '|cut:'+'|cut:'-' }}"
+       target="_blank" rel="noopener"
+       class="group flex items-center gap-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl p-6 text-white hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-1 transition-all duration-300">
+      <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform">
+        <svg viewBox="0 0 24 24" class="w-7 h-7 fill-white" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.12 1.526 5.855L.057 23.25a.75.75 0 0 0 .918.919l5.444-1.47A11.95 11.95 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.907 0-3.7-.504-5.249-1.382l-.375-.213-3.883 1.048 1.066-3.796-.232-.389A10 10 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      </div>
+      <div>
+        <p class="font-extrabold text-base leading-tight">WhatsApp</p>
+        <p class="text-emerald-100 text-sm mt-0.5">Chattez avec nous maintenant</p>
+        <p class="text-emerald-200 text-xs mt-1">{{ params.telephone }}</p>
+      </div>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-auto opacity-70 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+    </a>
+    {% endif %}
+
+    <!-- Réponse rapide -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/50 rounded-2xl p-6">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">⚡</div>
+        <div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Réponse garantie</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Nous nous engageons à répondre à tous les messages dans un délai de 24h ouvrables. Pour les urgences, privilégiez WhatsApp.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

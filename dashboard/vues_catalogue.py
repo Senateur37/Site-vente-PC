@@ -1,6 +1,8 @@
 """Catalogue : produits, catégories, marques, avis (avec recherche, filtres et pagination)."""
 from django.contrib import messages
 from django.db.models import Count, Q
+from django.http import JsonResponse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -22,6 +24,24 @@ TRI_PRODUITS = {
 
 
 # ---------- Produits ----------
+
+@acces('catalogue')
+def recherche_produits(request):
+    """Suggestions instantanées (nom, slug, description) pour la barre de recherche."""
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'resultats': []})
+    produits = Produit.objects.filter(
+        Q(nom__icontains=q) | Q(slug__icontains=q) | Q(description__icontains=q)
+    ).order_by('nom')[:8]
+    return JsonResponse({'resultats': [{
+        'nom': p.nom,
+        'prix': f'{p.prix:.0f}',
+        'stock': p.stock,
+        'image': p.image.url if p.image else '',
+        'url': reverse('dashboard:produit_modifier', args=[p.id]),
+    } for p in produits]})
+
 
 @acces('catalogue')
 def liste_produits(request):

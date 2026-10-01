@@ -29,7 +29,10 @@
         <td class="dash-td"><span class="badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{{ m.role }}</span></td>
         <td class="dash-td">{{ m.user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
         <td class="dash-td">{% if m.user.is_active %}<span class="badge bg-green-100 text-green-700">Actif</span>{% else %}<span class="badge bg-slate-200 text-slate-600">Désactivé</span>{% endif %}</td>
-        <td class="dash-td text-right"><a href="{% url 'dashboard:equipe_modifier' m.user.id %}" class="dash-btn-ghost px-3 py-1.5 text-xs">Modifier</a></td>
+        <td class="dash-td text-right whitespace-nowrap">
+          <a href="{% url 'dashboard:equipe_modifier' m.user.id %}" class="dash-btn-ghost px-3 py-1.5 text-xs">Modifier</a>
+          {% if m.user != request.user %}<a href="{% url 'dashboard:equipe_supprimer' m.user.id %}" class="dash-btn-ghost px-3 py-1.5 text-xs !text-rose-600 hover:!border-rose-500">Supprimer</a>{% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>

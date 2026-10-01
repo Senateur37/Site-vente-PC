@@ -12,4 +12,5 @@ urlpatterns = [
     path('paiement/<int:commande_id>/', views.payer_commande, name='payer'),
     path('paiement/notification/', views.notification_paiement, name='notification_paiement'),
     path('confirmation/<int:commande_id>/', views.confirmation_commande, name='confirmation'),
+    path('suivi/', views.suivi_commande, name='suivi'),
 ]

@@ -390,3 +390,21 @@ def basculer_favori(request, produit_id):
         actif = True
 
     return JsonResponse({'ok': True, 'actif': actif})
+
+
+def liste_favoris(request):
+    """Affiche la liste des produits ajoutés aux favoris par l'utilisateur ou la session."""
+    session_id = request.session.session_key
+    if request.user.is_authenticated:
+        favoris = Favori.objects.filter(utilisateur=request.user).select_related('produit', 'produit__categorie').order_by('-date_ajout')
+    elif session_id:
+        favoris = Favori.objects.filter(session_id=session_id).select_related('produit', 'produit__categorie').order_by('-date_ajout')
+    else:
+        favoris = Favori.objects.none()
+
+    produits = [f.produit for f in favoris if f.produit.disponible]
+
+    return render(request, 'produits/favoris.html', {
+        'produits': produits,
+        'nb_favoris': len(produits),
+    })

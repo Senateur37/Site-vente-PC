@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load produit_tags %}
+{% block title %}Mes Favoris ({{ nb_favoris }}) — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto py-4 md:py-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/30 text-rose-500 flex items-center justify-center text-xl shadow-sm">❤️</span>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Mes Coups de Cœur</h1>
+          <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {% if nb_favoris == 1 %}1 article enregistré pour plus tard{% elif nb_favoris > 1 %}{{ nb_favoris }} articles enregistrés pour plus tard{% else %}Votre liste de souhaits est vide{% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'produits:liste' %}" class="inline-flex items-center gap-2 text-xs md:text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+        ← Continuer mes achats
+      </a>
+    </div>
+  </div>
+
+  {% if produits %}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      {% for produit in produits %}
+        <div class="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative" id="card-favori-{{ produit.id }}">
+          
+          <!-- Image -->
+          <a href="{% url 'produits:detail' produit.slug %}" class="block relative aspect-square bg-slate-100 dark:bg-slate-700/50 p-3 overflow-hidden">
+            {% if produit.image %}
+              <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center text-slate-400 text-xs">[ Pas d'image ]</div>
+            {% endif %}
+
+            {% if produit.en_promo %}
+              <span class="absolute top-2 left-2 bg-rose-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow">
+                -{{ produit.pourcentage_reduction }}%
+              </span>
+            {% endif %}
+
+            <!-- Bouton Retirer du favori -->
+            <button type="button" onclick="supprimerFavori(event, {{ produit.id }})" title="Retirer des favoris"
+                    class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-slate-800/90 text-rose-500 shadow-md flex items-center justify-center hover:scale-110 hover:bg-rose-500 hover:text-white transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </button>
+          </a>
+
+          <!-- Contenu -->
+          <div class="p-4 flex flex-col flex-1">
+            <div class="flex items-center gap-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-1">
+              <span>{{ produit.categorie.nom }}</span>
+              {% if produit.marque %}<span class="text-slate-400">· {{ produit.get_marque_display }}</span>{% endif %}
+            </div>
+
+            <a href="{% url 'produits:detail' produit.slug %}" class="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 hover:text-blue-600 transition mb-2">
+              {{ produit.nom }}
+            </a>
+
+            <div class="mt-auto pt-2">
+              <div class="flex items-baseline gap-2 mb-3">
+                <span class="text-base font-extrabold text-blue-600 dark:text-blue-400">
+                  {{ produit.prix|prix_fcfa }} FCFA
+                </span>
+                {% if produit.prix_barre %}
+                  <span class="text-xs text-slate-400 line-through">
+                    {{ produit.prix_barre|prix_fcfa }} FCFA
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Actions -->
+              <div class="flex flex-col gap-2">
+                {% if produit.en_stock %}
+                  <form method="post" action="{% url 'commandes:ajouter' produit.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantite" value="1">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                      Ajouter au panier
+                    </button>
+                  </form>
+                {% else %}
+                  <span class="block text-center text-xs font-semibold py-2 bg-slate-100 dark:bg-slate-700 text-slate-400 rounded-xl">
+                    Rupture de stock
+                  </span>
+                {% endif %}
+
+                {% if site_settings.telephone %}
+                  <a href="https://wa.me/{{ site_settings.telephone|cut:' '|cut:'+'|cut:'-' }}?text={{ 'Bonjour TechShop, je souhaite commander : '|urlencode }}{{ produit.nom|urlencode }}{{ ' ('|urlencode }}{{ produit.prix|prix_fcfa|urlencode }}{{ ' FCFA)'|urlencode }}"
+                     target="_blank" rel="noopener"
+                     class="w-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 font-bold py-1.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 border border-emerald-200 dark:border-emerald-800 transition">
+                    <span>💬</span> Commander via WhatsApp
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- État vide -->
+    <div class="text-center py-16 px-4 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-lg mx-auto">
+      <div class="w-20 h-20 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-500 mx-auto flex items-center justify-center text-3xl mb-4">
+        ❤️
+      </div>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Aucun favori pour l'instant</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
+        Explorez notre catalogue et cliquez sur l'icône cœur pour sauvegarder les articles qui vous plaisent !
+      </p>
+      <a href="{% url 'produits:liste' %}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition text-sm">
+        <span>🛒</span> Découvrir les ordinateurs & accessoires
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function supprimerFavori(e, produitId) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  fetch(`/favori/${produitId}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}',
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      const el = document.getElementById(`card-favori-${produitId}`);
+      if (el) {
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          el.remove();
+          // Si plus de favoris, recharger
+          if (document.querySelectorAll('[id^="card-favori-"]').length === 0) {
+            window.location.reload();
+          }
+        }, 250);
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

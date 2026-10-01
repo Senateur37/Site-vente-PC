@@ -21,6 +21,62 @@
     @media (max-width: 767px) {
       .sidebar-overlay { transition: opacity 0.3s ease-in-out; }
     }
+
+    /* Style ultra net et contrasté pour tous les menus déroulants (select) du Dashboard */
+    select, select.dash-input, .dash-input select {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1.5px solid #cbd5e1 !important;
+      font-weight: 600 !important;
+      font-size: 0.875rem !important;
+      cursor: pointer;
+      opacity: 1 !important;
+      filter: none !important;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23334155'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 0.85rem center !important;
+      background-size: 1.15rem 1.15rem !important;
+      padding-right: 2.5rem !important;
+      padding-left: 0.875rem !important;
+      padding-top: 0.65rem !important;
+      padding-bottom: 0.65rem !important;
+      border-radius: 0.75rem !important;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+
+    html.dark select, .dark select, html.dark select.dash-input, .dark select.dash-input {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border-color: #475569 !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23cbd5e1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    }
+
+    select:focus, select.dash-input:focus {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+      outline: none !important;
+    }
+
+    /* Style des éléments d'options de la liste déroulante */
+    select option {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      font-weight: 500 !important;
+      padding: 8px 12px !important;
+    }
+
+    html.dark select option, .dark select option {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+    }
+
+    /* Renforcement du contraste des inputs */
+    .dash-input {
+      font-weight: 500 !important;
+    }
   </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#050d1a] text-slate-800 dark:text-slate-200 min-h-screen flex flex-col md:flex-row">
@@ -116,6 +172,16 @@
         <p class="px-3 pt-5 pb-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Ventes</p>
       {% endif %}
       {% if 'commandes' in acces %}
+        {% if request.resolver_match.url_name == 'statistiques' %}
+          {% include 'dashboard/_nav_item.html' with url='dashboard:statistiques' label="Statistiques" icone='M11 3.055A9.001 9.001 0 1020.945 13H11V3.055zM20.488 9H15V3.512A9.025 9.025 0 0120.488 9z' actif=True %}
+        {% else %}
+          {% include 'dashboard/_nav_item.html' with url='dashboard:statistiques' label="Statistiques" icone='M11 3.055A9.001 9.001 0 1020.945 13H11V3.055zM20.488 9H15V3.512A9.025 9.025 0 0120.488 9z' actif=False %}
+        {% endif %}
+        {% if 'rapport' in request.resolver_match.url_name %}
+          {% include 'dashboard/_nav_item.html' with url='dashboard:rapport' label="Rapport" icone='M9 17v-6m3 6V7m3 10v-3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z' actif=True %}
+        {% else %}
+          {% include 'dashboard/_nav_item.html' with url='dashboard:rapport' label="Rapport" icone='M9 17v-6m3 6V7m3 10v-3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z' actif=False %}
+        {% endif %}
         {% if 'commande' in request.resolver_match.view_name %}
           {% include 'dashboard/_nav_item.html' with url='dashboard:commandes_liste' label="Commandes" icone='M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' actif=True badge=nb_a_traiter_menu couleur_badge='bg-amber-500 text-white' %}
         {% else %}
@@ -249,9 +315,54 @@
       </div>
     {% endif %}
 
+    {% if 'catalogue' in acces %}
+    <form method="get" action="{% url 'dashboard:produits_liste' %}" role="search" data-url="{% url 'dashboard:produits_recherche' %}" class="mb-6 relative max-w-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+      <input type="search" name="q" value="{% if request.resolver_match.url_name == 'produits_liste' %}{{ f.q }}{% endif %}" placeholder="Rechercher un PC par nom ou description…" aria-label="Rechercher un produit" autocomplete="off" id="recherche-globale" class="dash-input !pl-12 w-full">
+      <div id="recherche-resultats" hidden class="absolute z-50 left-0 right-0 top-full mt-2 bg-white dark:bg-[#0c1527] border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden"></div>
+    </form>
+    {% endif %}
+
     {% block content %}{% endblock %}
   </main>
 
+
+  <script>
+  (function () {
+    var champ = document.getElementById('recherche-globale'), boite = document.getElementById('recherche-resultats');
+    if (!champ) return;
+    var url = champ.form.dataset.url, minuteur, requete = 0;
+    function vider() { boite.hidden = true; boite.textContent = ''; }
+    function ligne(r) {
+      var a = document.createElement('a'); a.href = r.url;
+      a.className = 'flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-white/5';
+      var im = document.createElement(r.image ? 'img' : 'span'); im.className = 'w-10 h-10 rounded-lg object-cover bg-slate-100 dark:bg-white/5 shrink-0';
+      if (r.image) im.src = r.image; a.appendChild(im);
+      var t = document.createElement('span'); t.className = 'min-w-0 flex-1 text-sm font-semibold text-slate-900 dark:text-white truncate'; t.textContent = r.nom; a.appendChild(t);
+      var m = document.createElement('span'); m.className = 'text-xs text-slate-500 shrink-0'; m.textContent = r.prix + ' · stock ' + r.stock; a.appendChild(m);
+      return a;
+    }
+    champ.addEventListener('input', function () {
+      clearTimeout(minuteur);
+      var q = champ.value.trim();
+      if (q.length < 2) { requete++; vider(); return; }
+      minuteur = setTimeout(function () {
+        var n = ++requete;
+        fetch(url + '?q=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (n !== requete) return;
+            boite.textContent = '';
+            if (!d.resultats.length) { var v = document.createElement('p'); v.className = 'px-4 py-3 text-sm text-slate-500'; v.textContent = 'Aucun produit trouvé.'; boite.appendChild(v); }
+            d.resultats.forEach(function (r) { boite.appendChild(ligne(r)); });
+            boite.hidden = false;
+          }).catch(vider);
+      }, 200);
+    });
+    document.addEventListener('click', function (e) { if (!champ.form.contains(e.target)) vider(); });
+    champ.addEventListener('keydown', function (e) { if (e.key === 'Escape') vider(); });
+  })();
+  </script>
   {% block extra_js %}{% endblock %}
 
   <script>
@@ -310,5 +421,86 @@
       if (overlay) overlay.addEventListener('click', closeSidebar);
     })();
   </script>
+
+  {% if 'commandes' in acces %}
+  <!-- Notification flottante en direct pour les nouvelles commandes -->
+  <div id="live-order-alert-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm pointer-events-none"></div>
+
+  <script>
+    (function() {
+      let dernierMaxId = null;
+
+      function playChime() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.45);
+        } catch(e) {}
+      }
+
+      function afficherNotification(cmd) {
+        const container = document.getElementById('live-order-alert-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'pointer-events-auto bg-slate-900/95 text-white p-4 rounded-2xl shadow-2xl border border-blue-500/50 flex items-start gap-3 backdrop-blur-md transition-all duration-300';
+        toast.innerHTML = `
+          <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl shrink-0 shadow-lg">🛍️</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-blue-400">Nouvelle Commande !</span>
+              <span class="text-[10px] text-slate-400">À l'instant</span>
+            </div>
+            <p class="text-sm font-black text-white mt-0.5 truncate">#${cmd.id} — ${cmd.nom}</p>
+            <p class="text-xs text-blue-200 font-bold mt-0.5">${cmd.total} FCFA <span class="text-slate-400 font-normal">· ${cmd.telephone}</span></p>
+            <div class="mt-2.5 flex items-center gap-2">
+              <a href="${cmd.url}" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-lg inline-block transition shadow">
+                Voir la commande →
+              </a>
+              <button type="button" class="text-xs text-slate-400 hover:text-white px-2 py-1" onclick="this.closest('.pointer-events-auto').remove()">
+                Fermer
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(toast);
+        playChime();
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(-10px)';
+          setTimeout(() => toast.remove(), 400);
+        }, 15000);
+      }
+
+      function verifierNouvellesCommandes() {
+        const params = dernierMaxId !== null ? `?depuis_id=${dernierMaxId}` : '';
+        fetch(`{% url 'dashboard:api_nouvelles_commandes' %}${params}`)
+          .then(r => r.json())
+          .then(data => {
+            if (dernierMaxId !== null && data.nouvelles && data.nouvelles.length > 0) {
+              data.nouvelles.forEach(afficherNotification);
+            }
+            dernierMaxId = data.max_id;
+          })
+          .catch(() => {});
+      }
+
+      verifierNouvellesCommandes();
+      setInterval(verifierNouvellesCommandes, 25000);
+    })();
+  </script>
+  {% endif %}
 </body>
 </html>

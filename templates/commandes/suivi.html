@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load produit_tags %}
+{% block title %}Suivi de commande — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-6 md:py-10">
+
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <span class="inline-block text-[11px] font-extrabold uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-full px-4 py-1.5 mb-3">
+      Espace Client
+    </span>
+    <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+      Suivre ma commande
+    </h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md mx-auto">
+      Entrez votre numéro de commande (ex: <strong>#12</strong>) ou votre <strong>numéro de téléphone</strong> pour connaître l'état de votre livraison en temps réel.
+    </p>
+  </div>
+
+  <!-- Formulaire de recherche -->
+  <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 md:p-6 shadow-sm mb-8">
+    <form method="get" class="flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" name="ref" value="{{ reference }}" required
+               placeholder="Ex : #12 ou 77123456 ou email@domaine.com"
+               class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white font-medium">
+      </div>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-7 py-3 rounded-xl shadow-md shadow-blue-600/20 text-sm whitespace-nowrap transition-all">
+        Rechercher
+      </button>
+    </form>
+
+    {% if erreur %}
+      <div class="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs md:text-sm font-medium flex items-center gap-2">
+        <span>⚠️</span>
+        {{ erreur }}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Résultat de commande -->
+  {% if commande %}
+    <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 md:p-8 shadow-md">
+      
+      <!-- En-tête commande -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-700">
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Référence</span>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white">Commande #{{ commande.id }}</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Passée le {{ commande.date_creation|date:"d/m/Y à H:i" }}</p>
+        </div>
+
+        <div>
+          {% if commande.statut == 'en_attente' %}
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              En attente de confirmation
+            </span>
+          {% elif commande.statut == 'en_livraison' %}
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+              <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+              En cours de livraison 🚚
+            </span>
+          {% elif commande.statut == 'livree_payee' %}
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span>✅</span>
+              Livrée et payée
+            </span>
+          {% elif commande.statut == 'annulee' %}
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+              <span>❌</span>
+              Commande annulée
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Barre de progression (Stepper) -->
+      {% if commande.statut != 'annulee' %}
+      <div class="py-8 border-b border-slate-200 dark:border-slate-700">
+        <div class="relative flex items-center justify-between max-w-lg mx-auto">
+          <!-- Ligne de fond -->
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 dark:bg-slate-700 z-0"></div>
+          
+          <!-- Ligne active -->
+          <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-600 transition-all duration-500 z-0
+                      {% if commande.statut == 'en_attente' %}w-1/3{% elif commande.statut == 'en_livraison' %}w-2/3{% elif commande.statut == 'livree_payee' %}w-full{% endif %}"></div>
+
+          <!-- Étape 1 : Reçue -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-md">
+              ✓
+            </div>
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">Reçue</span>
+          </div>
+
+          <!-- Étape 2 : Confirmée -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div class="w-9 h-9 rounded-full {% if commande.statut == 'en_livraison' or commande.statut == 'livree_payee' %}bg-blue-600 text-white{% else %}bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 ring-4 ring-blue-50 dark:ring-blue-950{% endif %} flex items-center justify-center font-bold text-xs shadow-md">
+              {% if commande.statut == 'en_livraison' or commande.statut == 'livree_payee' %}✓{% else %}2{% endif %}
+            </div>
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">Préparation</span>
+          </div>
+
+          <!-- Étape 3 : Livraison -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div class="w-9 h-9 rounded-full {% if commande.statut == 'en_livraison' %}bg-blue-600 text-white ring-4 ring-blue-200 dark:ring-blue-800 animate-bounce{% elif commande.statut == 'livree_payee' %}bg-blue-600 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-500{% endif %} flex items-center justify-center font-bold text-xs shadow-md">
+              {% if commande.statut == 'livree_payee' %}✓{% else %}🚚{% endif %}
+            </div>
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">Livraison</span>
+          </div>
+
+          <!-- Étape 4 : Livrée -->
+          <div class="relative z-10 flex flex-col items-center">
+            <div class="w-9 h-9 rounded-full {% if commande.statut == 'livree_payee' %}bg-emerald-600 text-white{% else %}bg-slate-200 dark:bg-slate-700 text-slate-500{% endif %} flex items-center justify-center font-bold text-xs shadow-md">
+              {% if commande.statut == 'livree_payee' %}✓{% else %}🏁{% endif %}
+            </div>
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300 mt-2">Livrée</span>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Détails des articles -->
+      <div class="py-6 border-b border-slate-200 dark:border-slate-700">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">
+          Articles de la commande
+        </h3>
+        <div class="divide-y divide-slate-100 dark:divide-slate-700">
+          {% for ligne in commande.lignes.all %}
+            <div class="py-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden shrink-0 flex items-center justify-center">
+                  {% if ligne.produit and ligne.produit.image %}
+                    <img src="{{ ligne.produit.image.url }}" alt="{{ ligne.produit.nom }}" class="w-full h-full object-contain p-1">
+                  {% else %}
+                    <span class="text-xs text-slate-400">📦</span>
+                  {% endif %}
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {% if ligne.produit %}{{ ligne.produit.nom }}{% else %}{{ ligne.nom_produit }}{% endif %}
+                  </p>
+                  <p class="text-xs text-slate-400">Qté : {{ ligne.quantite }} × {{ ligne.prix_unitaire|prix_fcfa }} FCFA</p>
+                </div>
+              </div>
+              <span class="font-extrabold text-sm text-slate-900 dark:text-white whitespace-nowrap">
+                {{ ligne.sous_total|prix_fcfa }} FCFA
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-100 dark:divide-slate-700 flex justify-between items-center text-sm font-black text-slate-900 dark:text-white">
+          <span>Total à payer</span>
+          <span class="text-lg text-blue-600 dark:text-blue-400">{{ commande.total|prix_fcfa }} FCFA</span>
+        </div>
+      </div>
+
+      <!-- Informations de livraison et contact -->
+      <div class="pt-6 grid sm:grid-cols-2 gap-6">
+        <div>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Destinataire & Livraison</h4>
+          <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ commande.nom }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">📱 {{ commande.telephone }}</p>
+          {% if commande.adresse %}<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📍 {{ commande.adresse }}</p>{% endif %}
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">💳 {{ commande.get_paiement_display }}</p>
+        </div>
+
+        <div class="flex flex-col justify-end gap-2">
+          {% if site_settings.telephone %}
+            <a href="https://wa.me/{{ site_settings.telephone|cut:' '|cut:'+'|cut:'-' }}?text={{ 'Bonjour TechShop, je souhaite me renseigner sur ma commande # '|urlencode }}{{ commande.id|urlencode }}"
+               target="_blank" rel="noopener"
+               class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow transition">
+              <span>💬</span> Contacter l'équipe sur WhatsApp
+            </a>
+          {% endif %}
+          <button onclick="window.print()" class="border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold px-4 py-2 rounded-xl text-xs hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            🖨️ Imprimer le récapitulatif
+          </button>
+        </div>
+      </div>
+
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

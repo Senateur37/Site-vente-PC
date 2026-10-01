@@ -8,6 +8,7 @@ urlpatterns = [
     path('section/<int:section_id>/', views.section_detail, name='section_detail'),
     path('produit/<slug:slug>/', views.detail_produit, name='detail'),
     path('favori/<int:produit_id>/', views.basculer_favori, name='favori_toggle'),
+    path('favoris/', views.liste_favoris, name='favoris'),
     path('recherche/', views.recherche_ajax, name='recherche_ajax'),
     path('contact/', views.contact, name='contact'),
     path('apropos/', views.apropos, name='apropos'),

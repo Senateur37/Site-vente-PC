@@ -1,10 +1,11 @@
+import re
 from decimal import Decimal
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.http import Http404, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -121,6 +122,7 @@ def passer_commande(request):
             request.session['commandes_ids'] = ids[-19:] + [commande.id]
 
             envoyer_confirmation(commande)
+            messages.success(request, f"🎉 Félicitations ! Votre commande #{commande.id} a bien été enregistrée.")
             if commande.paiement_statut == 'en_attente':
                 return redirect('commandes:payer', commande_id=commande.id)
             return redirect('commandes:confirmation', commande_id=commande.id)
@@ -187,3 +189,28 @@ def notification_paiement(request):
         commande.paiement_statut = 'echoue'
     commande.save(update_fields=['paiement_statut', 'date_maj'])
     return HttpResponse('OK')
+
+
+def suivi_commande(request):
+    """Permet aux clients de suivre l'état de leur commande avec leur numéro de commande, téléphone ou email."""
+    commande = None
+    erreur = None
+    reference = request.GET.get('ref', '').strip()
+
+    if reference:
+        num_clean = re.sub(r'[^\d]', '', reference)
+        query = Q(telephone__icontains=reference)
+        if num_clean.isdigit():
+            query |= Q(id=int(num_clean))
+        if '@' in reference:
+            query |= Q(email__iexact=reference)
+
+        commande = Commande.objects.filter(query).prefetch_related('lignes__produit').order_by('-date_creation').first()
+        if not commande:
+            erreur = f"Aucune commande trouvée pour « {reference} ». Vérifiez votre numéro de commande ou numéro de téléphone."
+
+    return render(request, 'commandes/suivi.html', {
+        'commande': commande,
+        'reference': reference,
+        'erreur': erreur,
+    })

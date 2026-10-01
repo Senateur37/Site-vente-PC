@@ -207,3 +207,54 @@ class ContenuDuSiteTests(DashboardBase):
                           ('code_promo_liste', []), ('code_promo_ajouter', [])]:
             r = self.client.get(reverse(f'dashboard:{nom}', args=args))
             self.assertEqual(r.status_code, 200, nom)
+
+
+class RapportTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.admin = User.objects.create_user('rapadmin', password='x', is_staff=True, is_superuser=True)
+        self.client.force_login(self.admin)
+
+    def test_rapport_et_csv(self):
+        from django.urls import reverse
+        r = self.client.get(reverse('dashboard:rapport'), {'du': '2025-01-01', 'au': '2025-01-31'})
+        self.assertContains(r, "Rapport d'activité")
+        r = self.client.get(reverse('dashboard:rapport_csv'))
+        self.assertEqual(r['Content-Type'], 'text/csv; charset=utf-8')
+
+    def test_dates_invalides_ignorees(self):
+        from django.urls import reverse
+        self.assertEqual(self.client.get(reverse('dashboard:rapport'), {'du': 'zzz', 'au': 'x'}).status_code, 200)
+
+
+class StatistiquesTests(TestCase):
+    def test_page_statistiques(self):
+        from django.contrib.auth.models import User
+        from django.urls import reverse
+        self.client.force_login(User.objects.create_user('statadmin', password='x', is_staff=True, is_superuser=True))
+        for p in ('7', '365', 'abc'):
+            r = self.client.get(reverse('dashboard:statistiques'), {'p': p})
+            self.assertContains(r, 'Statistiques')
+
+
+class SuppressionMembreTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+        self.admin = User.objects.create_user('chef', password='x', is_staff=True, is_superuser=True)
+        self.autre = User.objects.create_user('employe', password='x', is_staff=True)
+        self.client.force_login(self.admin)
+
+    def test_supprime_un_membre(self):
+        from django.contrib.auth.models import User
+        from django.urls import reverse
+        url = reverse('dashboard:equipe_supprimer', args=[self.autre.pk])
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertTrue(User.objects.filter(pk=self.autre.pk).exists())
+        self.client.post(url)
+        self.assertFalse(User.objects.filter(pk=self.autre.pk).exists())
+
+    def test_ne_peut_pas_se_supprimer(self):
+        from django.contrib.auth.models import User
+        from django.urls import reverse
+        self.client.post(reverse('dashboard:equipe_supprimer', args=[self.admin.pk]))
+        self.assertTrue(User.objects.filter(pk=self.admin.pk).exists())

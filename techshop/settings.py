@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'commandes.context_processors.panier_context',
+                'produits.context_processors.favoris_context',
                 'dashboard.context_processors.site_settings',
                 'dashboard.context_processors.stock_faible',
                 'dashboard.context_processors.avis_attente',

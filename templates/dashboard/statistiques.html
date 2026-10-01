@@ -1,0 +1,131 @@
+{% extends "dashboard/base_admin.html" %}
+{% load produit_tags %}
+{% block title %}Statistiques — {{ site_settings.site_nom|default:'TechShop' }}{% endblock %}
+{% block content %}
+
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-7">
+  <div>
+    <p class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">Analyse</p>
+    <h1 class="dash-title">Statistiques</h1>
+    <p class="dash-subtitle">Comprenez quand, quoi et qui achète dans votre boutique.</p>
+  </div>
+  <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/5 self-start" role="group" aria-label="Période">
+    {% for jours, libelle in periodes %}
+      <a href="?p={{ jours }}"
+         class="px-3.5 py-1.5 rounded-lg text-sm font-semibold transition {% if periode == jours %}bg-white dark:bg-blue-600 text-slate-900 dark:text-white shadow-sm{% else %}text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white{% endif %}"
+         {% if periode == jours %}aria-current="true"{% endif %}>{{ libelle }}</a>
+    {% endfor %}
+    <a href="{% url 'dashboard:rapport' %}" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">Rapport →</a>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  <div class="dash-card p-5">
+    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">C.A. moyen / jour</p>
+    <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ ca_par_jour|prix_fcfa }} <span class="text-sm text-slate-400">FCFA</span></p>
+  </div>
+  <div class="dash-card p-5">
+    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Commandes / jour</p>
+    <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ cmds_par_jour }}</p>
+  </div>
+  <div class="dash-card p-5">
+    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Meilleur jour</p>
+    <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ meilleur_jour|default:"—" }}</p>
+  </div>
+  <div class="dash-card p-5">
+    <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Heure de pointe</p>
+    <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{% if heure_pointe is not None %}{{ heure_pointe }} h{% else %}—{% endif %}</p>
+  </div>
+</div>
+
+<div class="dash-card p-5 md:p-6 mb-6">
+  <h2 class="font-bold text-slate-900 dark:text-white mb-4">Évolution du chiffre d'affaires</h2>
+  <div class="h-72"><canvas id="chart-ca"></canvas></div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-4">Commandes par jour de la semaine</h2>
+    <div class="h-64"><canvas id="chart-semaine"></canvas></div>
+  </div>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-4">Commandes par heure</h2>
+    <div class="h-64"><canvas id="chart-heures"></canvas></div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-6 mb-6">
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-1">Ventes par catégorie</h2>
+    <p class="text-xs text-slate-400 mb-4">En FCFA</p>
+    <div class="h-64"><canvas id="chart-categories"></canvas></div>
+  </div>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-1">Ventes par marque</h2>
+    <p class="text-xs text-slate-400 mb-4">En nombre d'articles</p>
+    <div class="h-64"><canvas id="chart-marques"></canvas></div>
+  </div>
+  <div class="dash-card p-5 md:p-6">
+    <h2 class="font-bold text-slate-900 dark:text-white mb-1">Clients</h2>
+    <p class="text-xs text-slate-400 mb-4">{{ nb_clients }} client{{ nb_clients|pluralize }} · {{ nb_fideles }} déjà connu{{ nb_fideles|pluralize }} avant la période</p>
+    <div class="h-64"><canvas id="chart-clients"></canvas></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ graph_ca|json_script:"d-ca" }}
+{{ graph_semaine|json_script:"d-semaine" }}
+{{ graph_heures|json_script:"d-heures" }}
+{{ graph_categories|json_script:"d-categories" }}
+{{ graph_marques|json_script:"d-marques" }}
+{{ graph_clients|json_script:"d-clients" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  if (typeof Chart === 'undefined') return;
+  const lire = (id) => JSON.parse(document.getElementById(id).textContent);
+  const fmt = (v) => new Intl.NumberFormat('fr-FR').format(v);
+  const sombre = document.documentElement.classList.contains('dark');
+  const grille = sombre ? 'rgba(255,255,255,.06)' : 'rgba(15,23,42,.06)';
+  const texte = sombre ? '#94a3b8' : '#64748b';
+  const PALETTE = ['#2563eb', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#84cc16', '#94a3b8'];
+  Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+  Chart.defaults.font.weight = 600;
+
+  const vide = (id, msg) => { document.getElementById(id).parentElement.innerHTML = '<div class="h-full flex items-center justify-center text-sm text-slate-400 text-center">' + msg + '</div>'; };
+  const axes = (suffixe) => ({
+    y: { beginAtZero: true, border: { display: false }, grid: { color: grille }, ticks: { color: texte, callback: fmt, precision: 0 } },
+    x: { border: { display: false }, grid: { display: false }, ticks: { color: texte, maxTicksLimit: 12 } },
+  });
+
+  const ca = lire('d-ca');
+  if (!ca.valeurs.some((v) => v > 0)) vide('chart-ca', 'Pas encore de ventes livrées et payées sur cette période.');
+  else {
+    const c = document.getElementById('chart-ca'), g = c.getContext('2d').createLinearGradient(0, 0, 0, 290);
+    g.addColorStop(0, 'rgba(37,99,235,.35)'); g.addColorStop(1, 'rgba(37,99,235,0)');
+    const barres = ca.valeurs.length > 45;
+    new Chart(c, { type: barres ? 'bar' : 'line', data: { labels: ca.labels, datasets: [{ label: 'C.A. (FCFA)', data: ca.valeurs, borderColor: '#2563eb', backgroundColor: barres ? '#2563eb' : g, fill: true, tension: .35, borderWidth: 3, borderRadius: 8, pointRadius: ca.valeurs.length > 31 ? 0 : 4 }] },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (x) => ' ' + fmt(x.parsed.y) + ' FCFA' } } }, scales: axes() } });
+  }
+
+  const barres = (id, d, couleur, unite) => {
+    if (!d.valeurs.some((v) => v > 0)) return vide(id, 'Aucune commande sur la période.');
+    new Chart(document.getElementById(id), { type: 'bar', data: { labels: d.labels, datasets: [{ data: d.valeurs, backgroundColor: couleur, borderRadius: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (x) => ' ' + x.parsed.y + ' ' + unite } } }, scales: axes() } });
+  };
+  barres('chart-semaine', lire('d-semaine'), '#2563eb', 'commande(s)');
+  barres('chart-heures', lire('d-heures'), '#8b5cf6', 'commande(s)');
+
+  const anneau = (id, labels, valeurs, couleurs, unite) => {
+    if (!valeurs.some((v) => v > 0)) return vide(id, 'Aucune donnée sur la période.');
+    new Chart(document.getElementById(id), { type: 'doughnut', data: { labels, datasets: [{ data: valeurs, backgroundColor: couleurs, borderWidth: 0, hoverOffset: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { color: texte, usePointStyle: true, pointStyle: 'circle', padding: 12 } }, tooltip: { callbacks: { label: (x) => ' ' + fmt(x.parsed) + ' ' + unite } } } } });
+  };
+  const cat = lire('d-categories'), mar = lire('d-marques'), cli = lire('d-clients');
+  anneau('chart-categories', cat.map((d) => d.label), cat.map((d) => d.total), PALETTE, 'FCFA');
+  anneau('chart-marques', mar.map((d) => d.label), mar.map((d) => d.total), PALETTE, 'article(s)');
+  anneau('chart-clients', cli.labels, cli.valeurs, ['#10b981', '#2563eb'], 'client(s)');
+})();
+</script>
+{% endblock %}

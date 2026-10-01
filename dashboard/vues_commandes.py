@@ -10,8 +10,9 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, F, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -214,4 +215,34 @@ def liste_clients(request):
     return render(request, 'dashboard/clients_liste.html', {
         'page': page, 'clients': page.object_list, 'querystring': params.urlencode(),
         'total': paginator.count, 'f': {'q': request.GET.get('q', '')},
+    })
+
+
+@acces('commandes')
+def api_nouvelles_commandes(request):
+    """API légère pour vérifier les nouvelles commandes en attente en temps réel."""
+    derniere_id = request.GET.get('depuis_id', 0)
+    try:
+        derniere_id = int(derniere_id)
+    except (ValueError, TypeError):
+        derniere_id = 0
+
+    nb_en_attente = Commande.objects.filter(statut='en_attente').count()
+    max_id = Commande.objects.order_by('-id').values_list('id', flat=True).first() or 0
+
+    nouvelles = []
+    if derniere_id > 0:
+        nouvelles_qs = Commande.objects.filter(statut='en_attente', id__gt=derniere_id).order_by('-id')[:5]
+        nouvelles = [{
+            'id': c.id,
+            'nom': c.nom_client,
+            'total': f"{c.total:,.0f}".replace(',', ' '),
+            'telephone': c.telephone,
+            'url': reverse('dashboard:commande_detail', args=[c.id]),
+        } for c in nouvelles_qs]
+
+    return JsonResponse({
+        'total_en_attente': nb_en_attente,
+        'nouvelles': nouvelles,
+        'max_id': max_id,
     })

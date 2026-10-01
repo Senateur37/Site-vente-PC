@@ -133,3 +133,59 @@ def index(request):
         contexte['nb_avis_attente'] = Avis.objects.filter(approuve=False).count()
 
     return render(request, 'dashboard/index.html', contexte)
+
+
+JOURS_SEMAINE = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+
+
+@acces('commandes')
+def statistiques(request):
+    """Analyse graphique : évolution, jours et heures de pointe, catégories, clients fidèles."""
+    try:
+        jours = int(request.GET.get('p', 30))
+    except ValueError:
+        jours = 30
+    if jours not in dict(PERIODES):
+        jours = 30
+    maintenant = timezone.now()
+    debut = maintenant - timedelta(days=jours)
+    cmds = Commande.objects.filter(date_creation__gte=debut, date_creation__lt=maintenant).exclude(statut='annulee')
+    lignes = LigneCommande.objects.filter(commande__in=cmds)
+
+    etiquettes, valeurs = _serie(debut, maintenant, mensuel=jours > 120)
+    semaine, heures = [0] * 7, [0] * 24
+    for dt in cmds.values_list('date_creation', flat=True):
+        local = timezone.localtime(dt)
+        semaine[local.weekday()] += 1
+        heures[local.hour] += 1
+
+    categories = [
+        {'label': r['produit__categorie__nom'] or 'Sans catégorie', 'total': float(r['t'])}
+        for r in lignes.values('produit__categorie__nom').annotate(t=Sum(MONTANT)).order_by('-t')[:8]
+    ]
+    noms_marques = dict(Produit._meta.get_field('marque').choices or [])
+    marques = [
+        {'label': noms_marques.get(r['produit__marque'], r['produit__marque']) or 'Autres', 'total': int(r['q'])}
+        for r in lignes.values('produit__marque').annotate(q=Sum('quantite')).order_by('-q')[:8]
+    ]
+
+    # Clients récurrents : numéros de téléphone ayant déjà commandé avant la période.
+    tels = set(cmds.values_list('telephone', flat=True))
+    anciens = set(Commande.objects.filter(date_creation__lt=debut, telephone__in=tels).values_list('telephone', flat=True))
+    nb_cmds = cmds.count()
+    ca = chiffre_affaires(debut, maintenant)
+    contexte = {
+        'periodes': PERIODES, 'periode': jours,
+        'graph_ca': {'labels': etiquettes, 'valeurs': valeurs},
+        'graph_semaine': {'labels': JOURS_SEMAINE, 'valeurs': semaine},
+        'graph_heures': {'labels': [f'{h} h' for h in range(24)], 'valeurs': heures},
+        'graph_categories': categories, 'graph_marques': marques,
+        'graph_clients': {'labels': ['Nouveaux', 'Fidèles'], 'valeurs': [len(tels) - len(anciens), len(anciens)]},
+        'nb_commandes': nb_cmds, 'ca': ca,
+        'ca_par_jour': ca / jours,
+        'cmds_par_jour': round(nb_cmds / jours, 1),
+        'nb_clients': len(tels), 'nb_fideles': len(anciens),
+        'meilleur_jour': JOURS_SEMAINE[semaine.index(max(semaine))] if nb_cmds else None,
+        'heure_pointe': heures.index(max(heures)) if nb_cmds else None,
+    }
+    return render(request, 'dashboard/statistiques.html', contexte)

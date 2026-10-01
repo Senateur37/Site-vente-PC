@@ -88,31 +88,71 @@ def creer_commande(form, panier, utilisateur=None):
 
 
 def envoyer_confirmation(commande):
-    if not commande.email:
-        return
-    lignes = "\n".join(
+    """Envoie les notifications par e-mail au client et à l'administrateur de la boutique."""
+    params = SiteSettings.get_settings()
+    site_nom = params.site_nom if params and params.site_nom else "TechShop"
+    admin_email = (params.email if params and params.email else '') or getattr(settings, 'DEFAULT_FROM_EMAIL', '')
+
+    lignes_texte = "\n".join(
         f"- {l.nom_produit} x{l.quantite} : {l.prix_unitaire} FCFA"
         for l in commande.lignes.all()
     )
-    message = (
-        f"Bonjour {commande.nom_client},\n\n"
-        f"Merci pour votre commande #{commande.id}.\n\n"
-        f"{lignes}\n\n"
-        f"Sous-total : {commande.sous_total} FCFA\n"
-        f"Réduction : {commande.reduction} FCFA\n"
-        f"Livraison : {commande.frais_livraison} FCFA\n"
-        f"Total : {commande.total} FCFA\n\n"
-        f"Paiement : {commande.get_methode_paiement_display()}\n"
-        f"Adresse : {commande.adresse}\n\n"
-        f"Nous vous contacterons au {commande.telephone} pour la livraison.\n"
-    )
-    try:
-        send_mail(
-            subject=f"Confirmation commande #{commande.id}",
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
-            recipient_list=[commande.email],
-            fail_silently=True,
+
+    # 1. Notification au Client (si e-mail renseigné)
+    if commande.email:
+        message_client = (
+            f"Bonjour {commande.nom_client},\n\n"
+            f"Votre commande #{commande.id} sur {site_nom} a bien été enregistrée !\n\n"
+            f"--- RÉCAPITULATIF ---\n"
+            f"{lignes_texte}\n\n"
+            f"Sous-total : {commande.sous_total} FCFA\n"
+            f"Réduction : {commande.reduction} FCFA\n"
+            f"Frais de livraison : {commande.frais_livraison} FCFA\n"
+            f"Total général : {commande.total} FCFA\n\n"
+            f"Mode de paiement : {commande.get_methode_paiement_display()}\n"
+            f"Adresse de livraison : {commande.adresse}\n\n"
+            f"Vous pouvez suivre l'état de votre commande à tout moment à l'adresse :\n"
+            f"{settings.SITE_URL or ''}/suivi/?ref={commande.id}\n\n"
+            f"Notre équipe vous contactera au {commande.telephone} dès la mise en livraison.\n\n"
+            f"Merci pour votre confiance,\nL'équipe {site_nom}"
         )
-    except Exception:
-        pass
+        try:
+            send_mail(
+                subject=f"✅ Confirmation de votre commande #{commande.id} — {site_nom}",
+                message=message_client,
+                from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
+                recipient_list=[commande.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
+    # 2. Notification à l'Administrateur / Boutique
+    if admin_email:
+        message_admin = (
+            f"🚨 NOUVELLE COMMANDE REÇUE SUR {site_nom.upper()} !\n\n"
+            f"Référence : Commande #{commande.id}\n\n"
+            f"--- CLIENT ---\n"
+            f"Nom : {commande.nom_client}\n"
+            f"Téléphone : {commande.telephone}\n"
+            f"Email : {commande.email or 'Non renseigné'}\n"
+            f"Adresse : {commande.adresse}\n"
+            f"Note client : {commande.note or 'Aucune'}\n\n"
+            f"--- ARTICLES COMMANDÉS ---\n"
+            f"{lignes_texte}\n\n"
+            f"Total commande : {commande.total} FCFA\n"
+            f"Paiement : {commande.get_methode_paiement_display()}\n\n"
+            f"Pour traiter cette commande, rendez-vous sur le dashboard :\n"
+            f"{settings.SITE_URL or ''}/dashboard/commandes/{commande.id}/\n"
+        )
+        try:
+            send_mail(
+                subject=f"🛒 [NOUVELLE COMMANDE] #{commande.id} - {commande.nom_client} ({commande.total} FCFA)",
+                message=message_admin,
+                from_email=settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER,
+                recipient_list=[admin_email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+

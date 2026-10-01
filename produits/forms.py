@@ -17,6 +17,17 @@ class ProduitForm(forms.ModelForm):
             'marque': forms.Select(attrs={'class': 'form-control'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'categorie' in self.fields:
+            self.fields['categorie'].empty_label = "-- Choisir une catégorie --"
+            self.fields['categorie'].queryset = Categorie.objects.all().order_by('nom')
+        if 'marque' in self.fields:
+            self.fields['marque'].choices = [('', '-- Choisir une marque --')] + [
+                c for c in Produit.MARQUE_CHOICES if c[0] != ''
+            ]
+            self.fields['marque'].required = False
+
 
 class CategorieForm(forms.ModelForm):
     class Meta:

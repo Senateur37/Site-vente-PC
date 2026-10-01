@@ -6,6 +6,12 @@ import { useTitre } from '../hooks'
 
 const VIDE = { nom: '', email: '', sujet: '', message: '', site_web: '' }
 
+const FAQ = [
+  ['Comment suivre ma commande ?', 'Vous recevez une confirmation après votre commande. Pour un point d’avancement, contactez-nous avec votre numéro de commande.'],
+  ['Puis-je obtenir un devis pour plusieurs produits ?', 'Oui, décrivez votre besoin dans le formulaire et nous vous répondons avec une proposition adaptée.'],
+  ['Que faire si un produit est défectueux ?', 'Écrivez-nous en précisant le produit et le problème rencontré : nous trouvons une solution ensemble.'],
+]
+
 export default function Contact() {
   useTitre('Contact')
   const { site, notifier } = useShop()
@@ -57,6 +63,18 @@ export default function Contact() {
             </div>
           ))}
           <p className="text-sm text-slate-500 px-1">Nous répondons en général sous 24 h ouvrées.</p>
+
+          <div className="card p-5">
+            <p className="text-xs font-bold uppercase tracking-[.14em] text-slate-400 mb-2">Questions fréquentes</p>
+            {FAQ.map(([q, r]) => (
+              <details key={q} className="group border-t first:border-t-0 border-slate-200/70 dark:border-white/5 py-3">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-3 font-semibold text-slate-900 dark:text-white text-sm">
+                  {q}<Icon nom="plus" className="w-4 h-4 shrink-0 text-accent transition group-open:rotate-45" />
+                </summary>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">{r}</p>
+              </details>
+            ))}
+          </div>
         </div>
 
         <form onSubmit={soumettre} className="card !rounded-3xl p-6 md:p-8 space-y-5 shadow-premium">
