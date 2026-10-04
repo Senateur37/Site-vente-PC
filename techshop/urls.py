@@ -6,6 +6,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as serve_static
+from django.views.generic import RedirectView
 from produits.sitemaps import ProduitSitemap, PagesStatiquesSitemap
 
 sitemaps = {
@@ -35,6 +36,7 @@ urlpatterns = [
     path('', include('commandes.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('robots.txt', robots_txt, name='robots'),
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico', permanent=True)),
 ]
 
 if settings.DEBUG:

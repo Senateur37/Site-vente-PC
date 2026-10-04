@@ -7,6 +7,10 @@
   {% block meta_description %}{% if site_settings.site_description %}<meta name="description" content="{{ site_settings.site_description }}">{% endif %}{% endblock %}
   <title>{% block title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}</title>
   <meta name="theme-color" content="#2563eb">
+  <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/favicon-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'icons/favicon-180.png' %}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="{{ site_settings.site_nom|default:'TechShop' }}">
   <meta property="og:title" content="{% block og_title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}">
