@@ -1,0 +1,106 @@
+{% comment %}
+Protection anti-rétro-ingénierie et anti-tamper :
+- Désactivation du clic droit (hors champs de saisie)
+- Blocage des touches de développement (F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S)
+- Blocage du glisser-déposer des images (drag & drop)
+- Désactivation et purge automatique de la console JavaScript
+{% endcomment %}
+<script>
+(function() {
+  'use strict';
+
+  // 1. Désactiver et museler la console en production pour masquer les données internes
+  try {
+    var noop = function() {};
+    var methods = ['log', 'debug', 'info', 'warn', 'dir', 'dirxml', 'trace', 'table'];
+    for (var i = 0; i < methods.length; i++) {
+      if (window.console && window.console[methods[i]]) {
+        window.console[methods[i]] = noop;
+      }
+    }
+  } catch (e) {}
+
+  // 2. Interdiction du menu contextuel (clic droit) sauf dans les champs éditables
+  document.addEventListener('contextmenu', function(e) {
+    var target = e.target;
+    if (target) {
+      var tag = target.tagName ? target.tagName.toUpperCase() : '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
+        return true;
+      }
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }, { capture: true });
+
+  // 3. Blocage des raccourcis clavier d'inspection et d'extraction de code
+  document.addEventListener('keydown', function(e) {
+    // F12 (Outils de développement)
+    if (e.key === 'F12' || e.keyCode === 123) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    var ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    // Ctrl+Shift+I / J / C (Inspecteur, Console, Sélecteur d'éléments)
+    if (ctrlOrMeta && e.shiftKey) {
+      var keyUpper = (e.key || '').toUpperCase();
+      var code = e.keyCode;
+      if (keyUpper === 'I' || keyUpper === 'J' || keyUpper === 'C' || code === 73 || code === 74 || code === 67) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }
+
+    // Ctrl+U (Afficher le code source)
+    if (ctrlOrMeta && ((e.key || '').toUpperCase() === 'U' || e.keyCode === 85)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // Ctrl+S (Enregistrer la page HTML complète)
+    if (ctrlOrMeta && ((e.key || '').toUpperCase() === 'S' || e.keyCode === 83)) {
+      var activeTag = (e.target && e.target.tagName) ? e.target.tagName.toUpperCase() : '';
+      if (activeTag !== 'INPUT' && activeTag !== 'TEXTAREA') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }
+  }, { capture: true });
+
+  // 4. Bloquer le glisser-déposer des images
+  document.addEventListener('dragstart', function(e) {
+    if (e.target && e.target.tagName && e.target.tagName.toUpperCase() === 'IMG') {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  // 5. Nettoyage régulier de la console en cas d'ouverture manuelle
+  try {
+    setInterval(function() {
+      if (window.console && typeof window.console.clear === 'function') {
+        window.console.clear();
+      }
+    }, 2500);
+  } catch (e) {}
+})();
+</script>
+<style>
+  /* Protection contre le drag & drop non autorisé des images */
+  img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+</style>

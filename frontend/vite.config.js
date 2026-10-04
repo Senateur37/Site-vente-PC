@@ -7,6 +7,9 @@ const django = process.env.DJANGO_URL || 'http://127.0.0.1:8000'
 // le navigateur reste sur une seule origine (cookies de session et CSRF fonctionnent tels quels).
 export default defineConfig({
   plugins: [react()],
+  build: {
+    sourcemap: false,
+  },
   server: {
     port: 5173,
     proxy: {

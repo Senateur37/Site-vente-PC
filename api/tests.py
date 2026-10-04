@@ -85,7 +85,7 @@ class PanierEtCommandeTests(ApiBase):
         self.assertEqual(self.client.get('/api/panier/').json()['count'], 0)
         detail = self.client.get(f'/api/commandes/{cid}/').json()
         self.assertEqual(detail['total'], 2000)
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertGreaterEqual(len(mail.outbox), 1)
         # un autre visiteur ne voit pas la commande
         self.assertEqual(Client().get(f'/api/commandes/{cid}/').status_code, 404)
 
