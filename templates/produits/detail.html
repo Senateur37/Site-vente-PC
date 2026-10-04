@@ -1,7 +1,88 @@
 {% extends "base.html" %}
 {% load produit_tags %}
-{% block title %}{{ produit.nom }} — TechShop{% endblock %}
-{% block meta_description %}{% if produit.description %}<meta name="description" content="{{ produit.description|truncatechars:160 }}">{% endif %}{% endblock %}
+{% block title %}{{ produit.nom }} — Prix, Fiche Technique & Avis | {{ site_settings.site_nom|default:'Sack-Tech' }}{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Achetez {{ produit.nom }} à {{ produit.prix|floatformat:0 }} FCFA chez {{ site_settings.site_nom|default:'Sack-Tech' }}. {% if produit.description %}{{ produit.description|striptags|truncatewords:20 }}{% else %}Ordinateur haute performance garanti avec livraison rapide et paiement sécurisé.{% endif %}">
+{% endblock %}
+
+{% block meta_keywords %}
+  <meta name="keywords" content="{{ produit.nom }}, {{ produit.categorie.nom }}, pc portable {{ produit.marque }}, ordinateur {{ produit.marque }}, achat {{ produit.nom }}, prix {{ produit.nom }}, matériel informatique, abidjan, côte d'ivoire">
+{% endblock %}
+
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ produit.nom }} — {{ produit.prix|floatformat:0 }} FCFA | {{ site_settings.site_nom|default:'Sack-Tech' }}{% endblock %}
+{% block og_description %}{% if produit.description %}{{ produit.description|striptags|truncatewords:25 }}{% else %}Ordinateur performant et fiable disponible au meilleur prix.{% endif %}{% endblock %}
+{% block og_image %}{% if produit.image %}{{ request.scheme }}://{{ request.get_host }}{{ produit.image.url }}{% endif %}{% endblock %}
+
+{% block twitter_title %}{{ produit.nom }} — {{ produit.prix|floatformat:0 }} FCFA{% endblock %}
+{% block twitter_image %}{% if produit.image %}{{ request.scheme }}://{{ request.get_host }}{{ produit.image.url }}{% endif %}{% endblock %}
+
+{% block extra_schema %}
+<!-- Données structurées Produit Schema.org pour Google Shopping & Rich Snippets -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ produit.nom|escapejs }}",
+  {% if produit.image %}"image": ["{{ request.scheme }}://{{ request.get_host }}{{ produit.image.url }}"],{% endif %}
+  "description": "{{ produit.description|striptags|truncatewords:35|default:'Ordinateur performant et fiable.'|escapejs }}",
+  "sku": "PC-{{ produit.id }}",
+  "mpn": "{{ produit.slug }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ produit.get_marque_display|default:produit.marque|default:'Informatique'|escapejs }}"
+  },
+  "category": "{{ produit.categorie.nom|escapejs }}",
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ request.build_absolute_uri }}",
+    "priceCurrency": "XOF",
+    "price": "{{ produit.prix|floatformat:0 }}",
+    "priceValidUntil": "2027-12-31",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "{% if produit.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{ site_settings.site_nom|default:'Sack-Tech'|escapejs }}"
+    }
+  }{% if produit.note_moyenne and produit.nb_avis %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "{{ produit.note_moyenne }}",
+    "reviewCount": "{{ produit.nb_avis }}"
+  }{% endif %}
+}
+</script>
+
+<!-- Fil d'Ariane Schema.org BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Accueil",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'produits:liste' %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{{ produit.categorie.nom|escapejs }}",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'produits:liste' %}?categorie={{ produit.categorie.slug }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ produit.nom|escapejs }}",
+      "item": "{{ request.build_absolute_uri }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
 {% block content %}
 
 <!-- Fil d'Ariane -->

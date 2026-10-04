@@ -4,17 +4,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  {% block meta_description %}{% if site_settings.site_description %}<meta name="description" content="{{ site_settings.site_description }}">{% endif %}{% endblock %}
-  <title>{% block title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}</title>
+
+  <!-- SEO Primaire & Mots-clés ciblés (Ordinateurs, PC Portables, PC Gamer) -->
+  <title>{% block title %}{{ site_settings.site_nom|default:'Sack-Tech' }} — Vente Ordinateurs Portables, PC Gamer & Bureautique au Meilleur Prix{% endblock %}</title>
+  {% block meta_description %}
+    <meta name="description" content="{{ site_settings.site_description|default:"Boutique en ligne spécialisée dans la vente d'ordinateurs portables, PC gamer, PC de bureau et accessoires informatiques de grandes marques (HP, Dell, Lenovo, Asus, Apple). Matériel garanti, prix imbattables et livraison rapide." }}">
+  {% endblock %}
+  {% block meta_keywords %}
+    <meta name="keywords" content="ordinateur portable, pc portable, pc gamer, ordinateur de bureau, vente pc, vente ordinateur, achat ordinateur, laptop hp, dell, lenovo, asus, apple macbook, composant pc, matériel informatique, abidjan, côte d'ivoire">
+  {% endblock %}
+  <meta name="author" content="{{ site_settings.site_nom|default:'Sack-Tech' }}">
+  <meta name="robots" content="{% block meta_robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}">
+  {% block canonical %}
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  {% endblock %}
+
+  <!-- Localisation & Devise (SEO Local) -->
+  <meta name="geo.region" content="CI">
+  <meta name="geo.placename" content="Abidjan">
   <meta name="theme-color" content="#2563eb">
+
+  <!-- Favicons -->
   <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32.png' %}">
   <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icons/favicon-192.png' %}">
   <link rel="apple-touch-icon" href="{% static 'icons/favicon-180.png' %}">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="{{ site_settings.site_nom|default:'TechShop' }}">
-  <meta property="og:title" content="{% block og_title %}{{ site_settings.site_nom|default:'TechShop' }}{% endblock %}">
-  {% if site_settings.site_description %}<meta property="og:description" content="{{ site_settings.site_description }}">{% endif %}
+
+  <!-- Open Graph / Réseaux Sociaux & WhatsApp -->
+  <meta property="og:site_name" content="{{ site_settings.site_nom|default:'Sack-Tech' }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="{% block og_title %}{{ site_settings.site_nom|default:'Sack-Tech' }} — Vente Ordinateurs & PC Portables{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site_settings.site_description|default:"Vente d'ordinateurs portables, PC gamer et matériel informatique garanti au meilleur prix avec livraison rapide." }}{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'img/logo.jpeg' %}{% endif %}{% endblock %}">
+  <meta property="og:locale" content="fr_FR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ site_settings.site_nom|default:'Sack-Tech' }} — Vente Ordinateurs & PC Portables{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_desc %}{{ site_settings.site_description|default:"Vente d'ordinateurs portables, PC gamer et matériel informatique garanti au meilleur prix." }}{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'img/logo.jpeg' %}{% endif %}{% endblock %}">
+
+  <!-- Google Search Console Block -->
+  {% block google_verification %}{% endblock %}
+
+  <!-- Données Structurées JSON-LD (Schema.org ComputerStore) pour Google Rich Snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ComputerStore",
+    "name": "{{ site_settings.site_nom|default:'Sack-Tech'|escapejs }}",
+    "image": "{{ request.scheme }}://{{ request.get_host }}{% if site_settings.logo %}{{ site_settings.logo.url }}{% else %}{% static 'img/logo.jpeg' %}{% endif %}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}",
+    "telephone": "{{ site_settings.telephone|default:'93012582' }}",
+    "email": "{{ site_settings.email|default:'mahamadousacko599@gmail.com' }}",
+    "priceRange": "FCFA",
+    "currenciesAccepted": "XOF, FCFA",
+    "paymentAccepted": "Cash, Mobile Money",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ site_settings.adresse|default:'Golf'|escapejs }}",
+      "addressLocality": "Abidjan",
+      "addressCountry": "CI"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Catalogue Ordinateurs et Matériel Informatique",
+      "itemListElement": [
+        {
+          "@type": "OfferCatalog",
+          "name": "PC Portables"
+        },
+        {
+          "@type": "OfferCatalog",
+          "name": "PC Gamer"
+        },
+        {
+          "@type": "OfferCatalog",
+          "name": "Ordinateurs de Bureau"
+        }
+      ]
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ request.scheme }}://{{ request.get_host }}{% url 'produits:liste' %}?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  {% block extra_schema %}{% endblock %}
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

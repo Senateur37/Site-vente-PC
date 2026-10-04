@@ -7,23 +7,40 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as serve_static
 from django.views.generic import RedirectView
-from produits.sitemaps import ProduitSitemap, PagesStatiquesSitemap
+from produits.sitemaps import ProduitSitemap, CategorieSitemap, PagesStatiquesSitemap
 
 sitemaps = {
     'produits': ProduitSitemap,
+    'categories': CategorieSitemap,
     'pages': PagesStatiquesSitemap,
 }
 
 
 def robots_txt(request):
+    sitemap_url = request.build_absolute_uri('/sitemap.xml')
+    if getattr(settings, 'USE_HTTPS', False) or request.is_secure():
+        sitemap_url = sitemap_url.replace('http://', 'https://')
+
     lignes = [
         "User-agent: *",
         "Disallow: /admin/",
         "Disallow: /dashboard/",
         "Disallow: /api/",
         "Allow: /",
+        "Allow: /static/",
+        "Allow: /media/",
         "",
-        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}",
+        "User-agent: Googlebot",
+        "Allow: /",
+        "",
+        "User-agent: Googlebot-Image",
+        "Allow: /media/",
+        "Allow: /static/",
+        "",
+        "User-agent: Bingbot",
+        "Allow: /",
+        "",
+        f"Sitemap: {sitemap_url}",
     ]
     return HttpResponse("\n".join(lignes), content_type="text/plain")
 

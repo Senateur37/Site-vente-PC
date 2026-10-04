@@ -84,8 +84,10 @@ def liste_produits(request):
                      request.GET.get('prix_max'))
 
     categorie_slug = request.GET.get('categorie')
+    categorie_obj = None
     if categorie_slug:
         produits_qs = produits_qs.filter(categorie__slug=categorie_slug)
+        categorie_obj = categories.filter(slug=categorie_slug).first()
 
     recherche = request.GET.get('q')
     if recherche:
@@ -229,6 +231,7 @@ def liste_produits(request):
         'top_marques': top_marques,
         'categories': categories,
         'categorie_active': categorie_slug,
+        'categorie_obj': categorie_obj,
         'recherche': recherche or '',
         'marque_active': marque,
         'prix_min': prix_min,

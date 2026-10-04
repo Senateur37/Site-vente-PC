@@ -1,17 +1,49 @@
 {% extends "base.html" %}
 {% load static %}
 {% load produit_tags %}
-{% block title %}{% if categorie_active %}{{ categorie_active|capfirst }} — Boutique TechShop{% elif recherche %}Recherche "{{ recherche }}" — TechShop{% else %}Boutique — TechShop{% endif %}{% endblock %}
+{% block title %}
+  {% if recherche %}
+    Ordinateurs "{{ recherche }}" — Résultats & Prix | {{ site_settings.site_nom|default:'Sack-Tech' }}
+  {% elif categorie_obj %}
+    {{ categorie_obj.nom }} — Vente Ordinateurs & PC au Meilleur Prix | {{ site_settings.site_nom|default:'Sack-Tech' }}
+  {% elif marque_active %}
+    PC & Ordinateurs {{ marque_active|upper }} — Boutique | {{ site_settings.site_nom|default:'Sack-Tech' }}
+  {% else %}
+    {{ site_settings.site_nom|default:'Sack-Tech' }} — Vente Ordinateurs Portables, PC Gamer & Bureautique au Meilleur Prix
+  {% endif %}
+{% endblock %}
+
+{% block meta_description %}
+  {% if recherche %}
+    <meta name="description" content="Découvrez notre sélection d'ordinateurs et matériel informatique pour la recherche '{{ recherche }}'. Prix imbattables, garantie et livraison rapide chez {{ site_settings.site_nom|default:'Sack-Tech' }}.">
+  {% elif categorie_obj %}
+    <meta name="description" content="Achetez votre {{ categorie_obj.nom|lower }} au meilleur prix chez {{ site_settings.site_nom|default:'Sack-Tech' }}. Large choix, performances garanties et livraison rapide.">
+  {% elif marque_active %}
+    <meta name="description" content="Tous les ordinateurs portables et PC de bureau {{ marque_active|upper }} disponibles chez {{ site_settings.site_nom|default:'Sack-Tech' }}. Modèles authentiques avec garantie officielle.">
+  {% else %}
+    <meta name="description" content="Boutique en ligne spécialisée dans la vente d'ordinateurs portables, PC gamer, PC de bureau et accessoires informatiques (HP, Dell, Lenovo, Asus, Apple). Livraison rapide et paiement à la livraison.">
+  {% endif %}
+{% endblock %}
+
+{% block og_title %}
+  {% if categorie_obj %}
+    {{ categorie_obj.nom }} — Ordinateurs & PC Portables | {{ site_settings.site_nom|default:'Sack-Tech' }}
+  {% elif marque_active %}
+    Ordinateurs {{ marque_active|upper }} — {{ site_settings.site_nom|default:'Sack-Tech' }}
+  {% else %}
+    {{ site_settings.site_nom|default:'Sack-Tech' }} — Vente Ordinateurs Portables & PC Gamer
+  {% endif %}
+{% endblock %}
 
 {% block content %}
 
 <nav class="flex items-center gap-1.5 text-xs md:text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-6">
   <a href="{% url 'produits:liste' %}" class="hover:text-accent">Accueil</a>
   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 inline shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-  <span class="font-medium text-slate-700 dark:text-slate-200">Boutique</span>
+  <span class="font-medium text-slate-700 dark:text-slate-200">{% if categorie_obj %}{{ categorie_obj.nom }}{% else %}Boutique Informatique{% endif %}</span>
 </nav>
 
-{% if not recherche and not marque_active and not prix_min and not prix_max %}
+{% if not recherche and not marque_active and not prix_min and not prix_max and not categorie_active %}
     <style>
       @keyframes fade-loop {
         0%, 25% { opacity: 1; transform: scale(1.05); }
@@ -26,18 +58,18 @@
     </style>
     <div class="relative mb-6 md:mb-8 rounded-[1.5rem] overflow-hidden bg-slate-900 text-white min-h-[350px] md:min-h-[400px] flex flex-col justify-center shadow-2xl">
       <!-- Background Images -->
-      <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-1" alt="Setup Tech 1">
-      <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-2" alt="Setup Tech 2">
-      <img src="https://images.unsplash.com/photo-1550009158-9fffc39f4224?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-3" alt="Setup Tech 3">
+      <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-1" alt="Vente Ordinateurs Portables HP Dell Lenovo">
+      <img src="https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-2" alt="PC Gamer et Ordinateurs de Bureau">
+      <img src="https://images.unsplash.com/photo-1550009158-9fffc39f4224?q=80&w=1920&auto=format&fit=crop" class="bg-slide bg-slide-3" alt="Accessoires et Matériel Informatique">
       
       <!-- Overlay -->
       <div class="absolute inset-0 hero-overlay z-0"></div>
       
       <!-- Content -->
       <div class="relative z-10 p-6 md:p-12 max-w-2xl">
-        <span class="inline-block text-[11px] font-extrabold uppercase tracking-widest bg-accent/20 text-accent border border-accent/30 rounded-full px-4 py-1.5 mb-5 backdrop-blur-md">TechShop Bamako</span>
-        <h1 class="text-3xl md:text-5xl font-black leading-tight mb-4 tracking-tight">Le meilleur du <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">matériel informatique</span></h1>
-        <p class="text-sm md:text-base text-slate-300 mb-8 font-medium max-w-lg leading-relaxed">Ordinateurs, accessoires et composants garantis, livrés partout à Bamako au meilleur prix du marché.</p>
+        <span class="inline-block text-[11px] font-extrabold uppercase tracking-widest bg-accent/20 text-accent border border-accent/30 rounded-full px-4 py-1.5 mb-5 backdrop-blur-md">{{ site_settings.site_nom|default:'Sack-Tech' }} — Spécialiste PC & Informatique</span>
+        <h1 class="text-3xl md:text-5xl font-black leading-tight mb-4 tracking-tight">Vente d'Ordinateurs Portables & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-accent">PC Gamer</span></h1>
+        <p class="text-sm md:text-base text-slate-300 mb-8 font-medium max-w-lg leading-relaxed">{{ site_settings.hero_texte|default:"Ordinateurs portables, PC de bureau, composants et accessoires garantis, livrés au meilleur prix." }}</p>
         <a href="#tous-les-produits" class="inline-flex items-center gap-3 bg-white text-slate-900 font-bold text-sm px-7 py-3.5 rounded-xl hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300">
           Découvrir la boutique
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
