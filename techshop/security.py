@@ -1,14 +1,24 @@
 """En-têtes de sécurité et protections anti-rétro-ingénierie."""
 from django.http import HttpResponseNotFound
 
-# Chemins typiques recherchés par les scanners, bots et tentatives de rétro-ingénierie
-BLOCKED_PATH_PATTERNS = (
-    '.git', '.env', 'wp-admin', 'wp-login', 'wp-content',
-    'phpmyadmin', 'eval-stdin.php', 'setup.php', '.aws',
-    '.svn', '.ds_store', 'server-status', 'actuator',
-    'debug/default/view', 'telescope', 'solr', 'boaform',
-    'vendor/phpunit', 'xmlrpc.php',
-)
+# Premier segment d'URL typique des scanners (comparaison exacte : un produit dont le
+# nom contient "solr" ou "telescope" n'est pas bloqué)
+BLOCKED_FIRST_SEGMENTS = {
+    'wp-admin', 'wp-login.php', 'wp-content', 'wp-includes', 'phpmyadmin',
+    'eval-stdin.php', 'setup.php', 'server-status', 'actuator', 'telescope',
+    'solr', 'boaform', 'xmlrpc.php', 'vendor',
+}
+BLOCKED_SUBSTRINGS = ('debug/default/view', 'vendor/phpunit')
+
+
+def _chemin_suspect(path_lower):
+    segments = [seg for seg in path_lower.split('/') if seg]
+    if segments and segments[0] in BLOCKED_FIRST_SEGMENTS:
+        return True
+    # Fichiers cachés (.git, .env, .aws, .svn, .ds_store…), sauf .well-known
+    if any(seg.startswith('.') and seg != '.well-known' for seg in segments):
+        return True
+    return any(sub in path_lower for sub in BLOCKED_SUBSTRINGS)
 
 
 class SecurityHeadersMiddleware:
@@ -26,9 +36,8 @@ class SecurityHeadersMiddleware:
             return HttpResponseNotFound()
 
         # 2. Bloquer les scans automatisés de rétro-ingénierie et sondes de fichiers cachés
-        for pattern in BLOCKED_PATH_PATTERNS:
-            if pattern in path_lower:
-                return HttpResponseNotFound()
+        if _chemin_suspect(path_lower):
+            return HttpResponseNotFound()
 
         response = self.get_response(request)
 
