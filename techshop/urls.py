@@ -27,7 +27,7 @@ def robots_txt(request):
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     path('dashboard/', include('dashboard.urls')),
     path('api/', include('api.urls')),
     path('', include('produits.urls')),

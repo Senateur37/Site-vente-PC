@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'techshop.security.SecurityHeadersMiddleware',
 ]
 
 ROOT_URLCONF = 'techshop.urls'
@@ -106,7 +107,7 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 10}},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
@@ -187,12 +188,29 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {'anon': '300/min', 'user': '600/min'},
 }
+
+# Limites d'upload / de requête (anti-abus mémoire)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
+
+# URL de l'admin Django configurable (ex: ADMIN_URL=gestion-x7k2/) pour éviter /admin/
+ADMIN_URL = os.getenv('ADMIN_URL', 'admin/').strip().lstrip('/')
+if ADMIN_URL and not ADMIN_URL.endswith('/'):
+    ADMIN_URL += '/'
 # URL publique du front React (pour les retours de paiement) ; vide = même domaine
 FRONTEND_URL = os.getenv('FRONTEND_URL', '').rstrip('/')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 jours
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
 SECURE_REFERRER_POLICY = 'same-origin'

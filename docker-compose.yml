@@ -30,6 +30,7 @@ services:
       CINETPAY_API_KEY: ${CINETPAY_API_KEY}
       CINETPAY_SITE_ID: ${CINETPAY_SITE_ID}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
+      ADMIN_URL: ${ADMIN_URL:-admin/}
     depends_on:
       redis:
         condition: service_started
